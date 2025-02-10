@@ -1,0 +1,17 @@
+[
+  {
+    "id": 1,
+    "name": "Inception",
+    "type": "movie"
+  },
+  {
+    "id": 2,
+    "name": "Attack on Titan",
+    "type": "anime"
+  },
+  {
+    "id": 3,
+    "name": "The Simpsons",
+    "type": "cartoon"
+  }
+]
