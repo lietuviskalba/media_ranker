@@ -13,5 +13,11 @@
     "id": 3,
     "name": "The Simpsons",
     "type": "cartoon"
+  },
+  {
+    "id": "fc557c60-7f3b-4f80-8769-f12d6edaa5ec",
+    "name": "lala",
+    "type": "movie",
+    "dateAdded": "2025-02-11T22:06:20.757Z"
   }
 ]
