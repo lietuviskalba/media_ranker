@@ -1,30 +1,66 @@
 [
   {
-    "id": 1,
-    "name": "Inception",
-    "type": "movie"
+    "id": "uuid2",
+    "title": "Apocalypse Now",
+    "category": "Movie",
+    "type": "Standard",
+    "watched_status": "Not finished",
+    "recommendations": "Me no like",
+    "release_year": "1979",
+    "length_or_episodes": "153",
+    "synopsis": "Apocalypse Now is an engaging film that tells a compelling story with rich characters and dramatic moments.",
+    "date_added": "2024-02-13T12:00:00Z",
+    "image": ""
   },
   {
-    "id": 2,
-    "name": "Attack on Titan",
-    "type": "anime"
+    "id": "uuid3",
+    "title": "Clock Work Orange",
+    "category": "Movie",
+    "type": "Unknown",
+    "watched_status": "DONE",
+    "recommendations": "El Epico",
+    "release_year": "1971",
+    "length_or_episodes": "136",
+    "synopsis": "Clock Work Orange is an engaging film that tells a compelling story with rich characters and dramatic moments.",
+    "date_added": "2024-02-13T12:00:00Z",
+    "image": ""
   },
   {
-    "id": 3,
-    "name": "The Simpsons",
-    "type": "cartoon"
+    "id": "4991fbcc-9047-4935-81d7-9e3642266da4",
+    "title": "lala",
+    "category": "ddd",
+    "type": "Standard",
+    "watchedstatus": "adad",
+    "recommendations": "asfasf",
+    "releaseyear": 3,
+    "lengthepisodes": 4,
+    "synopsis": "aaffafa",
+    "dateadded": "2025-02-13T20:47:26.298Z"
   },
   {
-    "id": "fc557c60-7f3b-4f80-8769-f12d6edaa5ec",
-    "name": "lala",
-    "type": "movie",
-    "dateAdded": "2025-02-11T22:06:20.757Z"
+    "id": "uuid32",
+    "title": "Seven Deadly Sins",
+    "category": "Series",
+    "type": "Anime",
+    "watched_status": "S3",
+    "recommendations": "Fell off",
+    "release_year": "2014",
+    "length_or_episodes": "100",
+    "synopsis": "Seven Deadly Sins is a thrilling and engaging series filled with rich characters and compelling storytelling.",
+    "date_added": "2024-02-13T12:00:00Z",
+    "image": ""
   },
   {
-    "id": "06403559-ad43-4bbd-8262-46efd0b609da",
-    "name": "tata",
-    "type": "movie",
-    "dateAdded": "2025-02-13T20:03:06.624Z",
-    "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAATIAAACeCAYAAACxb4bkAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAKISURBVHhe7dvBrdtIDAZgDuUujDSRLtJHmsghp90u0sk2sS3kkrwUYQ1zkEaWBeSQk/SA7wMM2BLh4w+SGkUAvHPteAHgyn7e75+i6lu01qv3z/e3t//yWARwcf9Ga/eI+BCt/RMRIciA96xCkAHvTfX+Jap+VMT3qPp6vA8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/K328X6viIje55hyit7naK1tBVUVrbWoqpimKZbaHq216L3H/2+/nsUAJ8je+xpeGfMaYiPIxveqilgDbITYvg7gTDnCaMqMtnZgvfeINbhiDbTRjcWhBuBs2VqLzCl6VWROkZmRmdtIORyDSzcGXEXuu6tlXMxtfIzdjuyoqraRE+BM2fu8dGHrLqxqCbFjgI3gauuS344MuIqcpltkZjzmxx9DqqoiM7eAG6MnwBVkRMTj8YjbdNuOXvTeXzqwY7CN31Pm/r8ATpFVtY2VrS3BNBb++wB73aM9OzeAs+WIoufyfln4z/O8FR33ZfM8x22aXmoAzvIyGz6X+a+n+2PXiY2PHRlwFes5sucif4yY49o8L6G278pyd/If4GyZuZwbi4i43W67rmt5MjlO9I9Qi4iY13pdGXAFOTqu7cJ6tKL3eevQ9oHVe98eDgBcQcbabS3htbwUvt3M1/crc3fcQpABV/EbPLwGPSt/7LsAAAAASUVORK5CYII="
+    "id": "uuid33",
+    "title": "Overlord",
+    "category": "Series",
+    "type": "Anime",
+    "watched_status": "S4",
+    "recommendations": "Great",
+    "release_year": "2015",
+    "length_or_episodes": "52",
+    "synopsis": "Overlord is a thrilling and engaging series filled with rich characters and compelling storytelling.",
+    "date_added": "2024-02-13T12:00:00Z",
+    "image": ""
   }
 ]

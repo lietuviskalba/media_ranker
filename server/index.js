@@ -30,19 +30,47 @@ app.get("/api/records", (req, res) => {
 
 // POST /api/records - Add a new record (for the admin page)
 app.post("/api/records", (req, res) => {
-  const { name, type, image } = req.body;
-  if (!name || !type) {
-    return res.status(400).json({ error: "Name and type are required." });
+  // Modified to use underscore keys according to your new format.
+  const {
+    title,
+    category,
+    type,
+    watched_status,
+    recommendations,
+    release_year,
+    length_or_episodes,
+    synopsis,
+    image,
+  } = req.body;
+
+  // Check required fields
+  if (
+    !title ||
+    !category ||
+    !type ||
+    !watched_status ||
+    !release_year ||
+    !length_or_episodes ||
+    !synopsis
+  ) {
+    return res
+      .status(400)
+      .json({ error: "Missing required fields. Please complete the form." });
   }
 
   const newRecord = {
-    id: uuidv4(), // Generates a unique ID
-    name,
+    id: uuidv4(), // Generate unique ID
+    title,
+    category,
     type,
-    dateAdded: new Date().toISOString(), // Current date/time in ISO format
+    watched_status,
+    recommendations: recommendations || "",
+    release_year,
+    length_or_episodes,
+    synopsis,
+    date_added: new Date().toISOString(),
   };
 
-  // Optionally add image data if provided
   if (image) {
     newRecord.image = image;
   }

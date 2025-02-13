@@ -1,10 +1,17 @@
-// client/src/pages/Admin.js
+// client/src/Admin.js
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
 const Admin = () => {
-  const [name, setName] = useState("");
-  const [type, setType] = useState("movie"); // Default value
+  // Form state for all fields
+  const [title, setTitle] = useState("");
+  const [category, setCategory] = useState("");
+  const [type, setType] = useState("Standard"); // Default value
+  const [watchedStatus, setWatchedStatus] = useState("");
+  const [recommendations, setRecommendations] = useState("");
+  const [releaseYear, setReleaseYear] = useState("");
+  const [lengthEpisodes, setLengthEpisodes] = useState("");
+  const [synopsis, setSynopsis] = useState("");
   const [imageData, setImageData] = useState(null); // For file upload (Base64)
   const [imageURL, setImageURL] = useState(""); // For pasted URL
   const [message, setMessage] = useState("");
@@ -21,16 +28,26 @@ const Admin = () => {
     }
   };
 
-  // When the form is submitted, decide which image to send
+  // On form submission, send all field values with underscore keys
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Use the uploaded image (Base64) if available; otherwise, use the URL (if provided)
+    // Use uploaded image (Base64) if available; otherwise, use the URL (if provided)
     const image = imageData || imageURL || null;
 
     fetch("/api/records", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, type, image }),
+      body: JSON.stringify({
+        title,
+        category,
+        type,
+        watched_status: watchedStatus, // Modified key
+        recommendations,
+        release_year: Number(releaseYear), // Modified key
+        length_or_episodes: Number(lengthEpisodes), // Modified key
+        synopsis,
+        image,
+      }),
     })
       .then((res) => {
         if (!res.ok) {
@@ -41,8 +58,14 @@ const Admin = () => {
       .then((data) => {
         setMessage(`Record added successfully with ID: ${data.id}`);
         // Reset form fields
-        setName("");
-        setType("movie");
+        setTitle("");
+        setCategory("");
+        setType("Standard");
+        setWatchedStatus("");
+        setRecommendations("");
+        setReleaseYear("");
+        setLengthEpisodes("");
+        setSynopsis("");
         setImageData(null);
         setImageURL("");
       })
@@ -57,27 +80,79 @@ const Admin = () => {
       <header>
         <h1>Admin Page</h1>
         <nav>
-          <Link to="/">Back to Home</Link>
+          <Link to="/">Back to Ranking</Link>
         </nav>
       </header>
       <main>
         <form onSubmit={handleSubmit}>
           <div>
-            <label>Name: </label>
+            <label>Title: </label>
             <input
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            <label>Category: </label>
+            <input
+              type="text"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
               required
             />
           </div>
           <div>
             <label>Type: </label>
             <select value={type} onChange={(e) => setType(e.target.value)}>
-              <option value="movie">Movie</option>
-              <option value="cartoon">Cartoon</option>
-              <option value="anime">Anime</option>
+              <option value="Standard">Standard</option>
+              <option value="Unknown">Unknown</option>
+              {/* Add more options as needed */}
             </select>
+          </div>
+          <div>
+            <label>Watched Status: </label>
+            <input
+              type="text"
+              value={watchedStatus}
+              onChange={(e) => setWatchedStatus(e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            <label>Recommendations: </label>
+            <input
+              type="text"
+              value={recommendations}
+              onChange={(e) => setRecommendations(e.target.value)}
+            />
+          </div>
+          <div>
+            <label>Release Year: </label>
+            <input
+              type="number"
+              value={releaseYear}
+              onChange={(e) => setReleaseYear(e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            <label>Length/Episodes: </label>
+            <input
+              type="number"
+              value={lengthEpisodes}
+              onChange={(e) => setLengthEpisodes(e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            <label>Synopsis: </label>
+            <textarea
+              value={synopsis}
+              onChange={(e) => setSynopsis(e.target.value)}
+              required
+            />
           </div>
           <div>
             <label>Upload Image (optional): </label>
@@ -93,7 +168,7 @@ const Admin = () => {
             />
           </div>
           <div>
-            {/* Optional: Display image preview if available */}
+            {/* Display image preview if available */}
             {(imageData || imageURL) && (
               <img
                 src={imageData || imageURL}
