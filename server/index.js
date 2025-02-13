@@ -30,7 +30,7 @@ app.get("/api/records", (req, res) => {
 
 // POST /api/records - Add a new record (for the admin page)
 app.post("/api/records", (req, res) => {
-  const { name, type } = req.body;
+  const { name, type, image } = req.body;
   if (!name || !type) {
     return res.status(400).json({ error: "Name and type are required." });
   }
@@ -41,6 +41,11 @@ app.post("/api/records", (req, res) => {
     type,
     dateAdded: new Date().toISOString(), // Current date/time in ISO format
   };
+
+  // Optionally add image data if provided
+  if (image) {
+    newRecord.image = image;
+  }
 
   const dataPath = path.join(__dirname, "data.json");
 
