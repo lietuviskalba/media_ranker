@@ -318,7 +318,6 @@ const Admin = () => {
               required
             />
           </div>
-          {/* UPDATED: Category Drop Down (Line ~60) */}
           <div>
             <label>Category: </label>
             <select
@@ -326,13 +325,12 @@ const Admin = () => {
               onChange={(e) => setCategory(e.target.value)}
               required
             >
-              <option value="movie">movie</option>
-              <option value="series">series</option>
-              <option value="game">game</option>
-              <option value="other">other</option>
+              <option value="Movie">movie</option>
+              <option value="Series">series</option>
+              <option value="Game">game</option>
+              <option value="Other">other</option>
             </select>
           </div>
-          {/* UPDATED: Type Drop Down (Line ~70) */}
           <div>
             <label>Type: </label>
             <select value={type} onChange={(e) => setType(e.target.value)}>
@@ -344,7 +342,6 @@ const Admin = () => {
               <option value="Other">Other</option>
             </select>
           </div>
-          {/* UPDATED: Watched Status Drop Down (Line ~80) */}
           <div>
             <label>Watched Status: </label>
             <select
@@ -357,7 +354,6 @@ const Admin = () => {
               <option value="Completed">Completed</option>
             </select>
           </div>
-          {/* If category is series, show additional inputs for Season and Episode (Line ~90) */}
           {category.toLowerCase() === "series" && (
             <div>
               <label>Season: </label>
@@ -376,20 +372,20 @@ const Admin = () => {
               />
             </div>
           )}
-          {/* UPDATED: Recommendations Drop Down (Line ~100) */}
           <div>
             <label>Recommendations: </label>
             <select
               value={recommendations}
               onChange={(e) => setRecommendations(e.target.value)}
             >
+              <option value="-">-</option>
               <option value="El Epico">El Epico</option>
               <option value="Good; liked it">Good; liked it</option>
               <option value="Good; did not like">Good; did not like</option>
               <option value="Mixed">Mixed</option>
               <option value="Bad; liked it">Bad; liked it</option>
               <option value="Bad; did not like">Bad; did not like</option>
-              <option value="utter trash">utter trash</option>
+              <option value="Utter trash">Utter trash</option>
             </select>
           </div>
           <div>
