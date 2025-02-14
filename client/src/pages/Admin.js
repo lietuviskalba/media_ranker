@@ -1,9 +1,11 @@
 // client/src/Admin.js
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import SearchBar from "../components/SearchBar";
+import Navbar from "../components/Navbar";
+import styled from "styled-components";
+import ScrollToTop from "../components/ScrollToTop";
 
-// Mapping helper: converts camelCase keys to underscore keys if needed
+// ------------------ Helper Functions ------------------
 const fieldMapping = {
   releaseYear: "release_year",
   lengthEpisodes: "length_or_episodes",
@@ -17,15 +19,209 @@ const getField = (record, field) => {
     return record[fieldMapping[field]];
   return record[field.charAt(0).toUpperCase() + field.slice(1)] || "";
 };
+// ------------------ End Helper Functions ------------------
 
-const Admin = () => {
-  // Form state for adding/updating a record
+// =================== Styled Components ===================
+
+// Page container
+const Container = styled.div`
+  background-color: rgb(197, 7, 231);
+  color: rgb(183, 183, 183);
+  min-height: 100vh;
+  margin: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+  padding-top: 80px; /* space for fixed Navbar */
+`;
+
+// Main content area
+const Main = styled.main`
+  background-color: rgb(46, 46, 46);
+  padding: 10px;
+  padding-bottom: 10em;
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
+`;
+
+// Sticky record creation form container (full width)
+const CreationFormContainer = styled.div`
+  position: sticky;
+  top: 80px;
+  background-color: rgb(46, 46, 46);
+  padding: 10px 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  z-index: 900;
+  width: 100%;
+  box-sizing: border-box;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+`;
+
+// Sticky record creation form container (full width)
+const SectionTitles = styled.div`
+  color: rgb(192, 73, 248);
+  font-size: 2em;
+`;
+
+// Grid layout for the entire form in 3 columns
+const FormGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+`;
+
+// Nested grid for splitting small fields (2 columns)
+const NestedGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+`;
+
+// Form group wrapper – accepts an optional "span" prop to span multiple columns
+const FormGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  grid-column: ${(props) => (props.span ? props.span : "auto")};
+  outline: 1px dashed rgba(255, 0, 0, 0.5);
+`;
+
+// Styled input, select, and textarea fields
+const StyledInput = styled.input`
+  padding: 6px;
+  font-size: 1rem;
+  border: 1px solid rgb(80, 80, 80);
+  border-radius: 4px;
+  background-color: rgb(58, 58, 58);
+  color: rgb(58, 58, 58);
+`;
+
+const StyledSelect = styled.select`
+  padding: 6px;
+  font-size: 1rem;
+  border: 1px solid rgb(80, 80, 80);
+  border-radius: 4px;
+  background-color: rgb(58, 58, 58);
+  color: #eee;
+`;
+
+const StyledTextarea = styled.textarea`
+  padding: 6px;
+  font-size: 1rem;
+  border: 1px solid rgb(80, 80, 80);
+  border-radius: 4px;
+  background-color: rgb(58, 58, 58);
+  color: #eee;
+`;
+
+const SubmitButton = styled.button`
+  padding: 8px 16px;
+  font-size: 1.1rem;
+  background-color: rgb(68, 68, 68);
+  color: #eee;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+  &:hover {
+    background-color: rgb(65, 113, 203);
+  }
+`;
+
+const Message = styled.p`
+  font-size: 1rem;
+  color: #ff0;
+  margin-top: 10px;
+`;
+
+// ------------------ Table Styled Components (from Ranking.js) ------------------
+const StyledTable = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  table-layout: fixed;
+`;
+
+const StyledTd = styled.td`
+  padding: 10px;
+  border: 1px solid rgb(85, 85, 85);
+  text-align: center;
+`;
+
+const StyledTr = styled.tr`
+  background-color: ${(props) => (props.index % 2 === 0 ? "#333" : "#2a2a2a")};
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  &:hover {
+    background-color: #777;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  }
+`;
+
+const SynopsisTd = styled.td`
+  padding: 10px;
+  border: 1px solid rgb(85, 85, 85);
+  text-align: left;
+  white-space: normal;
+  word-wrap: break-word;
+  max-width: 300px;
+`;
+
+const Image = styled.img`
+  width: 100px;
+  height: 100px;
+  transition: transform 0.3s ease;
+  transform-origin: center center;
+  &:hover {
+    transform: scale(5) translateX(-50%);
+    z-index: 10;
+    position: relative;
+  }
+`;
+
+const ResizableTh = styled.th`
+  position: relative;
+  padding: 10px;
+  background-color: rgb(68, 68, 68);
+  border: 1px solid rgb(85, 85, 85);
+  cursor: pointer;
+  width: ${(props) => props.width}px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+const Resizer = styled.div`
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+  cursor: col-resize;
+  user-select: none;
+`;
+// ------------------ End Table Styled Components ------------------
+
+const initialColumnWidths = {
+  index: 30,
+  title: 150,
+  category: 150,
+  type: 150,
+  watchedStatus: 150,
+  recommendations: 80,
+  releaseYear: 100,
+  lengthEpisodes: 100,
+  synopsis: 300,
+};
+
+function Admin() {
+  // Form state
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [type, setType] = useState("Live action");
   const [watchedStatus, setWatchedStatus] = useState("");
-  const [season, setSeason] = useState(1); // For series only
-  const [episode, setEpisode] = useState(1); // For series only
+  const [season, setSeason] = useState(1);
+  const [episode, setEpisode] = useState(1);
   const [recommendations, setRecommendations] = useState("");
   const [releaseYear, setReleaseYear] = useState("");
   const [lengthEpisodes, setLengthEpisodes] = useState("");
@@ -33,18 +229,25 @@ const Admin = () => {
   const [imageData, setImageData] = useState(null);
   const [message, setMessage] = useState("");
 
-  // State for the existing records table
+  // Table state
   const [records, setRecords] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortColumn, setSortColumn] = useState(null);
   const [sortDirection, setSortDirection] = useState("asc");
   const [skipConfirm, setSkipConfirm] = useState(false);
-
-  // Edit mode state
   const [editMode, setEditMode] = useState(false);
   const [editId, setEditId] = useState(null);
+  const [columnWidths, setColumnWidths] = useState(initialColumnWidths);
 
-  // Fetch existing records (re-fetch when a new record is added/updated)
+  // Load saved column widths
+  useEffect(() => {
+    const savedWidths = localStorage.getItem("columnWidths");
+    if (savedWidths) {
+      setColumnWidths(JSON.parse(savedWidths));
+    }
+  }, []);
+
+  // Fetch records
   useEffect(() => {
     fetch("/api/records")
       .then((res) => res.json())
@@ -52,14 +255,12 @@ const Admin = () => {
       .catch((err) => console.error("Error fetching records:", err));
   }, [message]);
 
-  // Handlers for image upload and paste events
+  // Image handlers
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setImageData(reader.result);
-      };
+      reader.onloadend = () => setImageData(reader.result);
       reader.readAsDataURL(file);
     }
   };
@@ -71,22 +272,18 @@ const Admin = () => {
       if (item.type.indexOf("image") !== -1) {
         const file = item.getAsFile();
         const reader = new FileReader();
-        reader.onloadend = () => {
-          setImageData(reader.result);
-        };
+        reader.onloadend = () => setImageData(reader.result);
         reader.readAsDataURL(file);
         break;
       }
     }
   };
 
-  const handleRemoveImage = () => {
-    setImageData(null);
-  };
+  const handleRemoveImage = () => setImageData(null);
 
   const handleFillDummy = () => {
     setTitle("Apocalypse Now");
-    setCategory("movie");
+    setCategory("Movie");
     setType("Live action");
     setWatchedStatus("Not Started");
     setRecommendations("Me no like");
@@ -96,12 +293,10 @@ const Admin = () => {
       "Apocalypse Now is an engaging film that tells a compelling story with rich characters and dramatic moments."
     );
     setImageData(null);
-    // For series, you might also fill season and episode here.
     setSeason(1);
     setEpisode(1);
   };
 
-  // Clear form fields and reset edit mode
   const clearForm = () => {
     setTitle("");
     setCategory("");
@@ -118,8 +313,6 @@ const Admin = () => {
     setEditId(null);
   };
 
-  // Submit handler: either add or update record.
-  // If category is "series", include season and episode in watched_status.
   const handleSubmit = (e) => {
     e.preventDefault();
     let finalWatchedStatus = watchedStatus;
@@ -139,7 +332,6 @@ const Admin = () => {
     };
 
     if (editMode && editId) {
-      // Update record
       fetch(`/api/records/${editId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -165,7 +357,6 @@ const Admin = () => {
           setMessage(`Error updating record: ${err.message}`);
         });
     } else {
-      // Add new record
       fetch("/api/records", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -190,20 +381,17 @@ const Admin = () => {
     }
   };
 
-  // Handler to populate form for updating a record
   const handleEdit = (record) => {
     setEditMode(true);
     setEditId(record.id);
     setTitle(getField(record, "title"));
     setCategory(getField(record, "category"));
     setType(getField(record, "type"));
-    // Extract watchedStatus, and if it contains season/episode info, parse it.
     const ws = getField(record, "watchedStatus");
     if (
       getField(record, "category").toLowerCase() === "series" &&
       ws.includes("S")
     ) {
-      // Expected format: "In Progress (S2 E14)" for example.
       const match = ws.match(
         /(Not Started|In Progress|Completed)\s*\(S(\d+)\s*E(\d+)\)/i
       );
@@ -226,7 +414,6 @@ const Admin = () => {
     setImageData(record.image || null);
   };
 
-  // Handler for deleting a record
   const handleDelete = (record) => {
     const proceed =
       skipConfirm ||
@@ -259,7 +446,6 @@ const Admin = () => {
       });
   };
 
-  // Filtering and sorting for the existing records table
   const filteredRecords = records.filter((record) => {
     const query = searchQuery.toLowerCase();
     return (
@@ -298,182 +484,223 @@ const Admin = () => {
     }
   };
 
+  const handleMouseDown = (e, column) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startWidth = columnWidths[column];
+
+    const handleMouseMove = (e) => {
+      const newWidth = startWidth + (e.clientX - startX);
+      setColumnWidths((prev) => {
+        const updated = { ...prev, [column]: newWidth > 20 ? newWidth : 20 };
+        return updated;
+      });
+    };
+
+    const handleMouseUp = () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+      localStorage.setItem("columnWidths", JSON.stringify(columnWidths));
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+  };
+
   return (
     <div>
+      <Navbar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
       <header>
         <h1>Admin Page</h1>
-        <nav>
-          <Link to="/">Back to Ranking</Link>
-        </nav>
       </header>
-      <main>
-        <button onClick={handleFillDummy}>Fill Dummy Data</button>
-        <form onSubmit={handleSubmit}>
-          <div>
-            <label>Title: </label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <label>Category: </label>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              required
-            >
-              <option value="Movie">movie</option>
-              <option value="Series">series</option>
-              <option value="Game">game</option>
-              <option value="Other">other</option>
-            </select>
-          </div>
-          <div>
-            <label>Type: </label>
-            <select value={type} onChange={(e) => setType(e.target.value)}>
-              <option value="Live action">Live action</option>
-              <option value="Cartoon">Cartoon</option>
-              <option value="Anime">Anime</option>
-              <option value="3D Animation">3D Animation</option>
-              <option value="Mix">Mix</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-          <div>
-            <label>Watched Status: </label>
-            <select
-              value={watchedStatus}
-              onChange={(e) => setWatchedStatus(e.target.value)}
-              required
-            >
-              <option value="Not Started">Not Started</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Completed">Completed</option>
-            </select>
-          </div>
-          {category.toLowerCase() === "series" && (
-            <div>
-              <label>Season: </label>
-              <input
-                type="number"
-                value={season}
-                min="1"
-                onChange={(e) => setSeason(e.target.value)}
+      <Main>
+        {/* Record Creation Form */}
+        <CreationFormContainer>
+          <SectionTitles>Create/Update Record</SectionTitles>
+          {message && <Message>{message}</Message>}
+          <FormGrid>
+            {/* Column 1: Title, Category, Type, Synopsis */}
+            <FormGroup>
+              <label>Title:</label>
+              <StyledInput
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
               />
-              <label>Episode: </label>
-              <input
-                type="number"
-                value={episode}
-                min="1"
-                onChange={(e) => setEpisode(e.target.value)}
+            </FormGroup>
+            <FormGroup>
+              <label>Category:</label>
+              <StyledSelect
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                required
+              >
+                <option value="">Select</option>
+                <option value="Movie">Movie</option>
+                <option value="Series">Series</option>
+                <option value="Game">Game</option>
+                <option value="Other">Other</option>
+              </StyledSelect>
+            </FormGroup>
+            <FormGroup>
+              <label>Type:</label>
+              <StyledSelect
+                value={type}
+                onChange={(e) => setType(e.target.value)}
+              >
+                <option value="Live action">Live action</option>
+                <option value="Cartoon">Cartoon</option>
+                <option value="Anime">Anime</option>
+                <option value="3D Animation">3D Animation</option>
+                <option value="Mix">Mix</option>
+                <option value="Other">Other</option>
+              </StyledSelect>
+            </FormGroup>
+            <FormGroup>
+              <label>Recommendations:</label>
+              <StyledSelect
+                value={recommendations}
+                onChange={(e) => setRecommendations(e.target.value)}
+              >
+                <option value="">Select</option>
+                <option value="El Epico">El Epico</option>
+                <option value="Good; liked it">Good; liked it</option>
+                <option value="Good; did not like">Good; did not like</option>
+                <option value="Mixed">Mixed</option>
+                <option value="Fell off">Fell off</option>
+                <option value="Bad; liked it">Bad; liked it</option>
+                <option value="Bad; did not like">Bad; did not like</option>
+                <option value="Utter trash">Utter trash</option>
+              </StyledSelect>
+            </FormGroup>
+            {/* Column 2: Watched Status, then nested grid for Season/Episode, then nested grid for Release Year/Length */}
+            <FormGroup>
+              <label>Watched Status:</label>
+              <StyledSelect
+                value={watchedStatus}
+                onChange={(e) => setWatchedStatus(e.target.value)}
+                required
+              >
+                <option value="">Select</option>
+                <option value="Not Started">Not Started</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+              </StyledSelect>
+            </FormGroup>
+            <FormGroup>
+              <NestedGrid>
+                <div>
+                  <label>Season:</label>
+                  <StyledInput
+                    type="number"
+                    value={season}
+                    min="1"
+                    onChange={(e) => setSeason(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label>Episode:</label>
+                  <StyledInput
+                    type="number"
+                    value={episode}
+                    min="1"
+                    onChange={(e) => setEpisode(e.target.value)}
+                  />
+                </div>
+              </NestedGrid>
+            </FormGroup>
+            <FormGroup>
+              <NestedGrid>
+                <div>
+                  <label>Release Year:</label>
+                  <StyledInput
+                    type="number"
+                    value={releaseYear}
+                    onChange={(e) => setReleaseYear(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <label>Length/Episodes:</label>
+                  <StyledInput
+                    type="number"
+                    value={lengthEpisodes}
+                    onChange={(e) => setLengthEpisodes(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <SubmitButton type="submit">
+                    {editMode ? "Update Record" : "Add Record"}
+                  </SubmitButton>
+                </div>
+              </NestedGrid>
+            </FormGroup>
+            {/* Column 3: Recommendations, Image Upload/Paste, and Submit Button */}
+
+            <FormGroup span="2">
+              <label>Synopsis:</label>
+              <StyledTextarea
+                value={synopsis}
+                onChange={(e) => setSynopsis(e.target.value)}
+                required
+                rows="2"
               />
-            </div>
-          )}
-          <div>
-            <label>Recommendations: </label>
-            <select
-              value={recommendations}
-              onChange={(e) => setRecommendations(e.target.value)}
-            >
-              <option value="-">-</option>
-              <option value="El Epico">El Epico</option>
-              <option value="Good; liked it">Good; liked it</option>
-              <option value="Good; did not like">Good; did not like</option>
-              <option value="Mixed">Mixed</option>
-              <option value="Fell off">Fell off</option>
-              <option value="Bad; liked it">Bad; liked it</option>
-              <option value="Bad; did not like">Bad; did not like</option>
-              <option value="Utter trash">Utter trash</option>
-            </select>
-          </div>
-          <div>
-            <label>Release Year: </label>
-            <input
-              type="number"
-              value={releaseYear}
-              onChange={(e) => setReleaseYear(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <label>Length/Episodes: </label>
-            <input
-              type="number"
-              value={lengthEpisodes}
-              onChange={(e) => setLengthEpisodes(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <label>Synopsis: </label>
-            <textarea
-              value={synopsis}
-              onChange={(e) => setSynopsis(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <label>Upload Image (optional): </label>
-            <input type="file" accept="image/*" onChange={handleFileChange} />
-          </div>
-          <div>
-            <label>Or Paste Image (optional): </label>
-            <div
-              onPaste={handlePaste}
-              style={{
-                border: "1px dashed #ccc",
-                padding: "10px",
-                marginTop: "10px",
-                cursor: "text",
-              }}
-            >
-              Click here and press Ctrl+V to paste an image
-            </div>
-          </div>
-          {imageData && (
-            <div
-              style={{
-                position: "relative",
-                display: "inline-block",
-                marginTop: "10px",
-              }}
-            >
-              <img
-                src={imageData}
-                alt="Preview"
-                style={{ maxWidth: "200px", display: "block" }}
+            </FormGroup>
+
+            <FormGroup>
+              <label>Image Upload / Paste:</label>
+              <StyledInput
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
               />
-              <button
-                type="button"
-                onClick={handleRemoveImage}
+              <div
+                onPaste={handlePaste}
                 style={{
-                  position: "absolute",
-                  top: 0,
-                  right: 0,
-                  background: "red",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "50%",
-                  width: "24px",
-                  height: "24px",
-                  cursor: "pointer",
+                  border: "1px dashed #ccc",
+                  padding: "10px",
+                  marginTop: "10px",
+                  cursor: "text",
                 }}
               >
-                X
-              </button>
-            </div>
-          )}
-          <button type="submit">
-            {editMode ? "Update Record" : "Add Record"}
-          </button>
-        </form>
-        {message && <p>{message}</p>}
-        <hr />
-        <h2>Existing Media</h2>
-        <div>
+                Click here and press Ctrl+V to paste an image
+              </div>
+              {imageData && (
+                <div style={{ position: "relative", marginTop: "10px" }}>
+                  <img
+                    src={imageData}
+                    alt="Preview"
+                    style={{ maxWidth: "200px", display: "block" }}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleRemoveImage}
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      right: 0,
+                      background: "red",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "50%",
+                      width: "24px",
+                      height: "24px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    X
+                  </button>
+                </div>
+              )}
+            </FormGroup>
+          </FormGrid>
+        </CreationFormContainer>
+
+        {/* Record Table */}
+        <SectionTitles>Existing Media</SectionTitles>
+        <div style={{ marginBottom: "10px" }}>
           <label>
             <input
               type="checkbox"
@@ -483,15 +710,17 @@ const Admin = () => {
             Delete without confirmation
           </label>
         </div>
-        <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-        <table>
+        <StyledTable>
           <thead>
             <tr>
-              <th>Actions</th>
-              <th>#</th>
-              <th
+              <ResizableTh width={50}>Actions</ResizableTh>
+              <ResizableTh width={columnWidths.index}>
+                #
+                <Resizer onMouseDown={(e) => handleMouseDown(e, "index")} />
+              </ResizableTh>
+              <ResizableTh
+                width={columnWidths.title}
                 onClick={() => handleSort("title")}
-                style={{ cursor: "pointer" }}
               >
                 Title{" "}
                 {sortColumn === "title"
@@ -499,10 +728,11 @@ const Admin = () => {
                     ? "▲"
                     : "▼"
                   : ""}
-              </th>
-              <th
+                <Resizer onMouseDown={(e) => handleMouseDown(e, "title")} />
+              </ResizableTh>
+              <ResizableTh
+                width={columnWidths.category}
                 onClick={() => handleSort("category")}
-                style={{ cursor: "pointer" }}
               >
                 Category{" "}
                 {sortColumn === "category"
@@ -510,10 +740,11 @@ const Admin = () => {
                     ? "▲"
                     : "▼"
                   : ""}
-              </th>
-              <th
+                <Resizer onMouseDown={(e) => handleMouseDown(e, "category")} />
+              </ResizableTh>
+              <ResizableTh
+                width={columnWidths.type}
                 onClick={() => handleSort("type")}
-                style={{ cursor: "pointer" }}
               >
                 Type{" "}
                 {sortColumn === "type"
@@ -521,10 +752,11 @@ const Admin = () => {
                     ? "▲"
                     : "▼"
                   : ""}
-              </th>
-              <th
+                <Resizer onMouseDown={(e) => handleMouseDown(e, "type")} />
+              </ResizableTh>
+              <ResizableTh
+                width={columnWidths.watchedStatus}
                 onClick={() => handleSort("watchedStatus")}
-                style={{ cursor: "pointer" }}
               >
                 Watched Status{" "}
                 {sortColumn === "watchedStatus"
@@ -532,10 +764,13 @@ const Admin = () => {
                     ? "▲"
                     : "▼"
                   : ""}
-              </th>
-              <th
+                <Resizer
+                  onMouseDown={(e) => handleMouseDown(e, "watchedStatus")}
+                />
+              </ResizableTh>
+              <ResizableTh
+                width={columnWidths.recommendations}
                 onClick={() => handleSort("recommendations")}
-                style={{ cursor: "pointer" }}
               >
                 Recommendations{" "}
                 {sortColumn === "recommendations"
@@ -543,10 +778,13 @@ const Admin = () => {
                     ? "▲"
                     : "▼"
                   : ""}
-              </th>
-              <th
+                <Resizer
+                  onMouseDown={(e) => handleMouseDown(e, "recommendations")}
+                />
+              </ResizableTh>
+              <ResizableTh
+                width={columnWidths.releaseYear}
                 onClick={() => handleSort("releaseYear")}
-                style={{ cursor: "pointer" }}
               >
                 Release Year{" "}
                 {sortColumn === "releaseYear"
@@ -554,10 +792,13 @@ const Admin = () => {
                     ? "▲"
                     : "▼"
                   : ""}
-              </th>
-              <th
+                <Resizer
+                  onMouseDown={(e) => handleMouseDown(e, "releaseYear")}
+                />
+              </ResizableTh>
+              <ResizableTh
+                width={columnWidths.lengthEpisodes}
                 onClick={() => handleSort("lengthEpisodes")}
-                style={{ cursor: "pointer" }}
               >
                 Length/Episodes{" "}
                 {sortColumn === "lengthEpisodes"
@@ -565,57 +806,60 @@ const Admin = () => {
                     ? "▲"
                     : "▼"
                   : ""}
-              </th>
-              <th>Synopsis</th>
-              <th>Image</th>
-              <th>Actions</th>
+                <Resizer
+                  onMouseDown={(e) => handleMouseDown(e, "lengthEpisodes")}
+                />
+              </ResizableTh>
+              <ResizableTh width={columnWidths.synopsis}>
+                Synopsis
+                <Resizer onMouseDown={(e) => handleMouseDown(e, "synopsis")} />
+              </ResizableTh>
+              <ResizableTh width={100}>Image</ResizableTh>
+              <ResizableTh width={50}>Actions</ResizableTh>
             </tr>
           </thead>
           <tbody>
             {sortedRecords.map((record, index) => (
               <tr key={record.id}>
-                {/* Left-side Actions */}
-                <td>
+                {/* Left Actions */}
+                <StyledTd>
                   <button onClick={() => handleEdit(record)}>Update</button>
                   <button onClick={() => handleDelete(record)}>Delete</button>
-                </td>
-                <td>{index + 1}</td>
-                <td>{getField(record, "title")}</td>
-                <td>{getField(record, "category")}</td>
-                <td>{getField(record, "type")}</td>
-                <td>{getField(record, "watchedStatus")}</td>
-                <td>{getField(record, "recommendations")}</td>
-                <td>{getField(record, "releaseYear")}</td>
-                <td>{getField(record, "lengthEpisodes")}</td>
-                <td>
+                </StyledTd>
+                <StyledTd>{index + 1}</StyledTd>
+                <StyledTd>{getField(record, "title")}</StyledTd>
+                <StyledTd>{getField(record, "category")}</StyledTd>
+                <StyledTd>{getField(record, "type")}</StyledTd>
+                <StyledTd>{getField(record, "watchedStatus")}</StyledTd>
+                <StyledTd>{getField(record, "recommendations")}</StyledTd>
+                <StyledTd>{getField(record, "releaseYear")}</StyledTd>
+                <StyledTd>{getField(record, "lengthEpisodes")}</StyledTd>
+                <SynopsisTd title={getField(record, "synopsis")}>
                   {(getField(record, "synopsis") + "").length > 50
                     ? (getField(record, "synopsis") + "").substring(0, 50) +
                       "..."
                     : getField(record, "synopsis")}
-                </td>
-                <td>
+                </SynopsisTd>
+                <StyledTd style={{ overflow: "visible" }}>
                   {record.image ? (
-                    <img
-                      src={record.image}
-                      alt={getField(record, "title")}
-                      style={{ width: "100px" }}
-                    />
+                    <Image src={record.image} alt={getField(record, "title")} />
                   ) : (
                     "No Image"
                   )}
-                </td>
-                {/* Right-side Actions */}
-                <td>
+                </StyledTd>
+                {/* Right Actions */}
+                <StyledTd>
                   <button onClick={() => handleEdit(record)}>Update</button>
                   <button onClick={() => handleDelete(record)}>Delete</button>
-                </td>
+                </StyledTd>
               </tr>
             ))}
           </tbody>
-        </table>
-      </main>
+        </StyledTable>
+      </Main>
+      <ScrollToTop />
     </div>
   );
-};
+}
 
 export default Admin;
