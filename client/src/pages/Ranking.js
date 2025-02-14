@@ -3,6 +3,21 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import SearchBar from "../components/SearchBar";
 
+// Mapping helper for converting camelCase keys to underscore keys
+const fieldMapping = {
+  releaseYear: "release_year",
+  lengthEpisodes: "length_or_episodes",
+  watchedStatus: "watched_status",
+  dateAdded: "date_added",
+};
+
+const getField = (record, field) => {
+  if (record[field] !== undefined) return record[field];
+  if (fieldMapping[field] && record[fieldMapping[field]] !== undefined)
+    return record[fieldMapping[field]];
+  return record[field.charAt(0).toUpperCase() + field.slice(1)] || "";
+};
+
 function Ranking() {
   const [records, setRecords] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -20,41 +35,33 @@ function Ranking() {
   const filteredRecords = records.filter((record) => {
     const query = searchQuery.toLowerCase();
     return (
-      record.title.toLowerCase().includes(query) ||
-      record.category.toLowerCase().includes(query) ||
-      record.type.toLowerCase().includes(query) ||
-      record.watched_status.toLowerCase().includes(query) ||
-      record.recommendations.toLowerCase().includes(query) ||
-      record.synopsis.toLowerCase().includes(query) ||
-      record.release_year.toString().includes(query) ||
-      record.length_or_episodes.toString().includes(query)
+      (getField(record, "title") + "").toLowerCase().includes(query) ||
+      (getField(record, "category") + "").toLowerCase().includes(query) ||
+      (getField(record, "type") + "").toLowerCase().includes(query) ||
+      (getField(record, "watchedStatus") + "").toLowerCase().includes(query) ||
+      (getField(record, "recommendations") + "")
+        .toLowerCase()
+        .includes(query) ||
+      (getField(record, "synopsis") + "").toLowerCase().includes(query) ||
+      (getField(record, "releaseYear") + "").toString().includes(query) ||
+      (getField(record, "lengthEpisodes") + "").toString().includes(query)
     );
   });
-
-  // Helper function to get a field's value (for sorting)
-  const getValue = (record, column) => {
-    return record[column];
-  };
 
   // Sort the filtered records if a sort column is selected
   const sortedRecords = [...filteredRecords].sort((a, b) => {
     if (!sortColumn) return 0;
-
-    let valA = getValue(a, sortColumn);
-    let valB = getValue(b, sortColumn);
-
-    // For string values, compare case-insensitively
+    let valA = getField(a, sortColumn);
+    let valB = getField(b, sortColumn);
     if (typeof valA === "string" && typeof valB === "string") {
       valA = valA.toLowerCase();
       valB = valB.toLowerCase();
     }
-
     if (valA < valB) return sortDirection === "asc" ? -1 : 1;
     if (valA > valB) return sortDirection === "asc" ? 1 : -1;
     return 0;
   });
 
-  // Handler to toggle sorting when clicking a column header
   const handleSort = (column) => {
     if (sortColumn === column) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
@@ -112,11 +119,11 @@ function Ranking() {
                   : ""}
               </th>
               <th
-                onClick={() => handleSort("watched_status")}
+                onClick={() => handleSort("watchedStatus")}
                 style={{ cursor: "pointer" }}
               >
                 Watched Status{" "}
-                {sortColumn === "watched_status"
+                {sortColumn === "watchedStatus"
                   ? sortDirection === "asc"
                     ? "▲"
                     : "▼"
@@ -134,22 +141,22 @@ function Ranking() {
                   : ""}
               </th>
               <th
-                onClick={() => handleSort("release_year")}
+                onClick={() => handleSort("releaseYear")}
                 style={{ cursor: "pointer" }}
               >
                 Release Year{" "}
-                {sortColumn === "release_year"
+                {sortColumn === "releaseYear"
                   ? sortDirection === "asc"
                     ? "▲"
                     : "▼"
                   : ""}
               </th>
               <th
-                onClick={() => handleSort("length_or_episodes")}
+                onClick={() => handleSort("lengthEpisodes")}
                 style={{ cursor: "pointer" }}
               >
                 Length/Episodes{" "}
-                {sortColumn === "length_or_episodes"
+                {sortColumn === "lengthEpisodes"
                   ? sortDirection === "asc"
                     ? "▲"
                     : "▼"
@@ -163,24 +170,29 @@ function Ranking() {
             {sortedRecords.map((record, index) => (
               <tr key={record.id}>
                 <td>{index + 1}</td>
-                <td>{record.title}</td>
-                <td>{record.category}</td>
-                <td>{record.type}</td>
-                <td>{record.watched_status}</td>
-                <td>{record.recommendations}</td>
-                <td>{record.release_year}</td>
-                <td>{record.length_or_episodes}</td>
+                <td>{getField(record, "title")}</td>
+                <td>{getField(record, "category")}</td>
+                <td>{getField(record, "type")}</td>
+                <td>{getField(record, "watchedStatus")}</td>
+                <td>{getField(record, "recommendations")}</td>
+                <td>{getField(record, "releaseYear")}</td>
+                <td>{getField(record, "lengthEpisodes")}</td>
                 <td>
-                  {record.synopsis.length > 50
-                    ? record.synopsis.substring(0, 50) + "..."
-                    : record.synopsis}
+                  {(getField(record, "synopsis") + "").length > 50
+                    ? (getField(record, "synopsis") + "").substring(0, 50) +
+                      "..."
+                    : getField(record, "synopsis")}
                 </td>
                 <td>
-                  <img
-                    src={record.image || "/images/default.png"}
-                    alt={record.title}
-                    style={{ width: "100px" }}
-                  />
+                  {record.image ? (
+                    <img
+                      src={record.image}
+                      alt={getField(record, "title")}
+                      style={{ width: "100px" }}
+                    />
+                  ) : (
+                    "No Image"
+                  )}
                 </td>
               </tr>
             ))}

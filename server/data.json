@@ -6,11 +6,11 @@
     "type": "Standard",
     "watched_status": "Not finished",
     "recommendations": "Me no like",
-    "release_year": "1979",
-    "length_or_episodes": "153",
+    "release_year": 1979,
+    "length_or_episodes": 158,
     "synopsis": "Apocalypse Now is an engaging film that tells a compelling story with rich characters and dramatic moments.",
     "date_added": "2024-02-13T12:00:00Z",
-    "image": ""
+    "image": "data:image/png;base64,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"
   },
   {
     "id": "uuid3",
@@ -39,31 +39,6 @@
     "image": ""
   },
   {
-    "id": "uuid33",
-    "title": "Overlord",
-    "category": "Series",
-    "type": "Anime",
-    "watched_status": "S4",
-    "recommendations": "Great",
-    "release_year": "2015",
-    "length_or_episodes": "52",
-    "synopsis": "Overlord is a thrilling and engaging series filled with rich characters and compelling storytelling.",
-    "date_added": "2024-02-13T12:00:00Z",
-    "image": ""
-  },
-  {
-    "id": "252d59e6-97d6-4ec6-903a-ff245fe135bb",
-    "title": "Apocalypse Now",
-    "category": "Movie",
-    "type": "Standard",
-    "watched_status": "Not finished",
-    "recommendations": "Me no like",
-    "release_year": 1979,
-    "length_or_episodes": 153,
-    "synopsis": "Apocalypse Now is an engaging film that tells a compelling story with rich characters and dramatic moments.",
-    "date_added": "2025-02-14T10:31:53.918Z"
-  },
-  {
     "id": "a9a3256f-99d6-4597-93c2-6408d5f6c8ce",
     "title": "Apocalypse Now",
     "category": "Movie",
@@ -74,6 +49,6 @@
     "length_or_episodes": 153,
     "synopsis": "Apocalypse Now is an engaging film that tells a compelling story with rich characters and dramatic moments.",
     "date_added": "2025-02-14T10:32:10.500Z",
-    "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACoAAAAoCAYAAACIC2hQAAAHSElEQVRYR4VZTWtdVRQ99+UlJq1tcaBQRNNGbfJiYyYaEQla6ldxUFFwriMHIpKJP8CRCupEcCAW24FGwQqKoGgqVQytiRXa2vY/FCeKgnkfnnX2WXeve3JjH6Tvfpx3zzprr732vqfVzIG50XA4DGNjY2E0GoWqqtL3cDgI+OC40+mk407HxuCDcfgbDGwcxuA5vMdn8RnpRv5wLH7P8fytjtNnVHcd7CWg9gEoAzMa2TWcA3RVGVgcj411bXQGvdMxF4jFdLvdejwBcF6MA2ic4xjjdeHpPhglMAwGME5MdgGaQHFvMOg3wJJdTlQCIWtki6DK68ogMfCZ1YE7D1ksM5tkzSbvJGbbvjkpZUMZMJwlKILj/VIqeI4RhTkRUZdYWgAY9dDZTYRWw8qVU7t4Bo4RTk7AMTc6t2dYiPlhqEvNqiSq6TvuGSGR9KNiZzj6/a063HwgE21raytN3JZg/D2fSbaYvMq8SqYEXR2cnk0axQ+RKNAoNFhmO+55ODppPJhoZGZ2DI0AJySLlIoyr26jhOnCk0bdfrZbjMnCdWoPtbBppmoC6jGBaXIoWy47g1gyzXmSPTEcvnrzRtUrwdKeqDWumg6hIHkNzI+Pjydtqj7rjM7WVLKpY1MyeRgsmeillsn9ugjgOn3OxpnnmWzou3aNC9CwlkaPZ5RSKGVQu8XdM/OJ0XI1nuFmFd0uGHHjV7tRkGSUNqOsPHHq07BvcSEaYZRTP2Z/PzIMB4n/4Dv9xfXi+5vlw2H5zNUwyOd1ZSIrGmJnl6XRfNWrly9Qk08Nndfx/fzFqwkkwIAbBZbO4/VB/v7+4V546LsraQyqdMp6asm+m1WITLOkEjzDRrEzKgwvmGTZpPafu3A5xKfXrCU2yWIGicqNa2vLvXD/6XMhTO1N53UJdW9k3TeIZa1XtlQubTZF2+Oinv01MpTIEDZzaE0CHvozy7Nh6dtraSzCX1cm05axSYaZ4fTQEjTBNSNilQfXKCfef2YzAgWjokVqMoEUhn880guLn50P1a49KQIVkklbLEsYq/Ns9QCQk2ExKRS5Lqsdbbc5A0xGj29eS0BVjzVAMpu/fz7aCwurBrRmVMPWSP98ognE6sXJtWYrw7p4WtWx9axRYZRAS2bXH5sLi1/lrAejSCYHx47FuyZKQpkz7+vWlUkTiroku+wB4K3H1q+EGK9sSa7TOqFEu+cenw3zn2yEaiqGHhFECdVEMuuxhDJraYbdQJmOtcFl7WeDo+WVFenJ9atxUs/6NoC8tvHUXJj/AuOzPbHDtwd76TQNWoOik5p2vQqxlLZJQGWE+0d+uBwiK55MmkBiUwD329O9MPt5jECElBiljxIoWVQ/1TrOycvKxKh40tm7FiUAph854z5aW5QAVNu6dPzeMLMax9OeXKOmz2ZtttaPfkqQmnxt/qkLa2s8duriNQLqFknnBMqqxHcmNMp8IP1TX+pYiTR5yjdJtmxkdeHkmtVu/cuMpfKZr+P7+srRsP/U75FRSK3O+iabTBhmPEF50lmS6ctcGxsaARwvfh2TIwZIAREgriU9ZsDXX+iF205cir4b84SViW+VzHa+zOlEzH4wzUTT+q4dWCkHusPhL3NyFOwl4HkBCXD8++PFuXDrh5einXUN6MFpvoUaLN1koNGrTrEoWhglwTaQmxE0eNU72O99/EtqMhosMtwCFPf/fPXBsO/tn8Kgg/YyA7WQ2s4H6zsAKXDtnjzz/U1yJ5dQ2cyejrW+YC6BLkDi2l8vzYc9710Iw7GbDCg6fDPvfm6Om90TQWnpVIlwcfoexeRpSqcTZk6eD2HSanfNagtI3P9nZSnsevNsGHUnXaPeJTWNXEFqIjnT1kTrPhX3BCgROgd+P33iXBhFoCXIMuNx/vfKA2H3G2fDcHzKGNXKpPXZjg0IJjO7svf/kl0mn75r6bPoz9OrEvodsp+g/315Lky+sxmB7nagZcaWYMhmybDuR2kbqNfVAW7/AIzurTWpTJYJNnhtKUy8vhaGEzen15PEKO2jjQUCULCaWCy5nmC2bUkWeR1R2f/RxTgppGIWpObP81q/rxwKE29thEFcmBi+2zVrOLsgbYaVNQfge6aaZLoTwrG3rLwfxu979IYgU2O+0gvh3SiVnHh1CW2r2VptcMwyy9BqO+gLtD5VM58JVboAW0VLTuvKLB/g1Z3m5jB3SspduDJ0O221WJtne1A0fju3yfU5LATlXG2t4rYdPgDVh6lBNzsp7IBYbwpGWXabWzy2G212ZQXEE9DfnzR6HinblrdEtq36xiK5SaagtE1TzdKydJucQOifvqHmE6vOFZh6LMb83x5VvZuX9AKN5FUROMPkL3j+mkJ2tTo1GxuTQwlIewF1C31zKFvGhj2VetI9TQuL/2cETd/D1dwrbdMok4bhbYuc2hnxpIVxa5yMJjh5Y1df3nCfycGGxa75BjB7BncFZ5QM+R6XbR639QW8rrvU/wF7yCiXc4FDnAAAAABJRU5ErkJggg=="
+    "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAoCAYAAAD6xArmAAAElklEQVRIS5VXS2tdVRRe+96bm5i+yESFqEmjuWmaiDj3MRBBKaLQELVqpWLrxIETtdAf4EAhA/X6QHEg/gaHtopWhTyqiJ3oQPH9qL2WkqQ5Z7u/tc+3z9qnodgL4ZyzH9/61rfWXnvF3TI54yX8vPfinEvPsiyl3W4Lnvi1Wi2d4w/jWM+9dg3Wut7UrN/a2tKNWGg3YIxzNNwkQUAS4Le7eaJX06iYk51lCKN2nCQwxh/H8K3AdAlWybzpti4O4NZ961FTFje9d5+nG9QYoNTXGiUwmUOmTqeT5Ms8nLppWhkTNPlVvRDYuklgS4Qe4alxImNYg/WiKBSSgAwWtcQ6G8jtgqlEGbxm1C0rm1LWAxrBWrC0GA55zAU2uleTAdiHmMBbGnEzUz1flFHj7ZKe+nNTMwaWDAkq8+cWrvM//DGk89TRZkkMhpdWdcqK4PLFza58/1tX99B9e0KVzL+fHvAOSe7D0fWFODwlvvPpda4aC+O//H5B7j9eZxLznx4rsP/2aAjzptmIg1iDhIn8G1lRFtJb+DHLHltr9N1/vRh2VowAooXGfsMDjNMTzHuZPvjTFQuW818dBIUI1gSmke2AF35Nh6oZdGSI82ceqhhHJtGIYUhjqnntUW/xz1RSGUSWAa03/swDOEqV+wTPQTJ5gmEfvOstnstqONMuHSy/dqCWAgaS+9DZGASgelNo8KYfHqTcb5bOGLzV+ypgG7g8gAACIGSKqVfIzKH1VE9skU9H3q/cC0SjLUABgrHArnrG95gtHsCPXUpS2MrIk+r88j2NrIgSYHMNVoNybP+TeQmwN4pmycbpu+qsqAITTxkuy3CjhEA5eFDlNmXZd7ijJQA1pHkpqMYfvP+EMo4FhEcXYKXsHC7l1rGfZXz0vLRbUS56sv/INenkYS+PdaofYy+fDSQCIOop/gIDH4oOmLXLS3L37mV5ZfY9mdx1To0lKZ7amQFTCpZPt+elbwIJgBG4eqqRUrqyKW/NLcmD4yvSaWEuyjL39JgC21Nnq53b/fxJ+BGjr+Dx6imHRlRdvPdnl+SRiS9kqF1LMX/s2tTAMCuyy2HXsx+GvZAiagxgZEUxskNK11FP+oHxo5OfB2CmYCFzx67X4DGAPHnJi9ETX1ZSQFercXyHwf78khzaezpctlUsQpbMP3PDZQ0MS6cWoZEXPwv0cl2ber9xWwSmFP8MnNzxwo0ZY4Chz8BPgcfvfDw2LNW13nKh+VPN8Reuq3Ab3L7nrEzs+DvkNTKulL8utGX1u9GsSbTNijJnw2Krk+007c1go261BUOs45geazQs9vpv3so0whMGcHvaMM9GBwZS8NDGYiEtWpfohZ2z81fqQFN/zEXNq5+g241bafCeVTnb0bOLwSLqxaS3bdT/6fHc66/2fbcbmo8g+Mb6hpz86JSsra5lNzBvCGrLgNruqNmVunfefleDF3PJy2AwkP5rb2YFxrrJxpxdKTVvtraR8fCwAm2sr8vHpz6RleXVy4AZyOzfgartskWeXmR5TPFtI26rV7PY4NvKQYnUQ/s/CKN8tU02AW1W/AduY7bFIOKnYgAAAABJRU5ErkJggg=="
   }
 ]
