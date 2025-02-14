@@ -8,8 +8,8 @@ import SearchBar from "../components/SearchBar";
 
 // Container for the entire page
 const Container = styled.div`
-  background-color: #222;
-  color: #eee;
+  background-color: rgb(197, 7, 231);
+  color: rgb(183, 183, 183);
   min-height: 100vh;
   margin: 0;
   box-sizing: border-box;
@@ -40,9 +40,9 @@ const Nav = styled.nav`
 
 // Main content area (full width, no extra gaps)
 const Main = styled.main`
-  background-color: #333;
+  background-color: rgb(46, 46, 46);
   padding: 10px;
-  border-radius: 8px;
+  padding-bottom: 10em;
   margin: 0;
   width: 100%;
   box-sizing: border-box;
@@ -116,6 +116,28 @@ const Resizer = styled.div`
   user-select: none;
 `;
 
+// The container for the Back-to-Top button, fixed at the bottom center.
+const BackToTopButton = styled.button`
+  width: 200px;
+  position: fixed;
+  bottom: 40px; /* This creates a gap at the bottom so the button doesn't cover content */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #444;
+  color: #eee;
+  border: none;
+  border-radius: 20px; /* Rounded rectangle */
+  padding: 10px 20px;
+  font-size: 1.5rem;
+  cursor: pointer;
+  opacity: ${(props) => (props.visible ? 1 : 0)};
+  transition: opacity 0.3s ease;
+  z-index: 1000;
+  &:hover {
+    background-color: rgb(65, 113, 203);
+  }
+`;
+
 // =================== End Styled Components ===================
 
 // Initial column widths (in pixels)
@@ -136,6 +158,7 @@ function Ranking() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortColumn, setSortColumn] = useState(null); // e.g. "title", "category", etc.
   const [sortDirection, setSortDirection] = useState("asc"); // "asc" or "desc"
+  const [showButton, setShowButton] = useState(false);
 
   // State for column widths
   const [columnWidths, setColumnWidths] = useState(initialColumnWidths);
@@ -232,6 +255,26 @@ function Ranking() {
 
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
+  };
+
+  // Hook to monitor scroll position
+  useEffect(() => {
+    const handleScroll = () => {
+      // Show the button if scrolled down more than 300px (adjust as needed)
+      if (window.pageYOffset > 300) {
+        setShowButton(true);
+      } else {
+        setShowButton(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Function to scroll back to top
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   // ---------- End Resizing Handlers ----------
@@ -381,6 +424,9 @@ function Ranking() {
           </tbody>
         </StyledTable>
       </Main>
+      <BackToTopButton visible={showButton} onClick={scrollToTop}>
+        ^ TOP ^
+      </BackToTopButton>
     </Container>
   );
 }
