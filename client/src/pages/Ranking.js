@@ -42,6 +42,7 @@ const StyledTable = styled.table`
   width: 100%;
   border-collapse: collapse;
   margin-top: 20px;
+  table-layout: fixed;
 `;
 
 const StyledTd = styled.td`
@@ -105,11 +106,11 @@ const Resizer = styled.div`
 
 // Initial column widths (in pixels)
 const initialColumnWidths = {
-  index: 30,
-  title: 150,
-  category: 150,
-  type: 150,
-  watchedStatus: 150,
+  index: 10,
+  title: 100,
+  category: 100,
+  type: 100,
+  watchedStatus: 100,
   recommendations: 80,
   releaseYear: 100,
   lengthEpisodes: 100,
