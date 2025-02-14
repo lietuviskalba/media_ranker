@@ -22,8 +22,10 @@ const Admin = () => {
   // Form state for adding/updating a record
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
-  const [type, setType] = useState("Standard");
+  const [type, setType] = useState("Live action");
   const [watchedStatus, setWatchedStatus] = useState("");
+  const [season, setSeason] = useState(1); // For series only
+  const [episode, setEpisode] = useState(1); // For series only
   const [recommendations, setRecommendations] = useState("");
   const [releaseYear, setReleaseYear] = useState("");
   const [lengthEpisodes, setLengthEpisodes] = useState("");
@@ -42,7 +44,7 @@ const Admin = () => {
   const [editMode, setEditMode] = useState(false);
   const [editId, setEditId] = useState(null);
 
-  // Fetch existing records (re-fetch when a new record is added or updated)
+  // Fetch existing records (re-fetch when a new record is added/updated)
   useEffect(() => {
     fetch("/api/records")
       .then((res) => res.json())
@@ -84,9 +86,9 @@ const Admin = () => {
 
   const handleFillDummy = () => {
     setTitle("Apocalypse Now");
-    setCategory("Movie");
-    setType("Standard");
-    setWatchedStatus("Not finished");
+    setCategory("movie");
+    setType("Live action");
+    setWatchedStatus("Not Started");
     setRecommendations("Me no like");
     setReleaseYear("1979");
     setLengthEpisodes("153");
@@ -94,14 +96,19 @@ const Admin = () => {
       "Apocalypse Now is an engaging film that tells a compelling story with rich characters and dramatic moments."
     );
     setImageData(null);
+    // For series, you might also fill season and episode here.
+    setSeason(1);
+    setEpisode(1);
   };
 
   // Clear form fields and reset edit mode
   const clearForm = () => {
     setTitle("");
     setCategory("");
-    setType("Standard");
+    setType("Live action");
     setWatchedStatus("");
+    setSeason(1);
+    setEpisode(1);
     setRecommendations("");
     setReleaseYear("");
     setLengthEpisodes("");
@@ -111,14 +118,19 @@ const Admin = () => {
     setEditId(null);
   };
 
-  // Submit handler: either add or update record
+  // Submit handler: either add or update record.
+  // If category is "series", include season and episode in watched_status.
   const handleSubmit = (e) => {
     e.preventDefault();
+    let finalWatchedStatus = watchedStatus;
+    if (category.toLowerCase() === "series") {
+      finalWatchedStatus = `${watchedStatus} (S${season} E${episode})`;
+    }
     const payload = {
       title,
       category,
       type,
-      watched_status: watchedStatus,
+      watched_status: finalWatchedStatus,
       recommendations,
       release_year: Number(releaseYear),
       length_or_episodes: Number(lengthEpisodes),
@@ -185,7 +197,28 @@ const Admin = () => {
     setTitle(getField(record, "title"));
     setCategory(getField(record, "category"));
     setType(getField(record, "type"));
-    setWatchedStatus(getField(record, "watchedStatus"));
+    // Extract watchedStatus, and if it contains season/episode info, parse it.
+    const ws = getField(record, "watchedStatus");
+    if (
+      getField(record, "category").toLowerCase() === "series" &&
+      ws.includes("S")
+    ) {
+      // Expected format: "In Progress (S2 E14)" for example.
+      const match = ws.match(
+        /(Not Started|In Progress|Completed)\s*\(S(\d+)\s*E(\d+)\)/i
+      );
+      if (match) {
+        setWatchedStatus(match[1]);
+        setSeason(Number(match[2]));
+        setEpisode(Number(match[3]));
+      } else {
+        setWatchedStatus(ws);
+        setSeason(1);
+        setEpisode(1);
+      }
+    } else {
+      setWatchedStatus(ws);
+    }
     setRecommendations(getField(record, "recommendations"));
     setReleaseYear(getField(record, "releaseYear"));
     setLengthEpisodes(getField(record, "lengthEpisodes"));
@@ -285,38 +318,79 @@ const Admin = () => {
               required
             />
           </div>
+          {/* UPDATED: Category Drop Down (Line ~60) */}
           <div>
             <label>Category: </label>
-            <input
-              type="text"
+            <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               required
-            />
+            >
+              <option value="movie">movie</option>
+              <option value="series">series</option>
+              <option value="game">game</option>
+              <option value="other">other</option>
+            </select>
           </div>
+          {/* UPDATED: Type Drop Down (Line ~70) */}
           <div>
             <label>Type: </label>
             <select value={type} onChange={(e) => setType(e.target.value)}>
-              <option value="Standard">Standard</option>
-              <option value="Unknown">Unknown</option>
+              <option value="Live action">Live action</option>
+              <option value="Cartoon">Cartoon</option>
+              <option value="Anime">Anime</option>
+              <option value="3D Animation">3D Animation</option>
+              <option value="Mix">Mix</option>
+              <option value="Other">Other</option>
             </select>
           </div>
+          {/* UPDATED: Watched Status Drop Down (Line ~80) */}
           <div>
             <label>Watched Status: </label>
-            <input
-              type="text"
+            <select
               value={watchedStatus}
               onChange={(e) => setWatchedStatus(e.target.value)}
               required
-            />
+            >
+              <option value="Not Started">Not Started</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Completed">Completed</option>
+            </select>
           </div>
+          {/* If category is series, show additional inputs for Season and Episode (Line ~90) */}
+          {category.toLowerCase() === "series" && (
+            <div>
+              <label>Season: </label>
+              <input
+                type="number"
+                value={season}
+                min="1"
+                onChange={(e) => setSeason(e.target.value)}
+              />
+              <label>Episode: </label>
+              <input
+                type="number"
+                value={episode}
+                min="1"
+                onChange={(e) => setEpisode(e.target.value)}
+              />
+            </div>
+          )}
+          {/* UPDATED: Recommendations Drop Down (Line ~100) */}
           <div>
             <label>Recommendations: </label>
-            <input
-              type="text"
+            <select
               value={recommendations}
               onChange={(e) => setRecommendations(e.target.value)}
-            />
+            >
+              <option value="El Epico">El Epico</option>
+              <option value="Good; liked it">Good; liked it</option>
+              <option value="Good; did not like">Good; did not like</option>
+              <option value="Mixed">Mixed</option>
+              <option value="Bad; liked it">Bad; liked it</option>
+              <option value="Bad; did not like">Bad; did not like</option>
+              <option value="utter trash">utter trash</option>
+            </select>
           </div>
           <div>
             <label>Release Year: </label>
