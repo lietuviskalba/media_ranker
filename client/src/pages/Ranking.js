@@ -3,12 +3,13 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import SearchBar from "../components/SearchBar";
-import ScrollToTop from "../components/ScrollToTop.js";
+import ScrollToTop from "../components/ScrollToTop";
+import Navbar from "../components/Navbar";
 
 // =================== Styled Components ===================
 
 const Container = styled.div`
-  background-color: rgb(197, 7, 231);
+  background-color: rgb(47, 47, 47);
   color: rgb(183, 183, 183);
   min-height: 100vh;
   margin: 0;
@@ -27,17 +28,10 @@ const Title = styled.h1`
   font-size: 4rem;
 `;
 
-const Nav = styled.nav`
-  a {
-    color: #eee;
-    text-decoration: none;
-    margin-left: 20px;
-  }
-`;
-
 const Main = styled.main`
   background-color: rgb(46, 46, 46);
   padding: 10px;
+  padding-top: 100px; /* extra padding at top to avoid content under fixed navbar */
   padding-bottom: 10em;
   margin: 0;
   width: 100%;
@@ -48,7 +42,6 @@ const StyledTable = styled.table`
   width: 100%;
   border-collapse: collapse;
   margin-top: 20px;
-  table-layout: fixed;
 `;
 
 const StyledTd = styled.td`
@@ -85,7 +78,7 @@ const Image = styled.img`
   }
 `;
 
-// Resizable Header Cell Components
+// ---------- Resizable Header Cell Components ----------
 const ResizableTh = styled.th`
   position: relative;
   padding: 10px;
@@ -108,17 +101,16 @@ const Resizer = styled.div`
   cursor: col-resize;
   user-select: none;
 `;
-
 // =================== End Styled Components ===================
 
 // Initial column widths (in pixels)
 const initialColumnWidths = {
-  index: 10,
+  index: 30,
   title: 150,
   category: 150,
   type: 150,
-  watchedStatus: 100,
-  recommendations: 100,
+  watchedStatus: 150,
+  recommendations: 80,
   releaseYear: 100,
   lengthEpisodes: 100,
   synopsis: 300,
@@ -222,15 +214,10 @@ function Ranking() {
 
   return (
     <Container>
+      <Navbar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
       <Main>
         <div style={{ display: "flex", justifyContent: "center" }}>
           <Title>Media Ranker</Title>
-        </div>
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <SearchBar
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-          />
         </div>
         <StyledTable>
           <thead>

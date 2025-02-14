@@ -383,6 +383,7 @@ const Admin = () => {
               <option value="Good; liked it">Good; liked it</option>
               <option value="Good; did not like">Good; did not like</option>
               <option value="Mixed">Mixed</option>
+              <option value="Fell off">Fell off</option>
               <option value="Bad; liked it">Bad; liked it</option>
               <option value="Bad; did not like">Bad; did not like</option>
               <option value="Utter trash">Utter trash</option>
