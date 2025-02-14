@@ -7,6 +7,7 @@ const SearchContainer = styled.div`
   position: relative;
   display: inline-block;
   width: 800px; /* Increased width */
+  padding-bottom: 2em;
 `;
 
 // The search input field
