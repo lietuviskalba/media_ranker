@@ -12,8 +12,7 @@ const Admin = () => {
   const [releaseYear, setReleaseYear] = useState("");
   const [lengthEpisodes, setLengthEpisodes] = useState("");
   const [synopsis, setSynopsis] = useState("");
-  const [imageData, setImageData] = useState(null); // For file upload (Base64)
-  const [imageURL, setImageURL] = useState(""); // For pasted URL
+  const [imageData, setImageData] = useState(null); // For file upload or pasted image (Base64)
   const [message, setMessage] = useState("");
 
   // Handle file input change: convert file to Base64 string
@@ -28,30 +27,70 @@ const Admin = () => {
     }
   };
 
-  // On form submission, send all field values with underscore keys
+  // Handle paste event to capture an image from the clipboard
+  const handlePaste = (e) => {
+    const items = e.clipboardData.items;
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.type.indexOf("image") !== -1) {
+        const file = item.getAsFile();
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setImageData(reader.result);
+        };
+        reader.readAsDataURL(file);
+        break; // Only handle the first image
+      }
+    }
+  };
+
+  // Handler to remove the preview image
+  const handleRemoveImage = () => {
+    setImageData(null);
+  };
+
+  // Handler to populate dummy data into the form fields
+  const handleFillDummy = () => {
+    setTitle("Apocalypse Now");
+    setCategory("Movie");
+    setType("Standard");
+    setWatchedStatus("Not finished");
+    setRecommendations("Me no like");
+    setReleaseYear("1979");
+    setLengthEpisodes("153");
+    setSynopsis(
+      "Apocalypse Now is an engaging film that tells a compelling story with rich characters and dramatic moments."
+    );
+    setImageData(null);
+  };
+
+  // On form submission, log the payload and send all field values with underscore keys
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Use uploaded image (Base64) if available; otherwise, use the URL (if provided)
-    const image = imageData || imageURL || null;
+    const payload = {
+      title,
+      category,
+      type,
+      watched_status: watchedStatus,
+      recommendations,
+      release_year: Number(releaseYear),
+      length_or_episodes: Number(lengthEpisodes),
+      synopsis,
+      image: imageData || null,
+    };
+
+    console.log("Submitting payload:", payload);
 
     fetch("/api/records", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        title,
-        category,
-        type,
-        watched_status: watchedStatus, // Modified key
-        recommendations,
-        release_year: Number(releaseYear), // Modified key
-        length_or_episodes: Number(lengthEpisodes), // Modified key
-        synopsis,
-        image,
-      }),
+      body: JSON.stringify(payload),
     })
       .then((res) => {
         if (!res.ok) {
-          throw new Error("Error creating record");
+          return res.json().then((data) => {
+            throw new Error(data.error || "Error creating record");
+          });
         }
         return res.json();
       })
@@ -67,11 +106,10 @@ const Admin = () => {
         setLengthEpisodes("");
         setSynopsis("");
         setImageData(null);
-        setImageURL("");
       })
       .catch((err) => {
         console.error("Error adding record:", err);
-        setMessage("Error adding record.");
+        setMessage(`Error adding record: ${err.message}`);
       });
   };
 
@@ -84,6 +122,7 @@ const Admin = () => {
         </nav>
       </header>
       <main>
+        <button onClick={handleFillDummy}>Fill Dummy Data</button>
         <form onSubmit={handleSubmit}>
           <div>
             <label>Title: </label>
@@ -108,7 +147,6 @@ const Admin = () => {
             <select value={type} onChange={(e) => setType(e.target.value)}>
               <option value="Standard">Standard</option>
               <option value="Unknown">Unknown</option>
-              {/* Add more options as needed */}
             </select>
           </div>
           <div>
@@ -159,24 +197,53 @@ const Admin = () => {
             <input type="file" accept="image/*" onChange={handleFileChange} />
           </div>
           <div>
-            <label>Or Paste Image URL (optional): </label>
-            <input
-              type="text"
-              placeholder="https://example.com/image.jpg"
-              value={imageURL}
-              onChange={(e) => setImageURL(e.target.value)}
-            />
+            <label>Or Paste Image (optional): </label>
+            {/* This div listens for a paste event to capture an actual image from the clipboard */}
+            <div
+              onPaste={handlePaste}
+              style={{
+                border: "1px dashed #ccc",
+                padding: "10px",
+                marginTop: "10px",
+                cursor: "text",
+              }}
+            >
+              Click here and press Ctrl+V to paste an image
+            </div>
           </div>
-          <div>
-            {/* Display image preview if available */}
-            {(imageData || imageURL) && (
+          {imageData && (
+            <div
+              style={{
+                position: "relative",
+                display: "inline-block",
+                marginTop: "10px",
+              }}
+            >
               <img
-                src={imageData || imageURL}
+                src={imageData}
                 alt="Preview"
-                style={{ maxWidth: "200px", marginTop: "10px" }}
+                style={{ maxWidth: "200px", display: "block" }}
               />
-            )}
-          </div>
+              <button
+                type="button"
+                onClick={handleRemoveImage}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  right: 0,
+                  background: "red",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "50%",
+                  width: "24px",
+                  height: "24px",
+                  cursor: "pointer",
+                }}
+              >
+                X
+              </button>
+            </div>
+          )}
           <button type="submit">Add Record</button>
         </form>
         {message && <p>{message}</p>}

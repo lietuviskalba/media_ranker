@@ -176,15 +176,11 @@ function Ranking() {
                     : record.synopsis}
                 </td>
                 <td>
-                  {record.image ? (
-                    <img
-                      src={record.image}
-                      alt={record.title}
-                      style={{ width: "100px" }}
-                    />
-                  ) : (
-                    "No Image"
-                  )}
+                  <img
+                    src={record.image || "/images/default.png"}
+                    alt={record.title}
+                    style={{ width: "100px" }}
+                  />
                 </td>
               </tr>
             ))}

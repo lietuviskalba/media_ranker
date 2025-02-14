@@ -30,7 +30,8 @@ app.get("/api/records", (req, res) => {
 
 // POST /api/records - Add a new record (for the admin page)
 app.post("/api/records", (req, res) => {
-  // Modified to use underscore keys according to your new format.
+  console.log("Received request body:", req.body); // Debug log
+
   const {
     title,
     category,
@@ -43,19 +44,22 @@ app.post("/api/records", (req, res) => {
     image,
   } = req.body;
 
-  // Check required fields
-  if (
-    !title ||
-    !category ||
-    !type ||
-    !watched_status ||
-    !release_year ||
-    !length_or_episodes ||
-    !synopsis
-  ) {
+  // Build a list of missing required fields
+  const missingFields = [];
+  if (!title) missingFields.push("title");
+  if (!category) missingFields.push("category");
+  if (!type) missingFields.push("type");
+  if (!watched_status) missingFields.push("watched_status");
+  if (!release_year && release_year !== 0) missingFields.push("release_year");
+  if (!length_or_episodes && length_or_episodes !== 0)
+    missingFields.push("length_or_episodes");
+  if (!synopsis) missingFields.push("synopsis");
+
+  if (missingFields.length > 0) {
+    console.error("Missing required fields:", missingFields.join(", "));
     return res
       .status(400)
-      .json({ error: "Missing required fields. Please complete the form." });
+      .json({ error: `Missing required fields: ${missingFields.join(", ")}` });
   }
 
   const newRecord = {

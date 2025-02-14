@@ -26,18 +26,6 @@
     "image": ""
   },
   {
-    "id": "4991fbcc-9047-4935-81d7-9e3642266da4",
-    "title": "lala",
-    "category": "ddd",
-    "type": "Standard",
-    "watchedstatus": "adad",
-    "recommendations": "asfasf",
-    "releaseyear": 3,
-    "lengthepisodes": 4,
-    "synopsis": "aaffafa",
-    "dateadded": "2025-02-13T20:47:26.298Z"
-  },
-  {
     "id": "uuid32",
     "title": "Seven Deadly Sins",
     "category": "Series",
@@ -62,5 +50,30 @@
     "synopsis": "Overlord is a thrilling and engaging series filled with rich characters and compelling storytelling.",
     "date_added": "2024-02-13T12:00:00Z",
     "image": ""
+  },
+  {
+    "id": "252d59e6-97d6-4ec6-903a-ff245fe135bb",
+    "title": "Apocalypse Now",
+    "category": "Movie",
+    "type": "Standard",
+    "watched_status": "Not finished",
+    "recommendations": "Me no like",
+    "release_year": 1979,
+    "length_or_episodes": 153,
+    "synopsis": "Apocalypse Now is an engaging film that tells a compelling story with rich characters and dramatic moments.",
+    "date_added": "2025-02-14T10:31:53.918Z"
+  },
+  {
+    "id": "a9a3256f-99d6-4597-93c2-6408d5f6c8ce",
+    "title": "Apocalypse Now",
+    "category": "Movie",
+    "type": "Standard",
+    "watched_status": "Not finished",
+    "recommendations": "Me no like",
+    "release_year": 1979,
+    "length_or_episodes": 153,
+    "synopsis": "Apocalypse Now is an engaging film that tells a compelling story with rich characters and dramatic moments.",
+    "date_added": "2025-02-14T10:32:10.500Z",
+    "image": "data:image/png;base64,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"
   }
 ]
