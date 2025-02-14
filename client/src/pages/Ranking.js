@@ -3,10 +3,10 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import SearchBar from "../components/SearchBar";
+import ScrollToTop from "../components/ScrollToTop.js";
 
 // =================== Styled Components ===================
 
-// Container for the entire page
 const Container = styled.div`
   background-color: rgb(197, 7, 231);
   color: rgb(183, 183, 183);
@@ -16,7 +16,6 @@ const Container = styled.div`
   font-family: Arial, sans-serif;
 `;
 
-// Header layout: title left, nav right
 const Header = styled.header`
   display: flex;
   justify-content: space-between;
@@ -24,12 +23,10 @@ const Header = styled.header`
   margin-bottom: 20px;
 `;
 
-// Title styling
 const Title = styled.h1`
   font-size: 4rem;
 `;
 
-// Navigation styling
 const Nav = styled.nav`
   a {
     color: #eee;
@@ -38,7 +35,6 @@ const Nav = styled.nav`
   }
 `;
 
-// Main content area (full width, no extra gaps)
 const Main = styled.main`
   background-color: rgb(46, 46, 46);
   padding: 10px;
@@ -48,21 +44,18 @@ const Main = styled.main`
   box-sizing: border-box;
 `;
 
-// Styled table with dark theme and zebra stripes
 const StyledTable = styled.table`
   width: 100%;
   border-collapse: collapse;
   margin-top: 20px;
 `;
 
-// Table data cell
 const StyledTd = styled.td`
   padding: 10px;
   border: 1px solid #555;
   text-align: center;
 `;
 
-// Table row with zebra stripes and hover effect
 const StyledTr = styled.tr`
   background-color: ${(props) => (props.index % 2 === 0 ? "#333" : "#2a2a2a")};
   &:hover {
@@ -70,17 +63,15 @@ const StyledTr = styled.tr`
   }
 `;
 
-// Create a new styled table cell for the synopsis that wraps text and shows full content
 const SynopsisTd = styled.td`
   padding: 10px;
   border: 1px solid #555;
   text-align: left;
-  white-space: normal; /* Allows wrapping */
-  word-wrap: break-word; /* Forces long words/URLs to break */
-  max-width: 300px; /* Adjust max width as needed */
+  white-space: normal;
+  word-wrap: break-word;
+  max-width: 300px;
 `;
 
-// In your styled-components section (client/src/Ranking.js)
 const Image = styled.img`
   width: 100px;
   height: 100px;
@@ -93,9 +84,7 @@ const Image = styled.img`
   }
 `;
 
-// ---------- Resizable Header Cell Components ----------
-
-// A resizable table header cell. Accepts a width prop.
+// Resizable Header Cell Components
 const ResizableTh = styled.th`
   position: relative;
   padding: 10px;
@@ -105,7 +94,6 @@ const ResizableTh = styled.th`
   width: ${(props) => props.width}px;
 `;
 
-// The resizer element for dragging column widths.
 const Resizer = styled.div`
   position: absolute;
   right: 0;
@@ -114,28 +102,6 @@ const Resizer = styled.div`
   width: 5px;
   cursor: col-resize;
   user-select: none;
-`;
-
-// The container for the Back-to-Top button, fixed at the bottom center.
-const BackToTopButton = styled.button`
-  width: 200px;
-  position: fixed;
-  bottom: 40px; /* This creates a gap at the bottom so the button doesn't cover content */
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: #444;
-  color: #eee;
-  border: none;
-  border-radius: 20px; /* Rounded rectangle */
-  padding: 10px 20px;
-  font-size: 1.5rem;
-  cursor: pointer;
-  opacity: ${(props) => (props.visible ? 1 : 0)};
-  transition: opacity 0.3s ease;
-  z-index: 1000;
-  &:hover {
-    background-color: rgb(65, 113, 203);
-  }
 `;
 
 // =================== End Styled Components ===================
@@ -156,14 +122,10 @@ const initialColumnWidths = {
 function Ranking() {
   const [records, setRecords] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortColumn, setSortColumn] = useState(null); // e.g. "title", "category", etc.
-  const [sortDirection, setSortDirection] = useState("asc"); // "asc" or "desc"
-  const [showButton, setShowButton] = useState(false);
-
-  // State for column widths
+  const [sortColumn, setSortColumn] = useState(null);
+  const [sortDirection, setSortDirection] = useState("asc");
   const [columnWidths, setColumnWidths] = useState(initialColumnWidths);
 
-  // On mount, load saved column widths from localStorage (if available)
   useEffect(() => {
     const savedWidths = localStorage.getItem("columnWidths");
     if (savedWidths) {
@@ -178,7 +140,6 @@ function Ranking() {
       .catch((err) => console.error("Error fetching records:", err));
   }, []);
 
-  // Mapping helper for converting camelCase keys to underscore keys
   const fieldMapping = {
     releaseYear: "release_year",
     lengthEpisodes: "length_or_episodes",
@@ -193,7 +154,6 @@ function Ranking() {
     return record[field.charAt(0).toUpperCase() + field.slice(1)] || "";
   };
 
-  // Filter records (case-insensitive)
   const filteredRecords = records.filter((record) => {
     const query = searchQuery.toLowerCase();
     return (
@@ -210,7 +170,6 @@ function Ranking() {
     );
   });
 
-  // Sort the filtered records if a sort column is selected
   const sortedRecords = [...filteredRecords].sort((a, b) => {
     if (!sortColumn) return 0;
     let valA = getField(a, sortColumn);
@@ -233,7 +192,6 @@ function Ranking() {
     }
   };
 
-  // ---------- Resizing Handlers ----------
   const handleMouseDown = (e, column) => {
     e.preventDefault();
     const startX = e.clientX;
@@ -257,35 +215,12 @@ function Ranking() {
     document.addEventListener("mouseup", handleMouseUp);
   };
 
-  // Hook to monitor scroll position
-  useEffect(() => {
-    const handleScroll = () => {
-      // Show the button if scrolled down more than 300px (adjust as needed)
-      if (window.pageYOffset > 300) {
-        setShowButton(true);
-      } else {
-        setShowButton(false);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  // Function to scroll back to top
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  // ---------- End Resizing Handlers ----------
-
   return (
     <Container>
       <Main>
         <div style={{ display: "flex", justifyContent: "center" }}>
           <Title>Media Ranker</Title>
         </div>
-        {/* Search bar is placed at the top center */}
         <div style={{ display: "flex", justifyContent: "center" }}>
           <SearchBar
             searchQuery={searchQuery}
@@ -424,9 +359,7 @@ function Ranking() {
           </tbody>
         </StyledTable>
       </Main>
-      <BackToTopButton visible={showButton} onClick={scrollToTop}>
-        ^ TOP ^
-      </BackToTopButton>
+      <ScrollToTop />
     </Container>
   );
 }
