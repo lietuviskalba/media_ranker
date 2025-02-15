@@ -516,186 +516,188 @@ function Admin() {
       <Main>
         {/* Record Creation Form */}
         <CreationFormContainer>
-          <SectionTitles>Create/Update Record</SectionTitles>
-          {message && <Message>{message}</Message>}
-          <FormGrid>
-            {/* Column 1: Title, Category, Type, Synopsis */}
-            <FormGroup>
-              <label>Title:</label>
-              <StyledInput
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-              />
-            </FormGroup>
-            <FormGroup>
-              <label>Category:</label>
-              <StyledSelect
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                required
-              >
-                <option value="">Select</option>
-                <option value="Movie">Movie</option>
-                <option value="Series">Series</option>
-                <option value="Game">Game</option>
-                <option value="Other">Other</option>
-              </StyledSelect>
-            </FormGroup>
-            <FormGroup>
-              <label>Type:</label>
-              <StyledSelect
-                value={type}
-                onChange={(e) => setType(e.target.value)}
-              >
-                <option value="Live action">Live action</option>
-                <option value="Cartoon">Cartoon</option>
-                <option value="Anime">Anime</option>
-                <option value="3D Animation">3D Animation</option>
-                <option value="Mix">Mix</option>
-                <option value="Other">Other</option>
-              </StyledSelect>
-            </FormGroup>
-            <FormGroup>
-              <label>Recommendations:</label>
-              <StyledSelect
-                value={recommendations}
-                onChange={(e) => setRecommendations(e.target.value)}
-              >
-                <option value="">Select</option>
-                <option value="El Epico">El Epico</option>
-                <option value="Good; liked it">Good; liked it</option>
-                <option value="Good; did not like">Good; did not like</option>
-                <option value="Mixed">Mixed</option>
-                <option value="Fell off">Fell off</option>
-                <option value="Bad; liked it">Bad; liked it</option>
-                <option value="Bad; did not like">Bad; did not like</option>
-                <option value="Utter trash">Utter trash</option>
-              </StyledSelect>
-            </FormGroup>
-            {/* Column 2: Watched Status, then nested grid for Season/Episode, then nested grid for Release Year/Length */}
-            <FormGroup>
-              <label>Watched Status:</label>
-              <StyledSelect
-                value={watchedStatus}
-                onChange={(e) => setWatchedStatus(e.target.value)}
-                required
-              >
-                <option value="">Select</option>
-                <option value="Not Started">Not Started</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Completed">Completed</option>
-              </StyledSelect>
-            </FormGroup>
-            <FormGroup>
-              <NestedGrid>
-                <div>
-                  <label>Season:</label>
-                  <StyledInput
-                    type="number"
-                    value={season}
-                    min="1"
-                    onChange={(e) => setSeason(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label>Episode:</label>
-                  <StyledInput
-                    type="number"
-                    value={episode}
-                    min="1"
-                    onChange={(e) => setEpisode(e.target.value)}
-                  />
-                </div>
-              </NestedGrid>
-            </FormGroup>
-            <FormGroup>
-              <NestedGrid>
-                <div>
-                  <label>Release Year:</label>
-                  <StyledInput
-                    type="number"
-                    value={releaseYear}
-                    onChange={(e) => setReleaseYear(e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <label>Length/Episodes:</label>
-                  <StyledInput
-                    type="number"
-                    value={lengthEpisodes}
-                    onChange={(e) => setLengthEpisodes(e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <SubmitButton type="submit">
-                    {editMode ? "Update Record" : "Add Record"}
-                  </SubmitButton>
-                </div>
-              </NestedGrid>
-            </FormGroup>
-            {/* Column 3: Recommendations, Image Upload/Paste, and Submit Button */}
+          <form onSubmit={handleSubmit}>
+            <SectionTitles>Create/Update Record</SectionTitles>
+            {message && <Message>{message}</Message>}
+            <FormGrid>
+              {/* Column 1: Title, Category, Type, Synopsis */}
+              <FormGroup>
+                <label>Title:</label>
+                <StyledInput
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  required
+                />
+              </FormGroup>
+              <FormGroup>
+                <label>Category:</label>
+                <StyledSelect
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  required
+                >
+                  <option value="">Select</option>
+                  <option value="Movie">Movie</option>
+                  <option value="Series">Series</option>
+                  <option value="Game">Game</option>
+                  <option value="Other">Other</option>
+                </StyledSelect>
+              </FormGroup>
+              <FormGroup>
+                <label>Type:</label>
+                <StyledSelect
+                  value={type}
+                  onChange={(e) => setType(e.target.value)}
+                >
+                  <option value="Live action">Live action</option>
+                  <option value="Cartoon">Cartoon</option>
+                  <option value="Anime">Anime</option>
+                  <option value="3D Animation">3D Animation</option>
+                  <option value="Mix">Mix</option>
+                  <option value="Other">Other</option>
+                </StyledSelect>
+              </FormGroup>
+              <FormGroup>
+                <label>Recommendations:</label>
+                <StyledSelect
+                  value={recommendations}
+                  onChange={(e) => setRecommendations(e.target.value)}
+                >
+                  <option value="">Select</option>
+                  <option value="El Epico">El Epico</option>
+                  <option value="Good; liked it">Good; liked it</option>
+                  <option value="Good; did not like">Good; did not like</option>
+                  <option value="Mixed">Mixed</option>
+                  <option value="Fell off">Fell off</option>
+                  <option value="Bad; liked it">Bad; liked it</option>
+                  <option value="Bad; did not like">Bad; did not like</option>
+                  <option value="Utter trash">Utter trash</option>
+                </StyledSelect>
+              </FormGroup>
+              {/* Column 2: Watched Status, then nested grid for Season/Episode, then nested grid for Release Year/Length */}
+              <FormGroup>
+                <label>Watched Status:</label>
+                <StyledSelect
+                  value={watchedStatus}
+                  onChange={(e) => setWatchedStatus(e.target.value)}
+                  required
+                >
+                  <option value="">Select</option>
+                  <option value="Not Started">Not Started</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Completed">Completed</option>
+                </StyledSelect>
+              </FormGroup>
+              <FormGroup>
+                <NestedGrid>
+                  <div>
+                    <label>Season:</label>
+                    <StyledInput
+                      type="number"
+                      value={season}
+                      min="1"
+                      onChange={(e) => setSeason(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label>Episode:</label>
+                    <StyledInput
+                      type="number"
+                      value={episode}
+                      min="1"
+                      onChange={(e) => setEpisode(e.target.value)}
+                    />
+                  </div>
+                </NestedGrid>
+              </FormGroup>
+              <FormGroup>
+                <NestedGrid>
+                  <div>
+                    <label>Release Year:</label>
+                    <StyledInput
+                      type="number"
+                      value={releaseYear}
+                      onChange={(e) => setReleaseYear(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label>Length/Episodes:</label>
+                    <StyledInput
+                      type="number"
+                      value={lengthEpisodes}
+                      onChange={(e) => setLengthEpisodes(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <SubmitButton type="submit">
+                      {editMode ? "Update Record" : "Add Record"}
+                    </SubmitButton>
+                  </div>
+                </NestedGrid>
+              </FormGroup>
+              {/* Column 3: Recommendations, Image Upload/Paste, and Submit Button */}
 
-            <FormGroup span="2">
-              <label>Synopsis:</label>
-              <StyledTextarea
-                value={synopsis}
-                onChange={(e) => setSynopsis(e.target.value)}
-                required
-                rows="2"
-              />
-            </FormGroup>
+              <FormGroup span="2">
+                <label>Synopsis:</label>
+                <StyledTextarea
+                  value={synopsis}
+                  onChange={(e) => setSynopsis(e.target.value)}
+                  required
+                  rows="2"
+                />
+              </FormGroup>
 
-            <FormGroup>
-              <label>Image Upload / Paste:</label>
-              <StyledInput
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-              />
-              <div
-                onPaste={handlePaste}
-                style={{
-                  border: "1px dashed #ccc",
-                  padding: "10px",
-                  marginTop: "10px",
-                  cursor: "text",
-                }}
-              >
-                Click here and press Ctrl+V to paste an image
-              </div>
-              {imageData && (
-                <div style={{ position: "relative", marginTop: "10px" }}>
-                  <img
-                    src={imageData}
-                    alt="Preview"
-                    style={{ maxWidth: "200px", display: "block" }}
-                  />
-                  <button
-                    type="button"
-                    onClick={handleRemoveImage}
-                    style={{
-                      position: "absolute",
-                      top: 0,
-                      right: 0,
-                      background: "red",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "50%",
-                      width: "24px",
-                      height: "24px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    X
-                  </button>
+              <FormGroup>
+                <label>Image Upload / Paste:</label>
+                <StyledInput
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                />
+                <div
+                  onPaste={handlePaste}
+                  style={{
+                    border: "1px dashed #ccc",
+                    padding: "10px",
+                    marginTop: "10px",
+                    cursor: "text",
+                  }}
+                >
+                  Click here and press Ctrl+V to paste an image
                 </div>
-              )}
-            </FormGroup>
-          </FormGrid>
+                {imageData && (
+                  <div style={{ position: "relative", marginTop: "10px" }}>
+                    <img
+                      src={imageData}
+                      alt="Preview"
+                      style={{ maxWidth: "200px", display: "block" }}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleRemoveImage}
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        right: 0,
+                        background: "red",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "50%",
+                        width: "24px",
+                        height: "24px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      X
+                    </button>
+                  </div>
+                )}
+              </FormGroup>
+            </FormGrid>
+          </form>
         </CreationFormContainer>
 
         {/* Record Table */}
