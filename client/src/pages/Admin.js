@@ -5,7 +5,6 @@ import Navbar from "../components/Navbar";
 import styled from "styled-components";
 import ScrollToTop from "../components/ScrollToTop";
 
-// ------------------ Helper Functions ------------------
 const fieldMapping = {
   releaseYear: "release_year",
   lengthEpisodes: "length_or_episodes",
@@ -13,17 +12,13 @@ const fieldMapping = {
   dateAdded: "date_added",
 };
 
-const getField = (record, field) => {
+function getField(record, field) {
   if (record[field] !== undefined) return record[field];
   if (fieldMapping[field] && record[fieldMapping[field]] !== undefined)
     return record[fieldMapping[field]];
   return record[field.charAt(0).toUpperCase() + field.slice(1)] || "";
-};
-// ------------------ End Helper Functions ------------------
+}
 
-// =================== Styled Components ===================
-
-// Page container
 const Container = styled.div`
   background-color: rgb(197, 7, 231);
   color: rgb(183, 183, 183);
@@ -31,10 +26,9 @@ const Container = styled.div`
   margin: 0;
   box-sizing: border-box;
   font-family: Arial, sans-serif;
-  padding-top: 80px; /* space for fixed Navbar */
+  padding-top: 80px;
 `;
 
-// Main content area
 const Main = styled.main`
   background-color: rgb(46, 46, 46);
   padding: 10px;
@@ -44,7 +38,6 @@ const Main = styled.main`
   box-sizing: border-box;
 `;
 
-// Sticky record creation form container (full width)
 const CreationFormContainer = styled.div`
   position: sticky;
   top: 80px;
@@ -58,27 +51,23 @@ const CreationFormContainer = styled.div`
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 `;
 
-// Sticky record creation form container (full width)
 const SectionTitles = styled.div`
   color: rgb(192, 73, 248);
   font-size: 2em;
 `;
 
-// Grid layout for the entire form in 3 columns
 const FormGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
 `;
 
-// Nested grid for splitting small fields (2 columns)
 const NestedGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
 `;
 
-// Form group wrapper – accepts an optional "span" prop to span multiple columns
 const FormGroup = styled.div`
   display: flex;
   flex-direction: column;
@@ -86,7 +75,6 @@ const FormGroup = styled.div`
   outline: 1px dashed rgba(255, 0, 0, 0.5);
 `;
 
-// Styled input, select, and textarea fields
 const StyledInput = styled.input`
   padding: 6px;
   font-size: 1rem;
@@ -134,7 +122,6 @@ const Message = styled.p`
   margin-top: 10px;
 `;
 
-// ------------------ Table Styled Components (from Ranking.js) ------------------
 const StyledTable = styled.table`
   width: 100%;
   border-collapse: collapse;
@@ -200,14 +187,13 @@ const Resizer = styled.div`
   cursor: col-resize;
   user-select: none;
 `;
-// ------------------ End Table Styled Components ------------------
 
 const initialColumnWidths = {
   index: 30,
-  title: 150,
-  category: 150,
-  type: 150,
-  watchedStatus: 150,
+  title: 100,
+  category: 100,
+  type: 100,
+  watchedStatus: 100,
   recommendations: 80,
   releaseYear: 100,
   lengthEpisodes: 100,
@@ -215,7 +201,6 @@ const initialColumnWidths = {
 };
 
 function Admin() {
-  // Form state
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [type, setType] = useState("Live action");
@@ -228,8 +213,6 @@ function Admin() {
   const [synopsis, setSynopsis] = useState("");
   const [imageData, setImageData] = useState(null);
   const [message, setMessage] = useState("");
-
-  // Table state
   const [records, setRecords] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortColumn, setSortColumn] = useState(null);
@@ -239,15 +222,17 @@ function Admin() {
   const [editId, setEditId] = useState(null);
   const [columnWidths, setColumnWidths] = useState(initialColumnWidths);
 
-  // Load saved column widths
   useEffect(() => {
-    const savedWidths = localStorage.getItem("columnWidths");
+    const savedWidths = localStorage.getItem("adminColumnWidths");
     if (savedWidths) {
       setColumnWidths(JSON.parse(savedWidths));
     }
   }, []);
 
-  // Fetch records
+  useEffect(() => {
+    localStorage.setItem("adminColumnWidths", JSON.stringify(columnWidths));
+  }, [columnWidths]);
+
   useEffect(() => {
     fetch("/api/records")
       .then((res) => res.json())
@@ -255,7 +240,28 @@ function Admin() {
       .catch((err) => console.error("Error fetching records:", err));
   }, [message]);
 
-  // Image handlers
+  const handleMouseDown = (e, column) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startWidth = columnWidths[column];
+
+    const handleMouseMove = (moveEvent) => {
+      const newWidth = startWidth + (moveEvent.clientX - startX);
+      setColumnWidths((prev) => {
+        const updated = { ...prev, [column]: newWidth > 20 ? newWidth : 20 };
+        return updated;
+      });
+    };
+
+    const handleMouseUp = () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+  };
+
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -330,7 +336,6 @@ function Admin() {
       synopsis,
       image: imageData || null,
     };
-
     if (editMode && editId) {
       fetch(`/api/records/${editId}`, {
         method: "PUT",
@@ -423,7 +428,6 @@ function Admin() {
         } "${getField(record, "title")}"?`
       );
     if (!proceed) return;
-
     fetch(`/api/records/${record.id}`, {
       method: "DELETE",
     })
@@ -484,43 +488,15 @@ function Admin() {
     }
   };
 
-  const handleMouseDown = (e, column) => {
-    e.preventDefault();
-    const startX = e.clientX;
-    const startWidth = columnWidths[column];
-
-    const handleMouseMove = (e) => {
-      const newWidth = startWidth + (e.clientX - startX);
-      setColumnWidths((prev) => {
-        const updated = { ...prev, [column]: newWidth > 20 ? newWidth : 20 };
-        return updated;
-      });
-    };
-
-    const handleMouseUp = () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-      localStorage.setItem("columnWidths", JSON.stringify(columnWidths));
-    };
-
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
-  };
-
   return (
-    <div>
+    <Container>
       <Navbar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-      <header>
-        <h1>Admin Page</h1>
-      </header>
       <Main>
-        {/* Record Creation Form */}
         <CreationFormContainer>
           <form onSubmit={handleSubmit}>
             <SectionTitles>Create/Update Record</SectionTitles>
             {message && <Message>{message}</Message>}
             <FormGrid>
-              {/* Column 1: Title, Category, Type, Synopsis */}
               <FormGroup>
                 <label>Title:</label>
                 <StyledInput
@@ -575,7 +551,6 @@ function Admin() {
                   <option value="Utter trash">Utter trash</option>
                 </StyledSelect>
               </FormGroup>
-              {/* Column 2: Watched Status, then nested grid for Season/Episode, then nested grid for Release Year/Length */}
               <FormGroup>
                 <label>Watched Status:</label>
                 <StyledSelect
@@ -638,8 +613,6 @@ function Admin() {
                   </div>
                 </NestedGrid>
               </FormGroup>
-              {/* Column 3: Recommendations, Image Upload/Paste, and Submit Button */}
-
               <FormGroup span="2">
                 <label>Synopsis:</label>
                 <StyledTextarea
@@ -649,7 +622,6 @@ function Admin() {
                   rows="2"
                 />
               </FormGroup>
-
               <FormGroup>
                 <label>Image Upload / Paste:</label>
                 <StyledInput
@@ -699,8 +671,6 @@ function Admin() {
             </FormGrid>
           </form>
         </CreationFormContainer>
-
-        {/* Record Table */}
         <SectionTitles>Existing Media</SectionTitles>
         <div style={{ marginBottom: "10px" }}>
           <label>
@@ -725,11 +695,8 @@ function Admin() {
                 onClick={() => handleSort("title")}
               >
                 Title{" "}
-                {sortColumn === "title"
-                  ? sortDirection === "asc"
-                    ? "▲"
-                    : "▼"
-                  : ""}
+                {sortColumn === "title" && sortDirection === "asc" ? "▲" : ""}
+                {sortColumn === "title" && sortDirection === "desc" ? "▼" : ""}
                 <Resizer onMouseDown={(e) => handleMouseDown(e, "title")} />
               </ResizableTh>
               <ResizableTh
@@ -737,10 +704,11 @@ function Admin() {
                 onClick={() => handleSort("category")}
               >
                 Category{" "}
-                {sortColumn === "category"
-                  ? sortDirection === "asc"
-                    ? "▲"
-                    : "▼"
+                {sortColumn === "category" && sortDirection === "asc"
+                  ? "▲"
+                  : ""}
+                {sortColumn === "category" && sortDirection === "desc"
+                  ? "▼"
                   : ""}
                 <Resizer onMouseDown={(e) => handleMouseDown(e, "category")} />
               </ResizableTh>
@@ -749,11 +717,8 @@ function Admin() {
                 onClick={() => handleSort("type")}
               >
                 Type{" "}
-                {sortColumn === "type"
-                  ? sortDirection === "asc"
-                    ? "▲"
-                    : "▼"
-                  : ""}
+                {sortColumn === "type" && sortDirection === "asc" ? "▲" : ""}
+                {sortColumn === "type" && sortDirection === "desc" ? "▼" : ""}
                 <Resizer onMouseDown={(e) => handleMouseDown(e, "type")} />
               </ResizableTh>
               <ResizableTh
@@ -761,10 +726,11 @@ function Admin() {
                 onClick={() => handleSort("watchedStatus")}
               >
                 Watched Status{" "}
-                {sortColumn === "watchedStatus"
-                  ? sortDirection === "asc"
-                    ? "▲"
-                    : "▼"
+                {sortColumn === "watchedStatus" && sortDirection === "asc"
+                  ? "▲"
+                  : ""}
+                {sortColumn === "watchedStatus" && sortDirection === "desc"
+                  ? "▼"
                   : ""}
                 <Resizer
                   onMouseDown={(e) => handleMouseDown(e, "watchedStatus")}
@@ -775,10 +741,11 @@ function Admin() {
                 onClick={() => handleSort("recommendations")}
               >
                 Recommendations{" "}
-                {sortColumn === "recommendations"
-                  ? sortDirection === "asc"
-                    ? "▲"
-                    : "▼"
+                {sortColumn === "recommendations" && sortDirection === "asc"
+                  ? "▲"
+                  : ""}
+                {sortColumn === "recommendations" && sortDirection === "desc"
+                  ? "▼"
                   : ""}
                 <Resizer
                   onMouseDown={(e) => handleMouseDown(e, "recommendations")}
@@ -789,10 +756,11 @@ function Admin() {
                 onClick={() => handleSort("releaseYear")}
               >
                 Release Year{" "}
-                {sortColumn === "releaseYear"
-                  ? sortDirection === "asc"
-                    ? "▲"
-                    : "▼"
+                {sortColumn === "releaseYear" && sortDirection === "asc"
+                  ? "▲"
+                  : ""}
+                {sortColumn === "releaseYear" && sortDirection === "desc"
+                  ? "▼"
                   : ""}
                 <Resizer
                   onMouseDown={(e) => handleMouseDown(e, "releaseYear")}
@@ -803,10 +771,11 @@ function Admin() {
                 onClick={() => handleSort("lengthEpisodes")}
               >
                 Length/Episodes{" "}
-                {sortColumn === "lengthEpisodes"
-                  ? sortDirection === "asc"
-                    ? "▲"
-                    : "▼"
+                {sortColumn === "lengthEpisodes" && sortDirection === "asc"
+                  ? "▲"
+                  : ""}
+                {sortColumn === "lengthEpisodes" && sortDirection === "desc"
+                  ? "▼"
                   : ""}
                 <Resizer
                   onMouseDown={(e) => handleMouseDown(e, "lengthEpisodes")}
@@ -822,8 +791,7 @@ function Admin() {
           </thead>
           <tbody>
             {sortedRecords.map((record, index) => (
-              <tr key={record.id}>
-                {/* Left Actions */}
+              <StyledTr key={record.id} index={index}>
                 <StyledTd>
                   <button onClick={() => handleEdit(record)}>Update</button>
                   <button onClick={() => handleDelete(record)}>Delete</button>
@@ -849,18 +817,17 @@ function Admin() {
                     "No Image"
                   )}
                 </StyledTd>
-                {/* Right Actions */}
                 <StyledTd>
                   <button onClick={() => handleEdit(record)}>Update</button>
                   <button onClick={() => handleDelete(record)}>Delete</button>
                 </StyledTd>
-              </tr>
+              </StyledTr>
             ))}
           </tbody>
         </StyledTable>
       </Main>
       <ScrollToTop />
-    </div>
+    </Container>
   );
 }
 
