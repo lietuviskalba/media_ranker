@@ -119,9 +119,7 @@ function Ranking() {
 
   useEffect(() => {
     const savedWidths = localStorage.getItem("columnWidths");
-    if (savedWidths) {
-      setColumnWidths(JSON.parse(savedWidths));
-    }
+    if (savedWidths) setColumnWidths(JSON.parse(savedWidths));
   }, []);
 
   useEffect(() => {
@@ -162,16 +160,9 @@ function Ranking() {
   });
 
   const sortedRecords = [...filteredRecords].sort((a, b) => {
-    if (!sortColumn) return 0;
-    let valA = getField(a, sortColumn);
-    let valB = getField(b, sortColumn);
-    if (typeof valA === "string" && typeof valB === "string") {
-      valA = valA.toLowerCase();
-      valB = valB.toLowerCase();
-    }
-    if (valA < valB) return sortDirection === "asc" ? -1 : 1;
-    if (valA > valB) return sortDirection === "asc" ? 1 : -1;
-    return 0;
+    const dateA = a.updatedAt ? new Date(a.updatedAt) : new Date(a.date_added);
+    const dateB = b.updatedAt ? new Date(b.updatedAt) : new Date(b.date_added);
+    return dateB - dateA;
   });
 
   const handleSort = (column) => {
@@ -223,7 +214,10 @@ function Ranking() {
     fetch(`/api/records/${record.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ watched_status: newStatus }),
+      body: JSON.stringify({
+        watched_status: newStatus,
+        updatedAt: new Date().toISOString(),
+      }),
     })
       .then((res) => {
         if (!res.ok) {
@@ -235,7 +229,6 @@ function Ranking() {
       })
       .then((data) => {
         alert(`Record "${data.title}" updated to:\n${data.watched_status}`);
-        // Update local state with new watched_status
         setRecords((prevRecords) =>
           prevRecords.map((r) => (r.id === record.id ? data : r))
         );
