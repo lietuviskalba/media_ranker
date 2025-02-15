@@ -116,6 +116,21 @@ const SubmitButton = styled.button`
   }
 `;
 
+const DummyButton = styled.button`
+  padding: 8px 16px;
+  font-size: 1.1rem;
+  background-color: rgb(80, 80, 80);
+  color: #eee;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+  margin-left: 10px;
+  &:hover {
+    background-color: rgb(65, 113, 203);
+  }
+`;
+
 const Message = styled.p`
   font-size: 1rem;
   color: #ff0;
@@ -224,9 +239,7 @@ function Admin() {
 
   useEffect(() => {
     const savedWidths = localStorage.getItem("adminColumnWidths");
-    if (savedWidths) {
-      setColumnWidths(JSON.parse(savedWidths));
-    }
+    if (savedWidths) setColumnWidths(JSON.parse(savedWidths));
   }, []);
 
   useEffect(() => {
@@ -244,20 +257,17 @@ function Admin() {
     e.preventDefault();
     const startX = e.clientX;
     const startWidth = columnWidths[column];
-
-    const handleMouseMove = (moveEvent) => {
-      const newWidth = startWidth + (moveEvent.clientX - startX);
+    const handleMouseMove = (e) => {
+      const newWidth = startWidth + (e.clientX - startX);
       setColumnWidths((prev) => {
         const updated = { ...prev, [column]: newWidth > 20 ? newWidth : 20 };
         return updated;
       });
     };
-
     const handleMouseUp = () => {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
-
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
   };
@@ -337,10 +347,14 @@ function Admin() {
       image: imageData || null,
     };
     if (editMode && editId) {
+      const updatedPayload = {
+        ...payload,
+        updatedAt: new Date().toISOString(),
+      };
       fetch(`/api/records/${editId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(updatedPayload),
       })
         .then((res) => {
           if (!res.ok) {
@@ -467,7 +481,15 @@ function Admin() {
   });
 
   const sortedRecords = [...filteredRecords].sort((a, b) => {
-    if (!sortColumn) return 0;
+    if (!sortColumn) {
+      const dateA = a.updatedAt
+        ? new Date(a.updatedAt)
+        : new Date(a.date_added);
+      const dateB = b.updatedAt
+        ? new Date(b.updatedAt)
+        : new Date(b.date_added);
+      return dateB - dateA;
+    }
     let valA = getField(a, sortColumn);
     let valB = getField(b, sortColumn);
     if (typeof valA === "string" && typeof valB === "string") {
@@ -491,7 +513,6 @@ function Admin() {
   return (
     <Container>
       <Navbar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-
       <Main>
         <CreationFormContainer>
           <form onSubmit={handleSubmit}>
@@ -607,10 +628,13 @@ function Admin() {
                       required
                     />
                   </div>
-                  <div>
+                  <div style={{ display: "flex", gap: "10px" }}>
                     <SubmitButton type="submit">
                       {editMode ? "Update Record" : "Add Record"}
                     </SubmitButton>
+                    <DummyButton type="button" onClick={handleFillDummy}>
+                      Fill Dummy Data
+                    </DummyButton>
                   </div>
                 </NestedGrid>
               </FormGroup>
@@ -631,13 +655,13 @@ function Admin() {
                   onChange={handleFileChange}
                 />
                 <div
-                  onPaste={handlePaste}
                   style={{
                     border: "1px dashed #ccc",
                     padding: "10px",
                     marginTop: "10px",
                     cursor: "text",
                   }}
+                  onPaste={handlePaste}
                 >
                   Click here and press Ctrl+V to paste an image
                 </div>
@@ -696,8 +720,11 @@ function Admin() {
                 onClick={() => handleSort("title")}
               >
                 Title{" "}
-                {sortColumn === "title" && sortDirection === "asc" ? "▲" : ""}
-                {sortColumn === "title" && sortDirection === "desc" ? "▼" : ""}
+                {sortColumn === "title" && sortDirection === "asc"
+                  ? "▲"
+                  : sortColumn === "title" && sortDirection === "desc"
+                  ? "▼"
+                  : ""}
                 <Resizer onMouseDown={(e) => handleMouseDown(e, "title")} />
               </ResizableTh>
               <ResizableTh
@@ -707,8 +734,7 @@ function Admin() {
                 Category{" "}
                 {sortColumn === "category" && sortDirection === "asc"
                   ? "▲"
-                  : ""}
-                {sortColumn === "category" && sortDirection === "desc"
+                  : sortColumn === "category" && sortDirection === "desc"
                   ? "▼"
                   : ""}
                 <Resizer onMouseDown={(e) => handleMouseDown(e, "category")} />
@@ -718,8 +744,11 @@ function Admin() {
                 onClick={() => handleSort("type")}
               >
                 Type{" "}
-                {sortColumn === "type" && sortDirection === "asc" ? "▲" : ""}
-                {sortColumn === "type" && sortDirection === "desc" ? "▼" : ""}
+                {sortColumn === "type" && sortDirection === "asc"
+                  ? "▲"
+                  : sortColumn === "type" && sortDirection === "desc"
+                  ? "▼"
+                  : ""}
                 <Resizer onMouseDown={(e) => handleMouseDown(e, "type")} />
               </ResizableTh>
               <ResizableTh
@@ -729,8 +758,7 @@ function Admin() {
                 Watched Status{" "}
                 {sortColumn === "watchedStatus" && sortDirection === "asc"
                   ? "▲"
-                  : ""}
-                {sortColumn === "watchedStatus" && sortDirection === "desc"
+                  : sortColumn === "watchedStatus" && sortDirection === "desc"
                   ? "▼"
                   : ""}
                 <Resizer
@@ -744,8 +772,7 @@ function Admin() {
                 Recommendations{" "}
                 {sortColumn === "recommendations" && sortDirection === "asc"
                   ? "▲"
-                  : ""}
-                {sortColumn === "recommendations" && sortDirection === "desc"
+                  : sortColumn === "recommendations" && sortDirection === "desc"
                   ? "▼"
                   : ""}
                 <Resizer
@@ -759,8 +786,7 @@ function Admin() {
                 Release Year{" "}
                 {sortColumn === "releaseYear" && sortDirection === "asc"
                   ? "▲"
-                  : ""}
-                {sortColumn === "releaseYear" && sortDirection === "desc"
+                  : sortColumn === "releaseYear" && sortDirection === "desc"
                   ? "▼"
                   : ""}
                 <Resizer
@@ -774,8 +800,7 @@ function Admin() {
                 Length/Episodes{" "}
                 {sortColumn === "lengthEpisodes" && sortDirection === "asc"
                   ? "▲"
-                  : ""}
-                {sortColumn === "lengthEpisodes" && sortDirection === "desc"
+                  : sortColumn === "lengthEpisodes" && sortDirection === "desc"
                   ? "▼"
                   : ""}
                 <Resizer

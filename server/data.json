@@ -2,7 +2,7 @@
   {
     "id": "uuid1",
     "title": "The North Man",
-    "category": "Movie",
+    "category": "Game",
     "type": "Live action",
     "watched_status": "Completed",
     "recommendations": "Good; did not like",
@@ -10,7 +10,8 @@
     "length_or_episodes": 134,
     "synopsis": "The North Man is an engaging film that tells a compelling story with rich characters and dramatic moments.",
     "date_added": "2024-02-13T12:00:00Z",
-    "image": null
+    "image": null,
+    "updatedAt": "2025-02-15T22:31:23.410Z"
   },
   {
     "id": "uuid2",
@@ -1597,5 +1598,17 @@
     "length_or_episodes": 2,
     "synopsis": "adadad",
     "date_added": "2025-02-15T22:27:05.777Z"
+  },
+  {
+    "id": "c86d1c5a-4f04-4027-b88d-698b26945641",
+    "title": "Apocalypse Now",
+    "category": "Movie",
+    "type": "Live action",
+    "watched_status": "Not Started",
+    "recommendations": "Me no like",
+    "release_year": 1979,
+    "length_or_episodes": 153,
+    "synopsis": "Apocalypse Now is an engaging film that tells a compelling story with rich characters and dramatic moments.",
+    "date_added": "2025-02-15T22:31:03.322Z"
   }
 ]
