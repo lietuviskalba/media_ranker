@@ -491,6 +491,7 @@ function Admin() {
   return (
     <Container>
       <Navbar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+
       <Main>
         <CreationFormContainer>
           <form onSubmit={handleSubmit}>

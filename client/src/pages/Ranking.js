@@ -1,12 +1,8 @@
 // client/src/Ranking.js
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import styled from "styled-components";
-import SearchBar from "../components/SearchBar";
 import ScrollToTop from "../components/ScrollToTop";
 import Navbar from "../components/Navbar";
-
-// =================== Styled Components ===================
 
 const Container = styled.div`
   background-color: rgb(47, 47, 47);
@@ -31,7 +27,7 @@ const Title = styled.h1`
 const Main = styled.main`
   background-color: rgb(46, 46, 46);
   padding: 10px;
-  padding-top: 100px; /* extra padding at top to avoid content under fixed navbar */
+  padding-top: 100px;
   padding-bottom: 10em;
   margin: 0;
   width: 100%;
@@ -79,7 +75,6 @@ const Image = styled.img`
   }
 `;
 
-// ---------- Resizable Header Cell Components ----------
 const ResizableTh = styled.th`
   position: relative;
   padding: 10px;
@@ -102,9 +97,7 @@ const Resizer = styled.div`
   cursor: col-resize;
   user-select: none;
 `;
-// =================== End Styled Components ===================
 
-// Initial column widths (in pixels)
 const initialColumnWidths = {
   index: 10,
   title: 100,
@@ -145,12 +138,12 @@ function Ranking() {
     dateAdded: "date_added",
   };
 
-  const getField = (record, field) => {
+  function getField(record, field) {
     if (record[field] !== undefined) return record[field];
     if (fieldMapping[field] && record[fieldMapping[field]] !== undefined)
       return record[fieldMapping[field]];
     return record[field.charAt(0).toUpperCase() + field.slice(1)] || "";
-  };
+  }
 
   const filteredRecords = records.filter((record) => {
     const query = searchQuery.toLowerCase();
@@ -194,7 +187,6 @@ function Ranking() {
     e.preventDefault();
     const startX = e.clientX;
     const startWidth = columnWidths[column];
-
     const handleMouseMove = (e) => {
       const newWidth = startWidth + (e.clientX - startX);
       setColumnWidths((prev) => {
@@ -202,15 +194,56 @@ function Ranking() {
         return updated;
       });
     };
-
     const handleMouseUp = () => {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
       localStorage.setItem("columnWidths", JSON.stringify(columnWidths));
     };
-
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
+  };
+
+  const handleRowClick = (record) => {
+    const confirmFinish = window.confirm(
+      "Have you completed watching this series?"
+    );
+    if (!confirmFinish) return;
+    const currentStatus = getField(record, "watchedStatus");
+    const currentDate = new Date().toISOString().slice(0, 10);
+    let newStatus = "";
+    const regex = /^Completed\s*\((\d+)\)(?:\n(.*))?$/i;
+    const match = currentStatus.match(regex);
+    if (match) {
+      const count = parseInt(match[1], 10) + 1;
+      const dates = match[2] ? match[2] + ", " + currentDate : currentDate;
+      newStatus = `Completed (${count})\n${dates}`;
+    } else {
+      newStatus = `Completed (1)\n${currentDate}`;
+    }
+    fetch(`/api/records/${record.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ watched_status: newStatus }),
+    })
+      .then((res) => {
+        if (!res.ok) {
+          return res.json().then((data) => {
+            throw new Error(data.error || "Error updating record");
+          });
+        }
+        return res.json();
+      })
+      .then((data) => {
+        alert(`Record "${data.title}" updated to:\n${data.watched_status}`);
+        // Update local state with new watched_status
+        setRecords((prevRecords) =>
+          prevRecords.map((r) => (r.id === record.id ? data : r))
+        );
+      })
+      .catch((err) => {
+        console.error("Error updating record:", err);
+        alert(`Error updating record: ${err.message}`);
+      });
   };
 
   return (
@@ -328,7 +361,11 @@ function Ranking() {
           </thead>
           <tbody>
             {sortedRecords.map((record, index) => (
-              <StyledTr key={record.id} index={index}>
+              <StyledTr
+                key={record.id}
+                index={index}
+                onClick={() => handleRowClick(record)}
+              >
                 <StyledTd>{index + 1}</StyledTd>
                 <StyledTd>{getField(record, "title")}</StyledTd>
                 <StyledTd>{getField(record, "category")}</StyledTd>
