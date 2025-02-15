@@ -4,14 +4,14 @@
     "title": "The North Man",
     "category": "Game",
     "type": "Live action",
-    "watched_status": "Completed",
+    "watched_status": "Completed (1)\n2025-02-15",
     "recommendations": "Good; did not like",
     "release_year": 2017,
     "length_or_episodes": 134,
     "synopsis": "The North Man is an engaging film that tells a compelling story with rich characters and dramatic moments.",
     "date_added": "2024-02-13T12:00:00Z",
     "image": null,
-    "updatedAt": "2025-02-15T22:31:23.410Z"
+    "updatedAt": "2025-02-15T22:54:57.849Z"
   },
   {
     "id": "uuid2",
@@ -57,14 +57,14 @@
     "title": "All of Us Are Dead",
     "category": "Series",
     "type": "Live action",
-    "watched_status": "Completed (1)\n2025-02-15",
+    "watched_status": "Completed (3)\n2025-02-15, 2025-02-15, 2025-02-15",
     "recommendations": "-",
     "release_year": "2022",
     "length_or_episodes": "12",
     "synopsis": "All of Us Are Dead is a unique piece of entertainment that has captivated audiences with its storytelling and artistic elements.",
     "date_added": "2024-02-13T12:00:00Z",
     "image": "",
-    "updatedAt": "2025-02-15T22:26:34.193Z"
+    "updatedAt": "2025-02-15T23:17:16.710Z"
   },
   {
     "id": "uuid6",
@@ -1610,5 +1610,55 @@
     "length_or_episodes": 153,
     "synopsis": "Apocalypse Now is an engaging film that tells a compelling story with rich characters and dramatic moments.",
     "date_added": "2025-02-15T22:31:03.322Z"
+  },
+  {
+    "id": "acbbf1b9-949f-492a-994e-2811ef2c7c30",
+    "title": "ddddddddddddddddd",
+    "category": "Movie",
+    "type": "Live action",
+    "watched_status": "Completed (1)\n2025-02-15",
+    "recommendations": "Me no like",
+    "release_year": 1979,
+    "length_or_episodes": 153,
+    "synopsis": "Apocalypse Now is an engaging film that tells a compelling story with rich characters and dramatic moments.",
+    "date_added": "2025-02-15T22:53:45.312Z",
+    "image": null,
+    "updatedAt": "2025-02-15T23:17:21.848Z"
+  },
+  {
+    "id": "f9a5d90f-3a74-402a-a9b8-31a47fee3f17",
+    "title": "Apocalypse Now",
+    "category": "Movie",
+    "type": "Live action",
+    "watched_status": "Not Started",
+    "recommendations": "Me no like",
+    "release_year": 1979,
+    "length_or_episodes": 153,
+    "synopsis": "Apocalypse Now is an engaging film that tells a compelling story with rich characters and dramatic moments.",
+    "date_added": "2025-02-15T22:56:35.825Z"
+  },
+  {
+    "id": "336aa5e4-ec09-49bc-a122-182819d13cfe",
+    "title": "sgsegdrghdegsgsgsg",
+    "category": "Movie",
+    "type": "Live action",
+    "watched_status": "Not Started",
+    "recommendations": "Me no like",
+    "release_year": 1979,
+    "length_or_episodes": 153,
+    "synopsis": "Apocalypse Now is an engaging film that tells a compelling story with rich characters and dramatic moments.",
+    "date_added": "2025-02-15T23:09:35.552Z"
+  },
+  {
+    "id": "d1fb4bc7-1fd7-4e36-9bfc-4678a7165665",
+    "title": "Apocalypse Now",
+    "category": "Movie",
+    "type": "Live action",
+    "watched_status": "Not Started",
+    "recommendations": "Me no like",
+    "release_year": 1979,
+    "length_or_episodes": 153,
+    "synopsis": "Apocalypse Now is an engaging film that tells a compelling story with rich characters and dramatic moments.",
+    "date_added": "2025-02-15T23:17:28.888Z"
   }
 ]

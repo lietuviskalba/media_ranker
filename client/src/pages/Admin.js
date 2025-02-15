@@ -5,6 +5,7 @@ import Navbar from "../components/Navbar";
 import styled from "styled-components";
 import ScrollToTop from "../components/ScrollToTop";
 
+// Mapping from camelCase to underscore keys as used in our JSON data
 const fieldMapping = {
   releaseYear: "release_year",
   lengthEpisodes: "length_or_episodes",
@@ -12,6 +13,7 @@ const fieldMapping = {
   dateAdded: "date_added",
 };
 
+// Helper function to retrieve a field value from a record using our mapping
 function getField(record, field) {
   if (record[field] !== undefined) return record[field];
   if (fieldMapping[field] && record[fieldMapping[field]] !== undefined)
@@ -19,6 +21,9 @@ function getField(record, field) {
   return record[field.charAt(0).toUpperCase() + field.slice(1)] || "";
 }
 
+// ---------------- Styled Components ----------------
+
+// Overall page container
 const Container = styled.div`
   background-color: rgb(197, 7, 231);
   color: rgb(183, 183, 183);
@@ -26,9 +31,10 @@ const Container = styled.div`
   margin: 0;
   box-sizing: border-box;
   font-family: Arial, sans-serif;
-  padding-top: 80px;
+  padding-top: 80px; /* Leaves space for the fixed Navbar */
 `;
 
+// Main content area styling
 const Main = styled.main`
   background-color: rgb(46, 46, 46);
   padding: 10px;
@@ -38,6 +44,7 @@ const Main = styled.main`
   box-sizing: border-box;
 `;
 
+// Container for the record creation/update form; uses sticky positioning so it stays in view
 const CreationFormContainer = styled.div`
   position: sticky;
   top: 80px;
@@ -51,23 +58,27 @@ const CreationFormContainer = styled.div`
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 `;
 
+// Section titles (for form header and table header)
 const SectionTitles = styled.div`
   color: rgb(192, 73, 248);
   font-size: 2em;
 `;
 
+// Grid layout for the form (three columns)
 const FormGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
 `;
 
+// Nested grid for grouping smaller fields in two columns
 const NestedGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
 `;
 
+// Form group wrapper for individual fields (can span multiple grid columns)
 const FormGroup = styled.div`
   display: flex;
   flex-direction: column;
@@ -75,6 +86,7 @@ const FormGroup = styled.div`
   outline: 1px dashed rgba(255, 0, 0, 0.5);
 `;
 
+// Styled text input field
 const StyledInput = styled.input`
   padding: 6px;
   font-size: 1rem;
@@ -84,6 +96,7 @@ const StyledInput = styled.input`
   color: rgb(58, 58, 58);
 `;
 
+// Styled select dropdown
 const StyledSelect = styled.select`
   padding: 6px;
   font-size: 1rem;
@@ -93,6 +106,7 @@ const StyledSelect = styled.select`
   color: #eee;
 `;
 
+// Styled textarea field
 const StyledTextarea = styled.textarea`
   padding: 6px;
   font-size: 1rem;
@@ -102,6 +116,7 @@ const StyledTextarea = styled.textarea`
   color: #eee;
 `;
 
+// Button for form submission
 const SubmitButton = styled.button`
   padding: 8px 16px;
   font-size: 1.1rem;
@@ -116,6 +131,7 @@ const SubmitButton = styled.button`
   }
 `;
 
+// Button to fill dummy data for testing
 const DummyButton = styled.button`
   padding: 8px 16px;
   font-size: 1.1rem;
@@ -131,12 +147,16 @@ const DummyButton = styled.button`
   }
 `;
 
+// Message display styling
 const Message = styled.p`
   font-size: 1rem;
   color: #ff0;
   margin-top: 10px;
 `;
 
+// ---------------- Table Styled Components ----------------
+
+// Table styling
 const StyledTable = styled.table`
   width: 100%;
   border-collapse: collapse;
@@ -144,12 +164,14 @@ const StyledTable = styled.table`
   table-layout: fixed;
 `;
 
+// Table cell styling
 const StyledTd = styled.td`
   padding: 10px;
   border: 1px solid rgb(85, 85, 85);
   text-align: center;
 `;
 
+// Table row styling with alternating colors and a hover effect
 const StyledTr = styled.tr`
   background-color: ${(props) => (props.index % 2 === 0 ? "#333" : "#2a2a2a")};
   transition: background-color 0.3s ease, box-shadow 0.3s ease;
@@ -159,6 +181,7 @@ const StyledTr = styled.tr`
   }
 `;
 
+// Table cell for the synopsis, with text wrapping
 const SynopsisTd = styled.td`
   padding: 10px;
   border: 1px solid rgb(85, 85, 85);
@@ -168,6 +191,7 @@ const SynopsisTd = styled.td`
   max-width: 300px;
 `;
 
+// Image thumbnail with hover scaling effect
 const Image = styled.img`
   width: 100px;
   height: 100px;
@@ -180,6 +204,7 @@ const Image = styled.img`
   }
 `;
 
+// Resizable table header cell styling
 const ResizableTh = styled.th`
   position: relative;
   padding: 10px;
@@ -193,6 +218,7 @@ const ResizableTh = styled.th`
   white-space: nowrap;
 `;
 
+// Resizer element for column resizing
 const Resizer = styled.div`
   position: absolute;
   right: 0;
@@ -202,7 +228,9 @@ const Resizer = styled.div`
   cursor: col-resize;
   user-select: none;
 `;
+// ---------------- End Table Styled Components ----------------
 
+// Initial widths for table columns
 const initialColumnWidths = {
   index: 30,
   title: 100,
@@ -216,6 +244,7 @@ const initialColumnWidths = {
 };
 
 function Admin() {
+  // Form state variables
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [type, setType] = useState("Live action");
@@ -228,6 +257,8 @@ function Admin() {
   const [synopsis, setSynopsis] = useState("");
   const [imageData, setImageData] = useState(null);
   const [message, setMessage] = useState("");
+
+  // Table state and search/sort functionality
   const [records, setRecords] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortColumn, setSortColumn] = useState(null);
@@ -237,15 +268,18 @@ function Admin() {
   const [editId, setEditId] = useState(null);
   const [columnWidths, setColumnWidths] = useState(initialColumnWidths);
 
+  // Load saved column widths from localStorage (persisting user-adjusted sizes)
   useEffect(() => {
     const savedWidths = localStorage.getItem("adminColumnWidths");
     if (savedWidths) setColumnWidths(JSON.parse(savedWidths));
   }, []);
 
+  // Save updated column widths to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem("adminColumnWidths", JSON.stringify(columnWidths));
   }, [columnWidths]);
 
+  // Fetch records from the server; re-fetch when message changes (after add/update/delete)
   useEffect(() => {
     fetch("/api/records")
       .then((res) => res.json())
@@ -253,12 +287,13 @@ function Admin() {
       .catch((err) => console.error("Error fetching records:", err));
   }, [message]);
 
+  // Handler for resizing columns by dragging the resizer element
   const handleMouseDown = (e, column) => {
     e.preventDefault();
     const startX = e.clientX;
     const startWidth = columnWidths[column];
-    const handleMouseMove = (e) => {
-      const newWidth = startWidth + (e.clientX - startX);
+    const handleMouseMove = (moveEvent) => {
+      const newWidth = startWidth + (moveEvent.clientX - startX);
       setColumnWidths((prev) => {
         const updated = { ...prev, [column]: newWidth > 20 ? newWidth : 20 };
         return updated;
@@ -272,6 +307,7 @@ function Admin() {
     document.addEventListener("mouseup", handleMouseUp);
   };
 
+  // Handler for image file changes
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -281,6 +317,7 @@ function Admin() {
     }
   };
 
+  // Handler for pasting an image from the clipboard
   const handlePaste = (e) => {
     const items = e.clipboardData.items;
     for (let i = 0; i < items.length; i++) {
@@ -295,8 +332,10 @@ function Admin() {
     }
   };
 
+  // Handler to remove the preview image
   const handleRemoveImage = () => setImageData(null);
 
+  // Fills the form with dummy data (for testing)
   const handleFillDummy = () => {
     setTitle("Apocalypse Now");
     setCategory("Movie");
@@ -313,6 +352,7 @@ function Admin() {
     setEpisode(1);
   };
 
+  // Clears the form and resets edit mode
   const clearForm = () => {
     setTitle("");
     setCategory("");
@@ -329,6 +369,7 @@ function Admin() {
     setEditId(null);
   };
 
+  // Handles form submission for creating or updating a record
   const handleSubmit = (e) => {
     e.preventDefault();
     let finalWatchedStatus = watchedStatus;
@@ -347,6 +388,7 @@ function Admin() {
       image: imageData || null,
     };
     if (editMode && editId) {
+      // Add updatedAt timestamp for recent updates
       const updatedPayload = {
         ...payload,
         updatedAt: new Date().toISOString(),
@@ -400,6 +442,7 @@ function Admin() {
     }
   };
 
+  // Populates the form with an existing record's data for editing
   const handleEdit = (record) => {
     setEditMode(true);
     setEditId(record.id);
@@ -433,6 +476,7 @@ function Admin() {
     setImageData(record.image || null);
   };
 
+  // Handles deletion of a record after confirmation
   const handleDelete = (record) => {
     const proceed =
       skipConfirm ||
@@ -464,6 +508,7 @@ function Admin() {
       });
   };
 
+  // Filter records based on the search query (case-insensitive)
   const filteredRecords = records.filter((record) => {
     const query = searchQuery.toLowerCase();
     return (
@@ -480,27 +525,14 @@ function Admin() {
     );
   });
 
+  // Sort records so that the most recently updated (or added) record appears at the top
   const sortedRecords = [...filteredRecords].sort((a, b) => {
-    if (!sortColumn) {
-      const dateA = a.updatedAt
-        ? new Date(a.updatedAt)
-        : new Date(a.date_added);
-      const dateB = b.updatedAt
-        ? new Date(b.updatedAt)
-        : new Date(b.date_added);
-      return dateB - dateA;
-    }
-    let valA = getField(a, sortColumn);
-    let valB = getField(b, sortColumn);
-    if (typeof valA === "string" && typeof valB === "string") {
-      valA = valA.toLowerCase();
-      valB = valB.toLowerCase();
-    }
-    if (valA < valB) return sortDirection === "asc" ? -1 : 1;
-    if (valA > valB) return sortDirection === "asc" ? 1 : -1;
-    return 0;
+    const dateA = a.updatedAt ? new Date(a.updatedAt) : new Date(a.date_added);
+    const dateB = b.updatedAt ? new Date(b.updatedAt) : new Date(b.date_added);
+    return dateB - dateA;
   });
 
+  // Handler for sorting by clicking on table headers (if needed to override default sorting)
   const handleSort = (column) => {
     if (sortColumn === column) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
@@ -514,11 +546,13 @@ function Admin() {
     <Container>
       <Navbar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
       <Main>
+        {/* Record Creation / Update Form */}
         <CreationFormContainer>
           <form onSubmit={handleSubmit}>
             <SectionTitles>Create/Update Record</SectionTitles>
             {message && <Message>{message}</Message>}
             <FormGrid>
+              {/* Column 1: Title, Category, Type, Recommendations */}
               <FormGroup>
                 <label>Title:</label>
                 <StyledInput
@@ -573,6 +607,7 @@ function Admin() {
                   <option value="Utter trash">Utter trash</option>
                 </StyledSelect>
               </FormGroup>
+              {/* Column 2: Watched Status; Nested grid for Season/Episode and Release Year/Length/Episodes */}
               <FormGroup>
                 <label>Watched Status:</label>
                 <StyledSelect
@@ -638,6 +673,7 @@ function Admin() {
                   </div>
                 </NestedGrid>
               </FormGroup>
+              {/* Column 3: Synopsis and Image Upload/Paste */}
               <FormGroup span="2">
                 <label>Synopsis:</label>
                 <StyledTextarea
@@ -656,7 +692,7 @@ function Admin() {
                 />
                 <div
                   style={{
-                    border: "1px dashed #ccc",
+                    border: "1px dashed rgb(204, 204, 204)",
                     padding: "10px",
                     marginTop: "10px",
                     cursor: "text",
@@ -679,7 +715,7 @@ function Admin() {
                         position: "absolute",
                         top: 0,
                         right: 0,
-                        background: "red",
+                        background: "rgb(255, 0, 0)",
                         color: "white",
                         border: "none",
                         borderRadius: "50%",
@@ -818,6 +854,7 @@ function Admin() {
           <tbody>
             {sortedRecords.map((record, index) => (
               <StyledTr key={record.id} index={index}>
+                {/* Left-side action buttons */}
                 <StyledTd>
                   <button onClick={() => handleEdit(record)}>Update</button>
                   <button onClick={() => handleDelete(record)}>Delete</button>
@@ -843,6 +880,7 @@ function Admin() {
                     "No Image"
                   )}
                 </StyledTd>
+                {/* Right-side action buttons */}
                 <StyledTd>
                   <button onClick={() => handleEdit(record)}>Update</button>
                   <button onClick={() => handleDelete(record)}>Delete</button>
