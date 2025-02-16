@@ -2,69 +2,67 @@
   {
     "id": "uuid1",
     "title": "The North Man",
-    "category": "Game",
+    "category": "Movie",
     "type": "Live action",
-    "watched_status": "Completed (1)\n2025-02-15",
-    "recommendations": "Good; did not like",
-    "release_year": 2017,
-    "length_or_episodes": 134,
+    "watched_status": "-",
+    "recommendations": "-",
+    "release_year": "2017",
+    "length_or_episodes": "134",
     "synopsis": "The North Man is an engaging film that tells a compelling story with rich characters and dramatic moments.",
     "date_added": "2024-02-13T12:00:00Z",
-    "image": null,
-    "updatedAt": "2025-02-15T22:54:57.849Z"
+    "image": ""
   },
   {
     "id": "uuid2",
     "title": "Apocalypse Now",
     "category": "Movie",
     "type": "Live action",
-    "watched_status": "Not Started",
+    "watched_status": "-",
     "recommendations": "-",
-    "release_year": 1979,
-    "length_or_episodes": 153,
+    "release_year": "1979",
+    "length_or_episodes": "153",
     "synopsis": "Apocalypse Now is an engaging film that tells a compelling story with rich characters and dramatic moments.",
     "date_added": "2024-02-13T12:00:00Z",
-    "image": null
+    "image": ""
   },
   {
     "id": "uuid3",
     "title": "Clock Work Orange",
     "category": "Movie",
     "type": "Unknown",
-    "watched_status": "Completed (2)\n2025-02-15, 2025-02-15",
+    "watched_status": "-",
     "recommendations": "-",
-    "release_year": 1971,
-    "length_or_episodes": 136,
+    "release_year": "1971",
+    "length_or_episodes": "136",
     "synopsis": "Clock Work Orange is an engaging film that tells a compelling story with rich characters and dramatic moments.",
     "date_added": "2024-02-13T12:00:00Z",
-    "image": null
+    "image": ""
   },
   {
     "id": "uuid4",
     "title": "Blade Runner 2048",
     "category": "Movie",
     "type": "Live action",
-    "watched_status": "Completed",
-    "recommendations": "Good; did not like",
-    "release_year": 2017,
-    "length_or_episodes": 163,
+    "watched_status": "-",
+    "recommendations": "-",
+    "release_year": "2017",
+    "length_or_episodes": "163",
     "synopsis": "Blade Runner 2048 is an engaging film that tells a compelling story with rich characters and dramatic moments.",
     "date_added": "2024-02-13T12:00:00Z",
-    "image": null
+    "image": ""
   },
   {
     "id": "uuid5",
     "title": "All of Us Are Dead",
     "category": "Series",
     "type": "Live action",
-    "watched_status": "Completed (3)\n2025-02-15, 2025-02-15, 2025-02-15",
+    "watched_status": "-",
     "recommendations": "-",
     "release_year": "2022",
     "length_or_episodes": "12",
     "synopsis": "All of Us Are Dead is a unique piece of entertainment that has captivated audiences with its storytelling and artistic elements.",
     "date_added": "2024-02-13T12:00:00Z",
-    "image": "",
-    "updatedAt": "2025-02-15T23:17:16.710Z"
+    "image": ""
   },
   {
     "id": "uuid6",
@@ -97,13 +95,13 @@
     "title": "Barry 2018",
     "category": "Series",
     "type": "Live action",
-    "watched_status": "Completed (S1 E1)",
-    "recommendations": "Good; liked it",
-    "release_year": 2018,
-    "length_or_episodes": 12,
+    "watched_status": "-",
+    "recommendations": "-",
+    "release_year": "2018",
+    "length_or_episodes": "12",
     "synopsis": "Barry 2018 is a thrilling series filled with unexpected twists, deep storytelling, and character development.",
     "date_added": "2024-02-13T12:00:00Z",
-    "image": null
+    "image": ""
   },
   {
     "id": "uuid9",
@@ -123,7 +121,7 @@
     "title": "Johnny Bolt",
     "category": "Series",
     "type": "Cartoon",
-    "watched_status": "Completed (2)\n2025-02-15, 2025-02-15",
+    "watched_status": "-",
     "recommendations": "-",
     "release_year": "2021",
     "length_or_episodes": "13",
@@ -136,13 +134,13 @@
     "title": "Better Call Saul",
     "category": "Series",
     "type": "Live action",
-    "watched_status": "Completed (S1 E1)",
-    "recommendations": "El Epico",
-    "release_year": 2015,
-    "length_or_episodes": 63,
+    "watched_status": "-",
+    "recommendations": "-",
+    "release_year": "2015",
+    "length_or_episodes": "63",
     "synopsis": "Better Call Saul is a thrilling series filled with unexpected twists, deep storytelling, and character development.",
     "date_added": "2024-02-13T12:00:00Z",
-    "image": "data:image/png;base64,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"
+    "image": ""
   },
   {
     "id": "uuid12",
@@ -659,7 +657,7 @@
     "watched_status": "-",
     "recommendations": "-",
     "release_year": "2014",
-    "length_or_episodes": "N_or_A",
+    "length_or_episodes": "222",
     "synopsis": "A thrilling narrative adventure.",
     "date_added": "2024-02-13T12:00:00Z",
     "image": ""
@@ -938,19 +936,6 @@
     "image": ""
   },
   {
-    "id": "c1a2f3b4-7d9e-4a91-8b23-6f21d3e7c4a9",
-    "title": "Avengers (All of them)",
-    "category": "Movie",
-    "type": "Live action",
-    "watched_status": "-",
-    "recommendations": "-",
-    "release_year": "Multiple",
-    "length_or_episodes": "Various",
-    "synopsis": "A team of superheroes come together to fight powerful villains and save the world.",
-    "date_added": "2024-02-13T12:00:00Z",
-    "image": ""
-  },
-  {
     "id": "f4b1a2c3-7d9e-4a91-8b23-6f21d3e7c4a9",
     "title": "John Wick 3",
     "category": "Movie",
@@ -971,7 +956,7 @@
     "watched_status": "-",
     "recommendations": "-",
     "release_year": "2011",
-    "length_or_episodes": "Varies",
+    "length_or_episodes": "222",
     "synopsis": "A sci-fi anthology series that explores the dark side of technology and human nature.",
     "date_added": "2024-02-13T12:00:00Z",
     "image": ""
@@ -1491,7 +1476,7 @@
     "watched_status": "-",
     "recommendations": "-",
     "release_year": "2024",
-    "length_or_episodes": "TBA",
+    "length_or_episodes": "222",
     "synopsis": "A prequel to Mad Max: Fury Road, exploring the origins of the fierce warrior Furiosa in a post-apocalyptic wasteland.",
     "date_added": "2024-02-13T12:00:00Z",
     "image": ""
@@ -1517,7 +1502,7 @@
     "watched_status": "-",
     "recommendations": "-",
     "release_year": "2024",
-    "length_or_episodes": "TBA",
+    "length_or_episodes": "222",
     "synopsis": "A historical drama series based on the novel Shōgun, depicting the rise of a powerful leader in feudal Japan.",
     "date_added": "2024-02-13T12:00:00Z",
     "image": ""
@@ -1530,7 +1515,7 @@
     "watched_status": "-",
     "recommendations": "-",
     "release_year": "2024",
-    "length_or_episodes": "TBA",
+    "length_or_episodes": "222",
     "synopsis": "A fantasy anime where adventurers must cook and eat dungeon monsters to survive while seeking treasure and their lost ally.",
     "date_added": "2024-02-13T12:00:00Z",
     "image": ""
@@ -1556,7 +1541,7 @@
     "watched_status": "-",
     "recommendations": "-",
     "release_year": "2024",
-    "length_or_episodes": "TBA",
+    "length_or_episodes": "222",
     "synopsis": "The epic continuation of Dune, as Paul Atreides seeks vengeance and embraces his destiny as a leader among the desert people.",
     "date_added": "2024-02-13T12:00:00Z",
     "image": ""
@@ -1586,79 +1571,5 @@
     "synopsis": "A group of elite clone troopers with unique mutations navigate the galaxy in the aftermath of the Clone Wars.",
     "date_added": "2024-02-13T12:00:00Z",
     "image": ""
-  },
-  {
-    "id": "85e0c84d-6505-4adc-a9a6-9c8f2a935749",
-    "title": "dasdasd",
-    "category": "Series",
-    "type": "Live action",
-    "watched_status": "Not Started (S1 E1)",
-    "recommendations": "Good; liked it",
-    "release_year": 3,
-    "length_or_episodes": 2,
-    "synopsis": "adadad",
-    "date_added": "2025-02-15T22:27:05.777Z"
-  },
-  {
-    "id": "c86d1c5a-4f04-4027-b88d-698b26945641",
-    "title": "Apocalypse Now",
-    "category": "Movie",
-    "type": "Live action",
-    "watched_status": "Not Started",
-    "recommendations": "Me no like",
-    "release_year": 1979,
-    "length_or_episodes": 153,
-    "synopsis": "Apocalypse Now is an engaging film that tells a compelling story with rich characters and dramatic moments.",
-    "date_added": "2025-02-15T22:31:03.322Z"
-  },
-  {
-    "id": "acbbf1b9-949f-492a-994e-2811ef2c7c30",
-    "title": "ddddddddddddddddd",
-    "category": "Movie",
-    "type": "Live action",
-    "watched_status": "Completed (1)\n2025-02-15",
-    "recommendations": "Me no like",
-    "release_year": 1979,
-    "length_or_episodes": 153,
-    "synopsis": "Apocalypse Now is an engaging film that tells a compelling story with rich characters and dramatic moments.",
-    "date_added": "2025-02-15T22:53:45.312Z",
-    "image": null,
-    "updatedAt": "2025-02-15T23:17:21.848Z"
-  },
-  {
-    "id": "f9a5d90f-3a74-402a-a9b8-31a47fee3f17",
-    "title": "Apocalypse Now",
-    "category": "Movie",
-    "type": "Live action",
-    "watched_status": "Not Started",
-    "recommendations": "Me no like",
-    "release_year": 1979,
-    "length_or_episodes": 153,
-    "synopsis": "Apocalypse Now is an engaging film that tells a compelling story with rich characters and dramatic moments.",
-    "date_added": "2025-02-15T22:56:35.825Z"
-  },
-  {
-    "id": "336aa5e4-ec09-49bc-a122-182819d13cfe",
-    "title": "sgsegdrghdegsgsgsg",
-    "category": "Movie",
-    "type": "Live action",
-    "watched_status": "Not Started",
-    "recommendations": "Me no like",
-    "release_year": 1979,
-    "length_or_episodes": 153,
-    "synopsis": "Apocalypse Now is an engaging film that tells a compelling story with rich characters and dramatic moments.",
-    "date_added": "2025-02-15T23:09:35.552Z"
-  },
-  {
-    "id": "d1fb4bc7-1fd7-4e36-9bfc-4678a7165665",
-    "title": "Apocalypse Now",
-    "category": "Movie",
-    "type": "Live action",
-    "watched_status": "Not Started",
-    "recommendations": "Me no like",
-    "release_year": 1979,
-    "length_or_episodes": 153,
-    "synopsis": "Apocalypse Now is an engaging film that tells a compelling story with rich characters and dramatic moments.",
-    "date_added": "2025-02-15T23:17:28.888Z"
   }
 ]

@@ -1,11 +1,11 @@
 // client/src/Admin.js
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import styled from "styled-components";
 import ScrollToTop from "../components/ScrollToTop";
+import MediaTable from "../components/MediaTable";
 
-// Mapping from camelCase to underscore keys as used in our JSON data
+// Mapping from camelCase to underscore keys used in the stored data
 const fieldMapping = {
   releaseYear: "release_year",
   lengthEpisodes: "length_or_episodes",
@@ -21,9 +21,7 @@ function getField(record, field) {
   return record[field.charAt(0).toUpperCase() + field.slice(1)] || "";
 }
 
-// ---------------- Styled Components ----------------
-
-// Overall page container
+// ----- Styled Components for the Admin page -----
 const Container = styled.div`
   background-color: rgb(197, 7, 231);
   color: rgb(183, 183, 183);
@@ -31,10 +29,9 @@ const Container = styled.div`
   margin: 0;
   box-sizing: border-box;
   font-family: Arial, sans-serif;
-  padding-top: 80px; /* Leaves space for the fixed Navbar */
+  padding-top: 80px; /* Space for fixed Navbar */
 `;
 
-// Main content area styling
 const Main = styled.main`
   background-color: rgb(46, 46, 46);
   padding: 10px;
@@ -44,7 +41,6 @@ const Main = styled.main`
   box-sizing: border-box;
 `;
 
-// Container for the record creation/update form; uses sticky positioning so it stays in view
 const CreationFormContainer = styled.div`
   position: sticky;
   top: 80px;
@@ -58,27 +54,23 @@ const CreationFormContainer = styled.div`
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 `;
 
-// Section titles (for form header and table header)
 const SectionTitles = styled.div`
   color: rgb(192, 73, 248);
   font-size: 2em;
 `;
 
-// Grid layout for the form (three columns)
 const FormGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
 `;
 
-// Nested grid for grouping smaller fields in two columns
 const NestedGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
 `;
 
-// Form group wrapper for individual fields (can span multiple grid columns)
 const FormGroup = styled.div`
   display: flex;
   flex-direction: column;
@@ -86,7 +78,6 @@ const FormGroup = styled.div`
   outline: 1px dashed rgba(255, 0, 0, 0.5);
 `;
 
-// Styled text input field
 const StyledInput = styled.input`
   padding: 6px;
   font-size: 1rem;
@@ -96,32 +87,29 @@ const StyledInput = styled.input`
   color: rgb(58, 58, 58);
 `;
 
-// Styled select dropdown
 const StyledSelect = styled.select`
   padding: 6px;
   font-size: 1rem;
   border: 1px solid rgb(80, 80, 80);
   border-radius: 4px;
   background-color: rgb(58, 58, 58);
-  color: #eee;
+  color: rgb(238, 238, 238);
 `;
 
-// Styled textarea field
 const StyledTextarea = styled.textarea`
   padding: 6px;
   font-size: 1rem;
   border: 1px solid rgb(80, 80, 80);
   border-radius: 4px;
   background-color: rgb(58, 58, 58);
-  color: #eee;
+  color: rgb(238, 238, 238);
 `;
 
-// Button for form submission
 const SubmitButton = styled.button`
   padding: 8px 16px;
   font-size: 1.1rem;
   background-color: rgb(68, 68, 68);
-  color: #eee;
+  color: rgb(238, 238, 238);
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -131,12 +119,11 @@ const SubmitButton = styled.button`
   }
 `;
 
-// Button to fill dummy data for testing
 const DummyButton = styled.button`
   padding: 8px 16px;
   font-size: 1.1rem;
   background-color: rgb(80, 80, 80);
-  color: #eee;
+  color: rgb(238, 238, 238);
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -147,90 +134,13 @@ const DummyButton = styled.button`
   }
 `;
 
-// Message display styling
 const Message = styled.p`
   font-size: 1rem;
-  color: #ff0;
+  color: rgb(255, 255, 0);
   margin-top: 10px;
 `;
+// ----- End Styled Components -----
 
-// ---------------- Table Styled Components ----------------
-
-// Table styling
-const StyledTable = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
-  table-layout: fixed;
-`;
-
-// Table cell styling
-const StyledTd = styled.td`
-  padding: 10px;
-  border: 1px solid rgb(85, 85, 85);
-  text-align: center;
-`;
-
-// Table row styling with alternating colors and a hover effect
-const StyledTr = styled.tr`
-  background-color: ${(props) => (props.index % 2 === 0 ? "#333" : "#2a2a2a")};
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
-  &:hover {
-    background-color: #777;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-  }
-`;
-
-// Table cell for the synopsis, with text wrapping
-const SynopsisTd = styled.td`
-  padding: 10px;
-  border: 1px solid rgb(85, 85, 85);
-  text-align: left;
-  white-space: normal;
-  word-wrap: break-word;
-  max-width: 300px;
-`;
-
-// Image thumbnail with hover scaling effect
-const Image = styled.img`
-  width: 100px;
-  height: 100px;
-  transition: transform 0.3s ease;
-  transform-origin: center center;
-  &:hover {
-    transform: scale(5) translateX(-50%);
-    z-index: 10;
-    position: relative;
-  }
-`;
-
-// Resizable table header cell styling
-const ResizableTh = styled.th`
-  position: relative;
-  padding: 10px;
-  background-color: rgb(68, 68, 68);
-  border: 1px solid rgb(85, 85, 85);
-  cursor: pointer;
-  width: ${(props) => props.width}px;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-`;
-
-// Resizer element for column resizing
-const Resizer = styled.div`
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: 5px;
-  cursor: col-resize;
-  user-select: none;
-`;
-// ---------------- End Table Styled Components ----------------
-
-// Initial widths for table columns
 const initialColumnWidths = {
   index: 30,
   title: 100,
@@ -244,7 +154,7 @@ const initialColumnWidths = {
 };
 
 function Admin() {
-  // Form state variables
+  // Form state for record creation/update
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [type, setType] = useState("Live action");
@@ -268,18 +178,18 @@ function Admin() {
   const [editId, setEditId] = useState(null);
   const [columnWidths, setColumnWidths] = useState(initialColumnWidths);
 
-  // Load saved column widths from localStorage (persisting user-adjusted sizes)
+  // Load column widths from localStorage so that user adjustments persist
   useEffect(() => {
     const savedWidths = localStorage.getItem("adminColumnWidths");
     if (savedWidths) setColumnWidths(JSON.parse(savedWidths));
   }, []);
 
-  // Save updated column widths to localStorage whenever they change
+  // Save updated column widths whenever they change
   useEffect(() => {
     localStorage.setItem("adminColumnWidths", JSON.stringify(columnWidths));
   }, [columnWidths]);
 
-  // Fetch records from the server; re-fetch when message changes (after add/update/delete)
+  // Fetch records from the backend API; re-fetch when message changes (after a record is added/updated/deleted)
   useEffect(() => {
     fetch("/api/records")
       .then((res) => res.json())
@@ -287,17 +197,17 @@ function Admin() {
       .catch((err) => console.error("Error fetching records:", err));
   }, [message]);
 
-  // Handler for resizing columns by dragging the resizer element
+  // Handler for column resizing (calls the MediaTable's resizing callback)
   const handleMouseDown = (e, column) => {
     e.preventDefault();
     const startX = e.clientX;
     const startWidth = columnWidths[column];
     const handleMouseMove = (moveEvent) => {
       const newWidth = startWidth + (moveEvent.clientX - startX);
-      setColumnWidths((prev) => {
-        const updated = { ...prev, [column]: newWidth > 20 ? newWidth : 20 };
-        return updated;
-      });
+      setColumnWidths((prev) => ({
+        ...prev,
+        [column]: newWidth > 20 ? newWidth : 20,
+      }));
     };
     const handleMouseUp = () => {
       document.removeEventListener("mousemove", handleMouseMove);
@@ -369,7 +279,8 @@ function Admin() {
     setEditId(null);
   };
 
-  // Handles form submission for creating or updating a record
+  // Handles form submission for creating or updating a record.
+  // When updating, an updatedAt timestamp is added.
   const handleSubmit = (e) => {
     e.preventDefault();
     let finalWatchedStatus = watchedStatus;
@@ -388,7 +299,6 @@ function Admin() {
       image: imageData || null,
     };
     if (editMode && editId) {
-      // Add updatedAt timestamp for recent updates
       const updatedPayload = {
         ...payload,
         updatedAt: new Date().toISOString(),
@@ -442,7 +352,7 @@ function Admin() {
     }
   };
 
-  // Populates the form with an existing record's data for editing
+  // Populates the form with an existing record’s data for editing
   const handleEdit = (record) => {
     setEditMode(true);
     setEditId(record.id);
@@ -476,7 +386,7 @@ function Admin() {
     setImageData(record.image || null);
   };
 
-  // Handles deletion of a record after confirmation
+  // Handles record deletion after user confirmation
   const handleDelete = (record) => {
     const proceed =
       skipConfirm ||
@@ -486,9 +396,7 @@ function Admin() {
         } "${getField(record, "title")}"?`
       );
     if (!proceed) return;
-    fetch(`/api/records/${record.id}`, {
-      method: "DELETE",
-    })
+    fetch(`/api/records/${record.id}`, { method: "DELETE" })
       .then((res) => {
         if (!res.ok) {
           return res.json().then((data) => {
@@ -525,14 +433,14 @@ function Admin() {
     );
   });
 
-  // Sort records so that the most recently updated (or added) record appears at the top
+  // Sort records so that the most recent (updated or added) appears at the top
   const sortedRecords = [...filteredRecords].sort((a, b) => {
     const dateA = a.updatedAt ? new Date(a.updatedAt) : new Date(a.date_added);
     const dateB = b.updatedAt ? new Date(b.updatedAt) : new Date(b.date_added);
     return dateB - dateA;
   });
 
-  // Handler for sorting by clicking on table headers (if needed to override default sorting)
+  // Handler for sorting when clicking on header cells
   const handleSort = (column) => {
     if (sortColumn === column) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
@@ -546,13 +454,11 @@ function Admin() {
     <Container>
       <Navbar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
       <Main>
-        {/* Record Creation / Update Form */}
         <CreationFormContainer>
           <form onSubmit={handleSubmit}>
             <SectionTitles>Create/Update Record</SectionTitles>
             {message && <Message>{message}</Message>}
             <FormGrid>
-              {/* Column 1: Title, Category, Type, Recommendations */}
               <FormGroup>
                 <label>Title:</label>
                 <StyledInput
@@ -607,7 +513,6 @@ function Admin() {
                   <option value="Utter trash">Utter trash</option>
                 </StyledSelect>
               </FormGroup>
-              {/* Column 2: Watched Status; Nested grid for Season/Episode and Release Year/Length/Episodes */}
               <FormGroup>
                 <label>Watched Status:</label>
                 <StyledSelect
@@ -673,7 +578,6 @@ function Admin() {
                   </div>
                 </NestedGrid>
               </FormGroup>
-              {/* Column 3: Synopsis and Image Upload/Paste */}
               <FormGroup span="2">
                 <label>Synopsis:</label>
                 <StyledTextarea
@@ -692,7 +596,7 @@ function Admin() {
                 />
                 <div
                   style={{
-                    border: "1px dashed rgb(204, 204, 204)",
+                    border: "1px dashed rgb(204,204,204)",
                     padding: "10px",
                     marginTop: "10px",
                     cursor: "text",
@@ -715,7 +619,7 @@ function Admin() {
                         position: "absolute",
                         top: 0,
                         right: 0,
-                        background: "rgb(255, 0, 0)",
+                        background: "rgb(255,0,0)",
                         color: "white",
                         border: "none",
                         borderRadius: "50%",
@@ -743,152 +647,22 @@ function Admin() {
             Delete without confirmation
           </label>
         </div>
-        <StyledTable>
-          <thead>
-            <tr>
-              <ResizableTh width={50}>Actions</ResizableTh>
-              <ResizableTh width={columnWidths.index}>
-                #
-                <Resizer onMouseDown={(e) => handleMouseDown(e, "index")} />
-              </ResizableTh>
-              <ResizableTh
-                width={columnWidths.title}
-                onClick={() => handleSort("title")}
-              >
-                Title{" "}
-                {sortColumn === "title" && sortDirection === "asc"
-                  ? "▲"
-                  : sortColumn === "title" && sortDirection === "desc"
-                  ? "▼"
-                  : ""}
-                <Resizer onMouseDown={(e) => handleMouseDown(e, "title")} />
-              </ResizableTh>
-              <ResizableTh
-                width={columnWidths.category}
-                onClick={() => handleSort("category")}
-              >
-                Category{" "}
-                {sortColumn === "category" && sortDirection === "asc"
-                  ? "▲"
-                  : sortColumn === "category" && sortDirection === "desc"
-                  ? "▼"
-                  : ""}
-                <Resizer onMouseDown={(e) => handleMouseDown(e, "category")} />
-              </ResizableTh>
-              <ResizableTh
-                width={columnWidths.type}
-                onClick={() => handleSort("type")}
-              >
-                Type{" "}
-                {sortColumn === "type" && sortDirection === "asc"
-                  ? "▲"
-                  : sortColumn === "type" && sortDirection === "desc"
-                  ? "▼"
-                  : ""}
-                <Resizer onMouseDown={(e) => handleMouseDown(e, "type")} />
-              </ResizableTh>
-              <ResizableTh
-                width={columnWidths.watchedStatus}
-                onClick={() => handleSort("watchedStatus")}
-              >
-                Watched Status{" "}
-                {sortColumn === "watchedStatus" && sortDirection === "asc"
-                  ? "▲"
-                  : sortColumn === "watchedStatus" && sortDirection === "desc"
-                  ? "▼"
-                  : ""}
-                <Resizer
-                  onMouseDown={(e) => handleMouseDown(e, "watchedStatus")}
-                />
-              </ResizableTh>
-              <ResizableTh
-                width={columnWidths.recommendations}
-                onClick={() => handleSort("recommendations")}
-              >
-                Recommendations{" "}
-                {sortColumn === "recommendations" && sortDirection === "asc"
-                  ? "▲"
-                  : sortColumn === "recommendations" && sortDirection === "desc"
-                  ? "▼"
-                  : ""}
-                <Resizer
-                  onMouseDown={(e) => handleMouseDown(e, "recommendations")}
-                />
-              </ResizableTh>
-              <ResizableTh
-                width={columnWidths.releaseYear}
-                onClick={() => handleSort("releaseYear")}
-              >
-                Release Year{" "}
-                {sortColumn === "releaseYear" && sortDirection === "asc"
-                  ? "▲"
-                  : sortColumn === "releaseYear" && sortDirection === "desc"
-                  ? "▼"
-                  : ""}
-                <Resizer
-                  onMouseDown={(e) => handleMouseDown(e, "releaseYear")}
-                />
-              </ResizableTh>
-              <ResizableTh
-                width={columnWidths.lengthEpisodes}
-                onClick={() => handleSort("lengthEpisodes")}
-              >
-                Length/Episodes{" "}
-                {sortColumn === "lengthEpisodes" && sortDirection === "asc"
-                  ? "▲"
-                  : sortColumn === "lengthEpisodes" && sortDirection === "desc"
-                  ? "▼"
-                  : ""}
-                <Resizer
-                  onMouseDown={(e) => handleMouseDown(e, "lengthEpisodes")}
-                />
-              </ResizableTh>
-              <ResizableTh width={columnWidths.synopsis}>
-                Synopsis
-                <Resizer onMouseDown={(e) => handleMouseDown(e, "synopsis")} />
-              </ResizableTh>
-              <ResizableTh width={100}>Image</ResizableTh>
-              <ResizableTh width={50}>Actions</ResizableTh>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedRecords.map((record, index) => (
-              <StyledTr key={record.id} index={index}>
-                {/* Left-side action buttons */}
-                <StyledTd>
-                  <button onClick={() => handleEdit(record)}>Update</button>
-                  <button onClick={() => handleDelete(record)}>Delete</button>
-                </StyledTd>
-                <StyledTd>{index + 1}</StyledTd>
-                <StyledTd>{getField(record, "title")}</StyledTd>
-                <StyledTd>{getField(record, "category")}</StyledTd>
-                <StyledTd>{getField(record, "type")}</StyledTd>
-                <StyledTd>{getField(record, "watchedStatus")}</StyledTd>
-                <StyledTd>{getField(record, "recommendations")}</StyledTd>
-                <StyledTd>{getField(record, "releaseYear")}</StyledTd>
-                <StyledTd>{getField(record, "lengthEpisodes")}</StyledTd>
-                <SynopsisTd title={getField(record, "synopsis")}>
-                  {(getField(record, "synopsis") + "").length > 50
-                    ? (getField(record, "synopsis") + "").substring(0, 50) +
-                      "..."
-                    : getField(record, "synopsis")}
-                </SynopsisTd>
-                <StyledTd style={{ overflow: "visible" }}>
-                  {record.image ? (
-                    <Image src={record.image} alt={getField(record, "title")} />
-                  ) : (
-                    "No Image"
-                  )}
-                </StyledTd>
-                {/* Right-side action buttons */}
-                <StyledTd>
-                  <button onClick={() => handleEdit(record)}>Update</button>
-                  <button onClick={() => handleDelete(record)}>Delete</button>
-                </StyledTd>
-              </StyledTr>
-            ))}
-          </tbody>
-        </StyledTable>
+        <MediaTable
+          records={sortedRecords}
+          columnWidths={columnWidths}
+          setColumnWidths={setColumnWidths}
+          sortColumn={sortColumn}
+          sortDirection={sortDirection}
+          handleSort={handleSort}
+          getField={getField}
+          handleMouseDown={handleMouseDown}
+          handleEdit={handleEdit}
+          handleDelete={handleDelete}
+          // In Admin, we show action buttons on both sides
+          doubleActions={true}
+          // In Admin, the row click is not used so we pass a no-op function
+          handleRowClick={() => {}}
+        />
       </Main>
       <ScrollToTop />
     </Container>

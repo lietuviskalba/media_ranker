@@ -657,7 +657,7 @@
     "watched_status": "-",
     "recommendations": "-",
     "release_year": "2014",
-    "length_or_episodes": "N_or_A",
+    "length_or_episodes": "222",
     "synopsis": "A thrilling narrative adventure.",
     "date_added": "2024-02-13T12:00:00Z",
     "image": ""
@@ -936,19 +936,6 @@
     "image": ""
   },
   {
-    "id": "c1a2f3b4-7d9e-4a91-8b23-6f21d3e7c4a9",
-    "title": "Avengers (All of them)",
-    "category": "Movie",
-    "type": "Live action",
-    "watched_status": "-",
-    "recommendations": "-",
-    "release_year": "Multiple",
-    "length_or_episodes": "Various",
-    "synopsis": "A team of superheroes come together to fight powerful villains and save the world.",
-    "date_added": "2024-02-13T12:00:00Z",
-    "image": ""
-  },
-  {
     "id": "f4b1a2c3-7d9e-4a91-8b23-6f21d3e7c4a9",
     "title": "John Wick 3",
     "category": "Movie",
@@ -969,7 +956,7 @@
     "watched_status": "-",
     "recommendations": "-",
     "release_year": "2011",
-    "length_or_episodes": "Varies",
+    "length_or_episodes": "222",
     "synopsis": "A sci-fi anthology series that explores the dark side of technology and human nature.",
     "date_added": "2024-02-13T12:00:00Z",
     "image": ""
@@ -1489,7 +1476,7 @@
     "watched_status": "-",
     "recommendations": "-",
     "release_year": "2024",
-    "length_or_episodes": "TBA",
+    "length_or_episodes": "222",
     "synopsis": "A prequel to Mad Max: Fury Road, exploring the origins of the fierce warrior Furiosa in a post-apocalyptic wasteland.",
     "date_added": "2024-02-13T12:00:00Z",
     "image": ""
@@ -1515,7 +1502,7 @@
     "watched_status": "-",
     "recommendations": "-",
     "release_year": "2024",
-    "length_or_episodes": "TBA",
+    "length_or_episodes": "222",
     "synopsis": "A historical drama series based on the novel Shōgun, depicting the rise of a powerful leader in feudal Japan.",
     "date_added": "2024-02-13T12:00:00Z",
     "image": ""
@@ -1528,7 +1515,7 @@
     "watched_status": "-",
     "recommendations": "-",
     "release_year": "2024",
-    "length_or_episodes": "TBA",
+    "length_or_episodes": "222",
     "synopsis": "A fantasy anime where adventurers must cook and eat dungeon monsters to survive while seeking treasure and their lost ally.",
     "date_added": "2024-02-13T12:00:00Z",
     "image": ""
@@ -1554,7 +1541,7 @@
     "watched_status": "-",
     "recommendations": "-",
     "release_year": "2024",
-    "length_or_episodes": "TBA",
+    "length_or_episodes": "222",
     "synopsis": "The epic continuation of Dune, as Paul Atreides seeks vengeance and embraces his destiny as a leader among the desert people.",
     "date_added": "2024-02-13T12:00:00Z",
     "image": ""

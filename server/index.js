@@ -1,35 +1,28 @@
 // server/index.js
 const express = require("express");
-const fs = require("fs");
-const path = require("path");
 const { v4: uuidv4 } = require("uuid");
+const pool = require("./db"); // Import the PostgreSQL pool
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(express.json());
 
-const dataPath = path.join(__dirname, "data.json");
-
-// GET /api/records - Return all records
-app.get("/api/records", (req, res) => {
-  fs.readFile(dataPath, "utf8", (err, data) => {
-    if (err) {
-      console.error("Error reading data file:", err);
-      return res.status(500).json({ error: "Error reading data file" });
-    }
-    try {
-      const records = JSON.parse(data);
-      res.json(records);
-    } catch (parseErr) {
-      console.error("Error parsing JSON data:", parseErr);
-      res.status(500).json({ error: "Error parsing JSON data" });
-    }
-  });
+// GET /api/media_records - Return all media_records
+app.get("/api/media_records", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM media_records ORDER BY date_added DESC"
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Error fetching media_records:", err);
+    res.status(500).json({ error: "Error fetching media_records" });
+  }
 });
 
-// POST /api/records - Add a new record
-app.post("/api/records", (req, res) => {
+// POST /api/media_records - Add a new record
+app.post("/api/media_records", async (req, res) => {
   const {
     title,
     category,
@@ -61,100 +54,109 @@ app.post("/api/records", (req, res) => {
       .json({ error: `Missing required fields: ${missingFields.join(", ")}` });
   }
 
-  const newRecord = {
-    id: uuidv4(),
+  // Insert the new record into the PostgreSQL table "media_records"
+  const id = uuidv4();
+  const date_added = new Date().toISOString();
+
+  try {
+    const query = `
+      INSERT INTO media_records (id, title, category, type, watched_status, recommendations, release_year, length_or_episodes, synopsis, image, date_added)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      RETURNING *
+    `;
+    const values = [
+      id,
+      title,
+      category,
+      type,
+      watched_status,
+      recommendations || "",
+      release_year,
+      length_or_episodes,
+      synopsis,
+      image || null,
+      date_added,
+    ];
+    const result = await pool.query(query, values);
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    console.error("Error inserting record:", err);
+    res.status(500).json({ error: "Error inserting record" });
+  }
+});
+
+// PUT /api/media_records/:id - Update a record
+app.put("/api/media_records/:id", async (req, res) => {
+  const recordId = req.params.id;
+  const updatedData = req.body;
+
+  // Build query parts dynamically (for simplicity, this example assumes all fields are being updated)
+  const {
     title,
     category,
     type,
     watched_status,
-    recommendations: recommendations || "",
+    recommendations,
     release_year,
     length_or_episodes,
     synopsis,
-    date_added: new Date().toISOString(),
-  };
+    image,
+  } = updatedData;
 
-  if (image) {
-    newRecord.image = image;
-  }
-
-  fs.readFile(dataPath, "utf8", (err, data) => {
-    let records = [];
-    if (!err) {
-      try {
-        records = JSON.parse(data);
-      } catch (parseErr) {
-        console.error("Error parsing JSON data:", parseErr);
-      }
-    }
-    records.push(newRecord);
-    fs.writeFile(dataPath, JSON.stringify(records, null, 2), (writeErr) => {
-      if (writeErr) {
-        console.error("Error writing to data file:", writeErr);
-        return res.status(500).json({ error: "Error writing to data file" });
-      }
-      res.status(201).json(newRecord);
-    });
-  });
-});
-
-// PUT /api/records/:id - Update a record
-app.put("/api/records/:id", (req, res) => {
-  const recordId = req.params.id;
-  const updatedData = req.body;
-
-  fs.readFile(dataPath, "utf8", (err, data) => {
-    if (err) {
-      console.error("Error reading data file:", err);
-      return res.status(500).json({ error: "Error reading data file" });
-    }
-    let records = [];
-    try {
-      records = JSON.parse(data);
-    } catch (parseErr) {
-      console.error("Error parsing JSON data:", parseErr);
-      return res.status(500).json({ error: "Error parsing JSON data" });
-    }
-    const recordIndex = records.findIndex((r) => r.id === recordId);
-    if (recordIndex === -1) {
+  try {
+    const query = `
+      UPDATE media_records
+      SET title = $1,
+          category = $2,
+          type = $3,
+          watched_status = $4,
+          recommendations = $5,
+          release_year = $6,
+          length_or_episodes = $7,
+          synopsis = $8,
+          image = $9,
+          updatedAt = $10
+      WHERE id = $11
+      RETURNING *
+    `;
+    const values = [
+      title,
+      category,
+      type,
+      watched_status,
+      recommendations || "",
+      release_year,
+      length_or_episodes,
+      synopsis,
+      image || null,
+      new Date().toISOString(),
+      recordId,
+    ];
+    const result = await pool.query(query, values);
+    if (result.rowCount === 0) {
       return res.status(404).json({ error: "Record not found" });
     }
-    const updatedRecord = { ...records[recordIndex], ...updatedData };
-    records[recordIndex] = updatedRecord;
-    fs.writeFile(dataPath, JSON.stringify(records, null, 2), (writeErr) => {
-      if (writeErr) {
-        console.error("Error writing to data file:", writeErr);
-        return res.status(500).json({ error: "Error writing to data file" });
-      }
-      res.json(updatedRecord);
-    });
-  });
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("Error updating record:", err);
+    res.status(500).json({ error: "Error updating record" });
+  }
 });
 
-// DELETE /api/records/:id - Delete a record
-app.delete("/api/records/:id", (req, res) => {
+// DELETE /api/media_records/:id - Delete a record
+app.delete("/api/media_records/:id", async (req, res) => {
   const recordId = req.params.id;
-  fs.readFile(dataPath, "utf8", (err, data) => {
-    if (err) {
-      console.error("Error reading data file:", err);
-      return res.status(500).json({ error: "Error reading data file" });
+  try {
+    const query = `DELETE FROM media_records WHERE id = $1`;
+    const result = await pool.query(query, [recordId]);
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "Record not found" });
     }
-    let records = [];
-    try {
-      records = JSON.parse(data);
-    } catch (parseErr) {
-      console.error("Error parsing JSON data:", parseErr);
-      return res.status(500).json({ error: "Error parsing JSON data" });
-    }
-    const newRecords = records.filter((r) => r.id !== recordId);
-    fs.writeFile(dataPath, JSON.stringify(newRecords, null, 2), (writeErr) => {
-      if (writeErr) {
-        console.error("Error writing to data file:", writeErr);
-        return res.status(500).json({ error: "Error writing to data file" });
-      }
-      res.json({ message: "Record deleted successfully" });
-    });
-  });
+    res.json({ message: "Record deleted successfully" });
+  } catch (err) {
+    console.error("Error deleting record:", err);
+    res.status(500).json({ error: "Error deleting record" });
+  }
 });
 
 app.listen(PORT, () => {
