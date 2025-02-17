@@ -5,7 +5,7 @@ import styled from "styled-components";
 import ScrollToTop from "../components/ScrollToTop";
 import MediaTable from "../components/MediaTable";
 
-// Mapping from camelCase to underscore keys used in the stored data
+// Mapping from camelCase keys to the underscore keys used in the database
 const fieldMapping = {
   releaseYear: "release_year",
   lengthEpisodes: "length_or_episodes",
@@ -13,7 +13,7 @@ const fieldMapping = {
   dateAdded: "date_added",
 };
 
-// Helper function to retrieve a field value from a record using our mapping
+// Helper function to get a field value from a record using the mapping
 function getField(record, field) {
   if (record[field] !== undefined) return record[field];
   if (fieldMapping[field] && record[fieldMapping[field]] !== undefined)
@@ -21,7 +21,9 @@ function getField(record, field) {
   return record[field.charAt(0).toUpperCase() + field.slice(1)] || "";
 }
 
-// ----- Styled Components for the Admin page -----
+// ----- Styled Components for Layout and Styling -----
+
+// Container for the entire Admin page. Leaves space at the top for the fixed Navbar.
 const Container = styled.div`
   background-color: rgb(197, 7, 231);
   color: rgb(183, 183, 183);
@@ -29,9 +31,10 @@ const Container = styled.div`
   margin: 0;
   box-sizing: border-box;
   font-family: Arial, sans-serif;
-  padding-top: 80px; /* Space for fixed Navbar */
+  padding-top: 80px;
 `;
 
+// Main content area styling.
 const Main = styled.main`
   background-color: rgb(46, 46, 46);
   padding: 10px;
@@ -41,6 +44,7 @@ const Main = styled.main`
   box-sizing: border-box;
 `;
 
+// Container for the creation/update form; sticky so it remains visible as you scroll.
 const CreationFormContainer = styled.div`
   position: sticky;
   top: 80px;
@@ -54,23 +58,27 @@ const CreationFormContainer = styled.div`
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 `;
 
+// Section title styling used for headings.
 const SectionTitles = styled.div`
   color: rgb(192, 73, 248);
   font-size: 2em;
 `;
 
+// Grid layout for the form, divided into three equal columns.
 const FormGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
 `;
 
+// Nested grid for grouping two small fields side-by-side.
 const NestedGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
 `;
 
+// Wrapper for individual form groups. The optional "span" prop lets you span multiple columns.
 const FormGroup = styled.div`
   display: flex;
   flex-direction: column;
@@ -78,6 +86,7 @@ const FormGroup = styled.div`
   outline: 1px dashed rgba(255, 0, 0, 0.5);
 `;
 
+// Styled input for text fields.
 const StyledInput = styled.input`
   padding: 6px;
   font-size: 1rem;
@@ -87,6 +96,7 @@ const StyledInput = styled.input`
   color: rgb(58, 58, 58);
 `;
 
+// Styled select for dropdown fields.
 const StyledSelect = styled.select`
   padding: 6px;
   font-size: 1rem;
@@ -96,6 +106,7 @@ const StyledSelect = styled.select`
   color: rgb(238, 238, 238);
 `;
 
+// Styled textarea for multi-line text.
 const StyledTextarea = styled.textarea`
   padding: 6px;
   font-size: 1rem;
@@ -105,6 +116,7 @@ const StyledTextarea = styled.textarea`
   color: rgb(238, 238, 238);
 `;
 
+// Styled button for form submission.
 const SubmitButton = styled.button`
   padding: 8px 16px;
   font-size: 1.1rem;
@@ -119,6 +131,7 @@ const SubmitButton = styled.button`
   }
 `;
 
+// Dummy button for quickly filling the form with sample data.
 const DummyButton = styled.button`
   padding: 8px 16px;
   font-size: 1.1rem;
@@ -134,13 +147,89 @@ const DummyButton = styled.button`
   }
 `;
 
+// Message styling for notifications and error messages.
 const Message = styled.p`
   font-size: 1rem;
   color: rgb(255, 255, 0);
   margin-top: 10px;
 `;
-// ----- End Styled Components -----
 
+// ----- Table Styled Components (for displaying records) -----
+
+// Styled table container with fixed layout.
+const StyledTable = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  table-layout: fixed;
+`;
+
+// Table cell styling.
+const StyledTd = styled.td`
+  padding: 10px;
+  border: 1px solid rgb(85, 85, 85);
+  text-align: center;
+`;
+
+// Table row styling with alternating background colors and hover effect.
+const StyledTr = styled.tr`
+  background-color: ${(props) => (props.index % 2 === 0 ? "#333" : "#2a2a2a")};
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  &:hover {
+    background-color: #777;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  }
+`;
+
+// Table cell for the synopsis with word wrap and maximum width.
+const SynopsisTd = styled.td`
+  padding: 10px;
+  border: 1px solid rgb(85, 85, 85);
+  text-align: left;
+  white-space: normal;
+  word-wrap: break-word;
+  max-width: 300px;
+`;
+
+// Styled image for thumbnails with hover scaling effect.
+const Image = styled.img`
+  width: 100px;
+  height: 100px;
+  transition: transform 0.3s ease;
+  transform-origin: center center;
+  &:hover {
+    transform: scale(5) translateX(-50%);
+    z-index: 10;
+    position: relative;
+  }
+`;
+
+// Resizable table header cell.
+const ResizableTh = styled.th`
+  position: relative;
+  padding: 10px;
+  background-color: rgb(68, 68, 68);
+  border: 1px solid rgb(85, 85, 85);
+  cursor: pointer;
+  width: ${(props) => props.width}px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+// Resizer element inside header cells for column resizing.
+const Resizer = styled.div`
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+  cursor: col-resize;
+  user-select: none;
+`;
+
+// Initial column widths for the table
 const initialColumnWidths = {
   index: 30,
   title: 100,
@@ -154,7 +243,7 @@ const initialColumnWidths = {
 };
 
 function Admin() {
-  // Form state for record creation/update
+  // ----- Form State: Holds data for creating/updating a record -----
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [type, setType] = useState("Live action");
@@ -168,7 +257,7 @@ function Admin() {
   const [imageData, setImageData] = useState(null);
   const [message, setMessage] = useState("");
 
-  // Table state and search/sort functionality
+  // ----- Table State: Holds fetched records and controls search/sort functionality -----
   const [records, setRecords] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortColumn, setSortColumn] = useState(null);
@@ -178,26 +267,26 @@ function Admin() {
   const [editId, setEditId] = useState(null);
   const [columnWidths, setColumnWidths] = useState(initialColumnWidths);
 
-  // Load column widths from localStorage so that user adjustments persist
+  // ----- Load Saved Column Widths from localStorage -----
   useEffect(() => {
     const savedWidths = localStorage.getItem("adminColumnWidths");
     if (savedWidths) setColumnWidths(JSON.parse(savedWidths));
   }, []);
 
-  // Save updated column widths whenever they change
+  // ----- Persist Column Widths to localStorage when changed -----
   useEffect(() => {
     localStorage.setItem("adminColumnWidths", JSON.stringify(columnWidths));
   }, [columnWidths]);
 
-  // Fetch records from the backend API; re-fetch when message changes (after a record is added/updated/deleted)
+  // ----- Fetch Records from PostgreSQL API Endpoint -----
   useEffect(() => {
-    fetch("/api/records")
+    fetch("/api/media_records")
       .then((res) => res.json())
       .then((data) => setRecords(data))
       .catch((err) => console.error("Error fetching records:", err));
   }, [message]);
 
-  // Handler for column resizing (calls the MediaTable's resizing callback)
+  // ----- Handler for Resizing Table Columns -----
   const handleMouseDown = (e, column) => {
     e.preventDefault();
     const startX = e.clientX;
@@ -217,7 +306,7 @@ function Admin() {
     document.addEventListener("mouseup", handleMouseUp);
   };
 
-  // Handler for image file changes
+  // ----- Handler for File Input Changes (Image Upload) -----
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -227,7 +316,7 @@ function Admin() {
     }
   };
 
-  // Handler for pasting an image from the clipboard
+  // ----- Handler for Pasting an Image from the Clipboard -----
   const handlePaste = (e) => {
     const items = e.clipboardData.items;
     for (let i = 0; i < items.length; i++) {
@@ -242,10 +331,10 @@ function Admin() {
     }
   };
 
-  // Handler to remove the preview image
+  // ----- Handler to Remove the Preview Image -----
   const handleRemoveImage = () => setImageData(null);
 
-  // Fills the form with dummy data (for testing)
+  // ----- Handler to Fill the Form with Dummy Data (for testing) -----
   const handleFillDummy = () => {
     setTitle("Apocalypse Now");
     setCategory("Movie");
@@ -262,7 +351,7 @@ function Admin() {
     setEpisode(1);
   };
 
-  // Clears the form and resets edit mode
+  // ----- Clears the Form and Resets Edit Mode -----
   const clearForm = () => {
     setTitle("");
     setCategory("");
@@ -279,11 +368,11 @@ function Admin() {
     setEditId(null);
   };
 
-  // Handles form submission for creating or updating a record.
-  // When updating, an updatedAt timestamp is added.
+  // ----- Handler for Form Submission (Create or Update Record) -----
   const handleSubmit = (e) => {
     e.preventDefault();
     let finalWatchedStatus = watchedStatus;
+    // Append season and episode info if category is "series"
     if (category.toLowerCase() === "series") {
       finalWatchedStatus = `${watchedStatus} (S${season} E${episode})`;
     }
@@ -299,11 +388,13 @@ function Admin() {
       image: imageData || null,
     };
     if (editMode && editId) {
+      // Include updated_at timestamp in snake_case to match DB column
       const updatedPayload = {
         ...payload,
-        updatedAt: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       };
-      fetch(`/api/records/${editId}`, {
+      // Send a PUT request to update the record
+      fetch(`/api/media_records/${editId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedPayload),
@@ -328,7 +419,8 @@ function Admin() {
           setMessage(`Error updating record: ${err.message}`);
         });
     } else {
-      fetch("/api/records", {
+      // Send a POST request to create a new record
+      fetch("/api/media_records", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -352,7 +444,7 @@ function Admin() {
     }
   };
 
-  // Populates the form with an existing record’s data for editing
+  // ----- Handler to Populate the Form with an Existing Record for Editing -----
   const handleEdit = (record) => {
     setEditMode(true);
     setEditId(record.id);
@@ -360,6 +452,7 @@ function Admin() {
     setCategory(getField(record, "category"));
     setType(getField(record, "type"));
     const ws = getField(record, "watchedStatus");
+    // If the category is series and watchedStatus contains season/episode info, extract it
     if (
       getField(record, "category").toLowerCase() === "series" &&
       ws.includes("S")
@@ -386,7 +479,7 @@ function Admin() {
     setImageData(record.image || null);
   };
 
-  // Handles record deletion after user confirmation
+  // ----- Handler for Deleting a Record after Confirmation -----
   const handleDelete = (record) => {
     const proceed =
       skipConfirm ||
@@ -396,7 +489,7 @@ function Admin() {
         } "${getField(record, "title")}"?`
       );
     if (!proceed) return;
-    fetch(`/api/records/${record.id}`, { method: "DELETE" })
+    fetch(`/api/media_records/${record.id}`, { method: "DELETE" })
       .then((res) => {
         if (!res.ok) {
           return res.json().then((data) => {
@@ -416,7 +509,7 @@ function Admin() {
       });
   };
 
-  // Filter records based on the search query (case-insensitive)
+  // ----- Filter Records Based on Search Query (Case-Insensitive) -----
   const filteredRecords = records.filter((record) => {
     const query = searchQuery.toLowerCase();
     return (
@@ -433,14 +526,18 @@ function Admin() {
     );
   });
 
-  // Sort records so that the most recent (updated or added) appears at the top
+  // ----- Sort Records so that the most recent (by updated_at or date_added) appears at the top -----
   const sortedRecords = [...filteredRecords].sort((a, b) => {
-    const dateA = a.updatedAt ? new Date(a.updatedAt) : new Date(a.date_added);
-    const dateB = b.updatedAt ? new Date(b.updatedAt) : new Date(b.date_added);
+    const dateA = a.updated_at
+      ? new Date(a.updated_at)
+      : new Date(a.date_added);
+    const dateB = b.updated_at
+      ? new Date(b.updated_at)
+      : new Date(b.date_added);
     return dateB - dateA;
   });
 
-  // Handler for sorting when clicking on header cells
+  // ----- Handler for Sorting When Clicking on Table Header Cells -----
   const handleSort = (column) => {
     if (sortColumn === column) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
@@ -450,6 +547,7 @@ function Admin() {
     }
   };
 
+  // ----- Render the Admin Page -----
   return (
     <Container>
       <Navbar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
@@ -647,6 +745,7 @@ function Admin() {
             Delete without confirmation
           </label>
         </div>
+        {/* Render MediaTable with action buttons on both sides for Admin */}
         <MediaTable
           records={sortedRecords}
           columnWidths={columnWidths}
@@ -658,10 +757,8 @@ function Admin() {
           handleMouseDown={handleMouseDown}
           handleEdit={handleEdit}
           handleDelete={handleDelete}
-          // In Admin, we show action buttons on both sides
-          doubleActions={true}
-          // In Admin, the row click is not used so we pass a no-op function
-          handleRowClick={() => {}}
+          doubleActions={true} // Show action buttons on both left and right
+          handleRowClick={() => {}} // No row click action in Admin view
         />
       </Main>
       <ScrollToTop />

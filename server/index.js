@@ -85,12 +85,11 @@ app.post("/api/media_records", async (req, res) => {
   }
 });
 
-// PUT /api/media_records/:id - Update a record
+// PUT /api/media_records/:id - Update a record in the PostgreSQL table
 app.put("/api/media_records/:id", async (req, res) => {
   const recordId = req.params.id;
   const updatedData = req.body;
 
-  // Build query parts dynamically (for simplicity, this example assumes all fields are being updated)
   const {
     title,
     category,
@@ -115,7 +114,7 @@ app.put("/api/media_records/:id", async (req, res) => {
           length_or_episodes = $7,
           synopsis = $8,
           image = $9,
-          updatedAt = $10
+          updated_at = $10
       WHERE id = $11
       RETURNING *
     `;
@@ -132,14 +131,16 @@ app.put("/api/media_records/:id", async (req, res) => {
       new Date().toISOString(),
       recordId,
     ];
+
     const result = await pool.query(query, values);
+
     if (result.rowCount === 0) {
       return res.status(404).json({ error: "Record not found" });
     }
     res.json(result.rows[0]);
   } catch (err) {
     console.error("Error updating record:", err);
-    res.status(500).json({ error: "Error updating record" });
+    res.status(500).json({ error: err.message });
   }
 });
 

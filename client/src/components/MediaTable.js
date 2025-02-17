@@ -2,21 +2,19 @@
 import React from "react";
 import styled from "styled-components";
 
-// ----- Table Styled Components -----
-// Table container with fixed layout and full width
 const StyledTable = styled.table`
   width: 100%;
   border-collapse: collapse;
   margin-top: 20px;
   table-layout: fixed;
 `;
-// Table cell styling with padding and border
+
 const StyledTd = styled.td`
   padding: 10px;
   border: 1px solid rgb(85, 85, 85);
   text-align: center;
 `;
-// Table row with alternating background colors and a hover effect
+
 const StyledTr = styled.tr`
   background-color: ${(props) =>
     props.index % 2 === 0 ? "rgb(51,51,51)" : "rgb(42,42,42)"};
@@ -26,7 +24,7 @@ const StyledTr = styled.tr`
     box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
   }
 `;
-// Synopsis cell with word wrapping and a maximum width
+
 const SynopsisTd = styled.td`
   padding: 10px;
   border: 1px solid rgb(85, 85, 85);
@@ -35,7 +33,7 @@ const SynopsisTd = styled.td`
   word-wrap: break-word;
   max-width: 300px;
 `;
-// Image thumbnail with a hover scaling effect
+
 const Image = styled.img`
   width: 100px;
   height: 100px;
@@ -47,7 +45,7 @@ const Image = styled.img`
     position: relative;
   }
 `;
-// Resizable table header cell styling
+
 const ResizableTh = styled.th`
   position: relative;
   padding: 10px;
@@ -60,7 +58,7 @@ const ResizableTh = styled.th`
   text-overflow: ellipsis;
   white-space: nowrap;
 `;
-// The resizer element displayed within each header cell
+
 const Resizer = styled.div`
   position: absolute;
   right: 0;
@@ -70,19 +68,19 @@ const Resizer = styled.div`
   cursor: col-resize;
   user-select: none;
 `;
-// ----- End Styled Components -----
 
-// MediaTable component – renders the table header and rows
-// Props:
-// • records: array of record objects to display
-// • columnWidths: object with widths for each column
-// • setColumnWidths: function to update column widths
-// • sortColumn, sortDirection, handleSort: sorting props and callback
-// • getField: helper function to extract a field from a record
-// • handleMouseDown: callback for resizing columns
-// • handleEdit, handleDelete: callbacks for the action buttons
-// • handleRowClick: callback when a row is clicked (e.g. for updating series status)
-// • doubleActions: if true, render an extra Actions column at the left (and/or right)
+const initialColumnWidths = {
+  index: 10,
+  title: 100,
+  category: 100,
+  type: 100,
+  watchedStatus: 100,
+  recommendations: 80,
+  releaseYear: 100,
+  lengthEpisodes: 100,
+  synopsis: 300,
+};
+
 const MediaTable = ({
   records,
   columnWidths,
@@ -97,6 +95,17 @@ const MediaTable = ({
   handleRowClick,
   doubleActions,
 }) => {
+  // cycleSort: cycles between ascending, descending, and default (unsorted)
+  const cycleSort = (column) => {
+    if (sortColumn !== column) {
+      handleSort(column, "asc");
+    } else if (sortDirection === "asc") {
+      handleSort(column, "desc");
+    } else if (sortDirection === "desc") {
+      handleSort(null, null);
+    }
+  };
+
   return (
     <StyledTable>
       <thead>
@@ -113,84 +122,95 @@ const MediaTable = ({
           </ResizableTh>
           <ResizableTh
             width={columnWidths.title}
-            onClick={() => handleSort("title")}
+            onClick={() => cycleSort("title")}
           >
             Title{" "}
-            {sortColumn === "title"
-              ? sortDirection === "asc"
+            {sortColumn === "title" &&
+              (sortDirection === "asc"
                 ? "▲"
-                : "▼"
-              : ""}
+                : sortDirection === "desc"
+                ? "▼"
+                : "")}
             <Resizer onMouseDown={(e) => handleMouseDown(e, "title")} />
           </ResizableTh>
           <ResizableTh
             width={columnWidths.category}
-            onClick={() => handleSort("category")}
+            onClick={() => cycleSort("category")}
           >
             Category{" "}
-            {sortColumn === "category"
-              ? sortDirection === "asc"
+            {sortColumn === "category" &&
+              (sortDirection === "asc"
                 ? "▲"
-                : "▼"
-              : ""}
+                : sortDirection === "desc"
+                ? "▼"
+                : "")}
             <Resizer onMouseDown={(e) => handleMouseDown(e, "category")} />
           </ResizableTh>
           <ResizableTh
             width={columnWidths.type}
-            onClick={() => handleSort("type")}
+            onClick={() => cycleSort("type")}
           >
             Type{" "}
-            {sortColumn === "type" ? (sortDirection === "asc" ? "▲" : "▼") : ""}
+            {sortColumn === "type" &&
+              (sortDirection === "asc"
+                ? "▲"
+                : sortDirection === "desc"
+                ? "▼"
+                : "")}
             <Resizer onMouseDown={(e) => handleMouseDown(e, "type")} />
           </ResizableTh>
           <ResizableTh
             width={columnWidths.watchedStatus}
-            onClick={() => handleSort("watchedStatus")}
+            onClick={() => cycleSort("watchedStatus")}
           >
             Watched Status{" "}
-            {sortColumn === "watchedStatus"
-              ? sortDirection === "asc"
+            {sortColumn === "watchedStatus" &&
+              (sortDirection === "asc"
                 ? "▲"
-                : "▼"
-              : ""}
+                : sortDirection === "desc"
+                ? "▼"
+                : "")}
             <Resizer onMouseDown={(e) => handleMouseDown(e, "watchedStatus")} />
           </ResizableTh>
           <ResizableTh
             width={columnWidths.recommendations}
-            onClick={() => handleSort("recommendations")}
+            onClick={() => cycleSort("recommendations")}
           >
             Recommendations{" "}
-            {sortColumn === "recommendations"
-              ? sortDirection === "asc"
+            {sortColumn === "recommendations" &&
+              (sortDirection === "asc"
                 ? "▲"
-                : "▼"
-              : ""}
+                : sortDirection === "desc"
+                ? "▼"
+                : "")}
             <Resizer
               onMouseDown={(e) => handleMouseDown(e, "recommendations")}
             />
           </ResizableTh>
           <ResizableTh
             width={columnWidths.releaseYear}
-            onClick={() => handleSort("releaseYear")}
+            onClick={() => cycleSort("releaseYear")}
           >
             Release Year{" "}
-            {sortColumn === "releaseYear"
-              ? sortDirection === "asc"
+            {sortColumn === "releaseYear" &&
+              (sortDirection === "asc"
                 ? "▲"
-                : "▼"
-              : ""}
+                : sortDirection === "desc"
+                ? "▼"
+                : "")}
             <Resizer onMouseDown={(e) => handleMouseDown(e, "releaseYear")} />
           </ResizableTh>
           <ResizableTh
             width={columnWidths.lengthEpisodes}
-            onClick={() => handleSort("lengthEpisodes")}
+            onClick={() => cycleSort("lengthEpisodes")}
           >
             Length/Episodes{" "}
-            {sortColumn === "lengthEpisodes"
-              ? sortDirection === "asc"
+            {sortColumn === "lengthEpisodes" &&
+              (sortDirection === "asc"
                 ? "▲"
-                : "▼"
-              : ""}
+                : sortDirection === "desc"
+                ? "▼"
+                : "")}
             <Resizer
               onMouseDown={(e) => handleMouseDown(e, "lengthEpisodes")}
             />
@@ -255,26 +275,6 @@ const MediaTable = ({
                 "No Image"
               )}
             </StyledTd>
-            {!doubleActions && (
-              <StyledTd>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleEdit(record);
-                  }}
-                >
-                  Update
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDelete(record);
-                  }}
-                >
-                  Delete
-                </button>
-              </StyledTd>
-            )}
           </StyledTr>
         ))}
       </tbody>
