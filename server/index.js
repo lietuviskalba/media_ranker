@@ -12,7 +12,7 @@ app.use(express.json());
 app.get("/api/media_records", async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT * FROM media_records ORDER BY date_added DESC"
+      "SELECT * FROM media_records ORDER BY COALESCE(updated_at, date_added) DESC"
     );
     res.json(result.rows);
   } catch (err) {

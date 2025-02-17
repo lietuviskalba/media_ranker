@@ -5,7 +5,6 @@ import ScrollToTop from "../components/ScrollToTop";
 import Navbar from "../components/Navbar";
 import MediaTable from "../components/MediaTable";
 
-// Mapping from camelCase to underscore keys used in the database
 const fieldMapping = {
   releaseYear: "release_year",
   lengthEpisodes: "length_or_episodes",
@@ -13,7 +12,6 @@ const fieldMapping = {
   dateAdded: "date_added",
 };
 
-// Helper function to get a field value from a record
 function getField(record, field) {
   if (record[field] !== undefined) return record[field];
   if (fieldMapping[field] && record[fieldMapping[field]] !== undefined)
@@ -21,7 +19,6 @@ function getField(record, field) {
   return record[field.charAt(0).toUpperCase() + field.slice(1)] || "";
 }
 
-// Styled container for the page
 const Container = styled.div`
   background-color: rgb(47, 47, 47);
   color: rgb(183, 183, 183);
@@ -31,7 +28,6 @@ const Container = styled.div`
   font-family: Arial, sans-serif;
 `;
 
-// Main content area styling with padding for the fixed Navbar
 const Main = styled.main`
   background-color: rgb(46, 46, 46);
   padding: 10px;
@@ -42,13 +38,11 @@ const Main = styled.main`
   box-sizing: border-box;
 `;
 
-// Styled title centered on the page
 const Title = styled.h1`
   font-size: 4rem;
   text-align: center;
 `;
 
-// Initial column widths for the MediaTable
 const initialColumnWidths = {
   index: 10,
   title: 100,
@@ -62,20 +56,17 @@ const initialColumnWidths = {
 };
 
 function Ranking() {
-  // State declarations for records, search query, sorting, and column widths
   const [records, setRecords] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortColumn, setSortColumn] = useState(null);
   const [sortDirection, setSortDirection] = useState("asc");
   const [columnWidths, setColumnWidths] = useState(initialColumnWidths);
 
-  // Load saved column widths from localStorage on mount
   useEffect(() => {
     const savedWidths = localStorage.getItem("columnWidths");
     if (savedWidths) setColumnWidths(JSON.parse(savedWidths));
   }, []);
 
-  // Fetch records from the PostgreSQL endpoint
   useEffect(() => {
     fetch("/api/media_records")
       .then((response) => response.json())
@@ -83,7 +74,6 @@ function Ranking() {
       .catch((err) => console.error("Error fetching records:", err));
   }, []);
 
-  // Filter records based on the search query (case-insensitive)
   const filteredRecords = records.filter((record) => {
     const query = searchQuery.toLowerCase();
     return (
@@ -100,15 +90,15 @@ function Ranking() {
     );
   });
 
-  // Sort records: if no sort column is selected, sort by updatedAt (or date_added) descending
+  // If no sort column is selected, sort by updated_at (or date_added) descending.
   const sortedRecords =
     sortColumn === null
       ? [...filteredRecords].sort((a, b) => {
-          const dateA = a.updatedAt
-            ? new Date(a.updatedAt)
+          const dateA = a.updated_at
+            ? new Date(a.updated_at)
             : new Date(a.date_added);
-          const dateB = b.updatedAt
-            ? new Date(b.updatedAt)
+          const dateB = b.updated_at
+            ? new Date(b.updated_at)
             : new Date(b.date_added);
           return dateB - dateA;
         })
@@ -122,7 +112,6 @@ function Ranking() {
           return 0;
         });
 
-  // Updated handleSort: accepts two parameters and resets when both are null.
   const handleSort = (column, direction) => {
     if (column === null) {
       setSortColumn(null);
@@ -133,7 +122,6 @@ function Ranking() {
     }
   };
 
-  // Handler for column resizing; saves new widths to localStorage
   const handleMouseDown = (e, column) => {
     e.preventDefault();
     const startX = e.clientX;
@@ -154,35 +142,24 @@ function Ranking() {
     document.addEventListener("mouseup", handleMouseUp);
   };
 
-  // Updated row click handler:
-  // When a row is clicked, update the record's watched_status by incrementing the counter and appending the current date (yyyy-mm-dd).
-  // The payload includes all current record fields so that the PUT query in the backend works correctly.
+  // When a row is clicked, update the record's watched_status.
   const handleRowClick = (record) => {
-    // Ask the user if they have completed watching the series
     const confirmFinish = window.confirm(
       "Have you completed watching this series?"
     );
     if (!confirmFinish) return;
-
-    // Get the current watched status and the current date (formatted yyyy-mm-dd)
     const currentStatus = getField(record, "watchedStatus");
-    const currentDate = new Date().toISOString().slice(0, 10);
-
-    // Determine the new watched status by checking if it already has a "Completed" entry
+    const currentDate = new Date().toISOString().slice(0, 10); // yyyy-mm-dd format
     let newStatus = "";
     const regex = /^Completed\s*\((\d+)\)(?:\n(.*))?$/i;
     const match = currentStatus.match(regex);
     if (match) {
-      // Increment the counter and append the new date
       const count = parseInt(match[1], 10) + 1;
       const dates = match[2] ? `${match[2]}, ${currentDate}` : currentDate;
       newStatus = `Completed (${count})\n${dates}`;
     } else {
       newStatus = `Completed (1)\n${currentDate}`;
     }
-
-    // Build the payload with all required fields from the record,
-    // using "updated_at" (underscore) as the column name for the timestamp.
     const payload = {
       title: record.title,
       category: record.category,
@@ -195,8 +172,7 @@ function Ranking() {
       image: record.image || null,
       updated_at: new Date().toISOString(),
     };
-
-    // Send the PUT request to update the record in the database
+    // Use the correct endpoint for updating a record in the media_records table
     fetch(`/api/media_records/${record.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -212,7 +188,6 @@ function Ranking() {
       })
       .then((data) => {
         alert(`Record "${data.title}" updated to:\n${data.watched_status}`);
-        // Update the local state so the table reflects the change
         setRecords((prevRecords) =>
           prevRecords.map((r) => (r.id === record.id ? data : r))
         );
@@ -228,7 +203,6 @@ function Ranking() {
       <Navbar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
       <Main>
         <Title>Media Ranker</Title>
-        {/* Render MediaTable with no action buttons (Ranking view) */}
         <MediaTable
           records={sortedRecords}
           columnWidths={columnWidths}
