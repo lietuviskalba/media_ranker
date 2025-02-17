@@ -158,24 +158,31 @@ function Ranking() {
   // When a row is clicked, update the record's watched_status by incrementing the counter and appending the current date (yyyy-mm-dd).
   // The payload includes all current record fields so that the PUT query in the backend works correctly.
   const handleRowClick = (record) => {
+    // Ask the user if they have completed watching the series
     const confirmFinish = window.confirm(
       "Have you completed watching this series?"
     );
     if (!confirmFinish) return;
+
+    // Get the current watched status and the current date (formatted yyyy-mm-dd)
     const currentStatus = getField(record, "watchedStatus");
-    const currentDate = new Date().toISOString().slice(0, 10); // yyyy-mm-dd format
+    const currentDate = new Date().toISOString().slice(0, 10);
+
+    // Determine the new watched status by checking if it already has a "Completed" entry
     let newStatus = "";
     const regex = /^Completed\s*\((\d+)\)(?:\n(.*))?$/i;
     const match = currentStatus.match(regex);
     if (match) {
       // Increment the counter and append the new date
       const count = parseInt(match[1], 10) + 1;
-      const dates = match[2] ? match[2] + ", " + currentDate : currentDate;
+      const dates = match[2] ? `${match[2]}, ${currentDate}` : currentDate;
       newStatus = `Completed (${count})\n${dates}`;
     } else {
       newStatus = `Completed (1)\n${currentDate}`;
     }
-    // Build payload with all required fields from the existing record
+
+    // Build the payload with all required fields from the record,
+    // using "updated_at" (underscore) as the column name for the timestamp.
     const payload = {
       title: record.title,
       category: record.category,
@@ -186,10 +193,11 @@ function Ranking() {
       length_or_episodes: record.length_or_episodes || record.lengthEpisodes,
       synopsis: record.synopsis,
       image: record.image || null,
-      updatedAt: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     };
-    // Send update request to backend
-    fetch(`/api/records/${record.id}`, {
+
+    // Send the PUT request to update the record in the database
+    fetch(`/api/media_records/${record.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -204,7 +212,7 @@ function Ranking() {
       })
       .then((data) => {
         alert(`Record "${data.title}" updated to:\n${data.watched_status}`);
-        // Update local state with new record data so sorting by updatedAt works
+        // Update the local state so the table reflects the change
         setRecords((prevRecords) =>
           prevRecords.map((r) => (r.id === record.id ? data : r))
         );
