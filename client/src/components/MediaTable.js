@@ -220,14 +220,6 @@ const MediaTable = ({
             <Resizer onMouseDown={(e) => handleMouseDown(e, "synopsis")} />
           </ResizableTh>
           <ResizableTh width={100}>Image</ResizableTh>
-          {doubleActions && (
-            <ResizableTh width={50}>
-              Actions
-              <Resizer
-                onMouseDown={(e) => handleMouseDown(e, "actionsRight")}
-              />
-            </ResizableTh>
-          )}
         </tr>
       </thead>
       <tbody>
