@@ -79,6 +79,7 @@ const initialColumnWidths = {
   releaseYear: 100,
   lengthEpisodes: 100,
   synopsis: 300,
+  comment: 50,
 };
 
 const MediaTable = ({
@@ -219,6 +220,10 @@ const MediaTable = ({
             Synopsis
             <Resizer onMouseDown={(e) => handleMouseDown(e, "synopsis")} />
           </ResizableTh>
+          <ResizableTh width={columnWidths.comment}>
+            Comment
+            <Resizer onMouseDown={(e) => handleMouseDown(e, "comment")} />
+          </ResizableTh>
           <ResizableTh width={100}>Image</ResizableTh>
         </tr>
       </thead>
@@ -260,6 +265,7 @@ const MediaTable = ({
             <SynopsisTd title={getField(record, "synopsis")}>
               {getField(record, "synopsis")}
             </SynopsisTd>
+            <StyledTd>{getField(record, "comment")}</StyledTd>
             <StyledTd style={{ overflow: "visible" }}>
               {record.image ? (
                 <Image src={record.image} alt={getField(record, "title")} />

@@ -33,6 +33,7 @@ app.post("/api/media_records", async (req, res) => {
     length_or_episodes,
     synopsis,
     image,
+    comment, // new field
   } = req.body;
 
   // Validate required fields
@@ -60,8 +61,8 @@ app.post("/api/media_records", async (req, res) => {
 
   try {
     const query = `
-      INSERT INTO media_records (id, title, category, type, watched_status, recommendations, release_year, length_or_episodes, synopsis, image, date_added)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      INSERT INTO media_records (id, title, category, type, watched_status, recommendations, release_year, length_or_episodes, synopsis, image, comment, date_added)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
       RETURNING *
     `;
     const values = [
@@ -75,6 +76,7 @@ app.post("/api/media_records", async (req, res) => {
       length_or_episodes,
       synopsis,
       image || null,
+      comment || "",
       date_added,
     ];
     const result = await pool.query(query, values);
@@ -85,7 +87,7 @@ app.post("/api/media_records", async (req, res) => {
   }
 });
 
-// PUT /api/media_records/:id - Update a record in the PostgreSQL table
+// PUT /api/media_records/:id - Update a record
 app.put("/api/media_records/:id", async (req, res) => {
   const recordId = req.params.id;
   const updatedData = req.body;
@@ -100,6 +102,7 @@ app.put("/api/media_records/:id", async (req, res) => {
     length_or_episodes,
     synopsis,
     image,
+    comment, // new field
   } = updatedData;
 
   try {
@@ -114,8 +117,9 @@ app.put("/api/media_records/:id", async (req, res) => {
           length_or_episodes = $7,
           synopsis = $8,
           image = $9,
-          updated_at = $10
-      WHERE id = $11
+          comment = $10,
+          updated_at = $11
+      WHERE id = $12
       RETURNING *
     `;
     const values = [
@@ -128,6 +132,7 @@ app.put("/api/media_records/:id", async (req, res) => {
       length_or_episodes,
       synopsis,
       image || null,
+      comment || "",
       new Date().toISOString(),
       recordId,
     ];
