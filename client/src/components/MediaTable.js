@@ -71,15 +71,15 @@ const Resizer = styled.div`
 
 const initialColumnWidths = {
   index: 10,
-  title: 100,
-  category: 100,
-  type: 100,
-  watchedStatus: 100,
-  recommendations: 80,
-  releaseYear: 100,
-  lengthEpisodes: 100,
-  synopsis: 300,
-  comment: 50,
+  title: 120,
+  category: 20,
+  type: 20,
+  watchedStatus: 50,
+  recommendations: 50,
+  releaseYear: 20,
+  lengthEpisodes: 20,
+  synopsis: 100,
+  comment: 150,
 };
 
 const MediaTable = ({
