@@ -13,7 +13,7 @@ const fieldMapping = {
   dateAdded: "date_added",
 };
 
-// Helper function to get a field value from a record using the mapping
+// Helper function to get a field value from a record using our mapping
 function getField(record, field) {
   if (record[field] !== undefined) return record[field];
   if (fieldMapping[field] && record[fieldMapping[field]] !== undefined)
@@ -22,7 +22,6 @@ function getField(record, field) {
 }
 
 // ----- Styled Components for Layout and Styling -----
-
 const Container = styled.div`
   background-color: rgb(197, 7, 231);
   color: rgb(183, 183, 183);
@@ -30,7 +29,7 @@ const Container = styled.div`
   margin: 0;
   box-sizing: border-box;
   font-family: Arial, sans-serif;
-  padding-top: 80px;
+  padding-top: 80px; /* Leaves space for the fixed Navbar */
 `;
 
 const Main = styled.main`
@@ -141,9 +140,74 @@ const Message = styled.p`
   margin-top: 10px;
 `;
 
-// ----- End Styled Components for Layout -----
+// ----- Table Styled Components (for displaying records) -----
+const StyledTable = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  table-layout: fixed;
+`;
 
-// Initial column widths for the MediaTable component
+const StyledTd = styled.td`
+  padding: 10px;
+  border: 1px solid rgb(85, 85, 85);
+  text-align: center;
+`;
+
+const StyledTr = styled.tr`
+  background-color: ${(props) => (props.index % 2 === 0 ? "#333" : "#2a2a2a")};
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  &:hover {
+    background-color: #777;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  }
+`;
+
+const SynopsisTd = styled.td`
+  padding: 10px;
+  border: 1px solid rgb(85, 85, 85);
+  text-align: left;
+  white-space: normal;
+  word-wrap: break-word;
+  max-width: 300px;
+`;
+
+const Image = styled.img`
+  width: 100px;
+  height: 100px;
+  transition: transform 0.3s ease;
+  transform-origin: center center;
+  &:hover {
+    transform: scale(5) translateX(-50%);
+    z-index: 10;
+    position: relative;
+  }
+`;
+
+const ResizableTh = styled.th`
+  position: relative;
+  padding: 10px;
+  background-color: rgb(68, 68, 68);
+  border: 1px solid rgb(85, 85, 85);
+  cursor: pointer;
+  width: ${(props) => props.width}px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+const Resizer = styled.div`
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+  cursor: col-resize;
+  user-select: none;
+`;
+
+// ----- Initial Column Widths for the MediaTable Component -----
 const initialColumnWidths = {
   index: 30,
   title: 100,
@@ -168,6 +232,8 @@ function Admin() {
   const [releaseYear, setReleaseYear] = useState("");
   const [lengthEpisodes, setLengthEpisodes] = useState("");
   const [synopsis, setSynopsis] = useState("");
+  // NEW: State for Comment field
+  const [comment, setComment] = useState("");
   const [imageData, setImageData] = useState(null);
   const [message, setMessage] = useState("");
 
@@ -200,61 +266,6 @@ function Admin() {
       .catch((err) => console.error("Error fetching records:", err));
   }, [message]);
 
-  // ----- Sorting Logic -----
-  // Filter records based on the search query (case-insensitive)
-  const filteredRecords = records.filter((record) => {
-    const query = searchQuery.toLowerCase();
-    return (
-      (getField(record, "title") + "").toLowerCase().includes(query) ||
-      (getField(record, "category") + "").toLowerCase().includes(query) ||
-      (getField(record, "type") + "").toLowerCase().includes(query) ||
-      (getField(record, "watchedStatus") + "").toLowerCase().includes(query) ||
-      (getField(record, "recommendations") + "")
-        .toLowerCase()
-        .includes(query) ||
-      (getField(record, "synopsis") + "").toLowerCase().includes(query) ||
-      (getField(record, "releaseYear") + "").toString().includes(query) ||
-      (getField(record, "lengthEpisodes") + "").toString().includes(query)
-    );
-  });
-
-  // Sort records:
-  // If no sort column is selected, sort by updated_at (if available) or date_added descending.
-  // Otherwise, sort by the selected column using the current sort direction.
-  const sortedRecords =
-    sortColumn === null
-      ? [...filteredRecords].sort((a, b) => {
-          const dateA = a.updated_at
-            ? new Date(a.updated_at)
-            : new Date(a.date_added);
-          const dateB = b.updated_at
-            ? new Date(b.updated_at)
-            : new Date(b.date_added);
-          return dateB - dateA;
-        })
-      : [...filteredRecords].sort((a, b) => {
-          let valA = getField(a, sortColumn);
-          let valB = getField(b, sortColumn);
-          if (typeof valA === "string") valA = valA.toLowerCase();
-          if (typeof valB === "string") valB = valB.toLowerCase();
-          if (valA < valB) return sortDirection === "asc" ? -1 : 1;
-          if (valA > valB) return sortDirection === "asc" ? 1 : -1;
-          return 0;
-        });
-
-  // ----- Updated handleSort Function: Cycles through ascending, descending, and default sorting -----
-  const handleSort = (column) => {
-    if (sortColumn !== column) {
-      setSortColumn(column);
-      setSortDirection("asc");
-    } else if (sortDirection === "asc") {
-      setSortDirection("desc");
-    } else if (sortDirection === "desc") {
-      setSortColumn(null);
-      setSortDirection("asc");
-    }
-  };
-
   // ----- Handler for Resizing Table Columns -----
   const handleMouseDown = (e, column) => {
     e.preventDefault();
@@ -275,7 +286,7 @@ function Admin() {
     document.addEventListener("mouseup", handleMouseUp);
   };
 
-  // ----- Handlers for Image Upload/Paste, Dummy Data, and Form Clearing -----
+  // ----- Handler for File Input Changes (Image Upload) -----
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -285,6 +296,7 @@ function Admin() {
     }
   };
 
+  // ----- Handler for Pasting an Image from the Clipboard -----
   const handlePaste = (e) => {
     const items = e.clipboardData.items;
     for (let i = 0; i < items.length; i++) {
@@ -299,8 +311,10 @@ function Admin() {
     }
   };
 
+  // ----- Handler to Remove the Preview Image -----
   const handleRemoveImage = () => setImageData(null);
 
+  // ----- Handler to Fill the Form with Dummy Data (for testing) -----
   const handleFillDummy = () => {
     setTitle("Apocalypse Now");
     setCategory("Movie");
@@ -312,11 +326,14 @@ function Admin() {
     setSynopsis(
       "Apocalypse Now is an engaging film that tells a compelling story with rich characters and dramatic moments."
     );
+    // Set a dummy comment as well
+    setComment("Great movie!");
     setImageData(null);
     setSeason(1);
     setEpisode(1);
   };
 
+  // ----- Clears the Form and Resets Edit Mode -----
   const clearForm = () => {
     setTitle("");
     setCategory("");
@@ -328,6 +345,7 @@ function Admin() {
     setReleaseYear("");
     setLengthEpisodes("");
     setSynopsis("");
+    setComment(""); // Clear the comment field
     setImageData(null);
     setEditMode(false);
     setEditId(null);
@@ -337,9 +355,11 @@ function Admin() {
   const handleSubmit = (e) => {
     e.preventDefault();
     let finalWatchedStatus = watchedStatus;
+    // Append season and episode info if category is "series"
     if (category.toLowerCase() === "series") {
       finalWatchedStatus = `${watchedStatus} (S${season} E${episode})`;
     }
+    // Include the comment in the payload
     const payload = {
       title,
       category,
@@ -349,13 +369,16 @@ function Admin() {
       release_year: Number(releaseYear),
       length_or_episodes: Number(lengthEpisodes),
       synopsis,
+      comment, // NEW: comment field added
       image: imageData || null,
     };
     if (editMode && editId) {
+      // Include updated_at timestamp in snake_case to match DB column
       const updatedPayload = {
         ...payload,
         updated_at: new Date().toISOString(),
       };
+      // Send a PUT request to update the record
       fetch(`/api/media_records/${editId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -381,6 +404,7 @@ function Admin() {
           setMessage(`Error updating record: ${err.message}`);
         });
     } else {
+      // Send a POST request to create a new record
       fetch("/api/media_records", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -405,7 +429,7 @@ function Admin() {
     }
   };
 
-  // ----- Handler to Populate the Form for Editing -----
+  // ----- Handler to Populate the Form with an Existing Record for Editing -----
   const handleEdit = (record) => {
     setEditMode(true);
     setEditId(record.id);
@@ -413,6 +437,7 @@ function Admin() {
     setCategory(getField(record, "category"));
     setType(getField(record, "type"));
     const ws = getField(record, "watchedStatus");
+    // If the category is "series" and watchedStatus contains season/episode info, extract it
     if (
       getField(record, "category").toLowerCase() === "series" &&
       ws.includes("S")
@@ -437,9 +462,11 @@ function Admin() {
     setLengthEpisodes(getField(record, "lengthEpisodes"));
     setSynopsis(getField(record, "synopsis"));
     setImageData(record.image || null);
+    // NEW: Populate the comment field for editing
+    setComment(getField(record, "comment"));
   };
 
-  // ----- Handler for Deleting a Record -----
+  // ----- Handler for Deleting a Record after User Confirmation -----
   const handleDelete = (record) => {
     const proceed =
       skipConfirm ||
@@ -469,6 +496,45 @@ function Admin() {
       });
   };
 
+  // ----- Filter Records Based on the Search Query (Case-Insensitive) -----
+  const filteredRecords = records.filter((record) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      (getField(record, "title") + "").toLowerCase().includes(query) ||
+      (getField(record, "category") + "").toLowerCase().includes(query) ||
+      (getField(record, "type") + "").toLowerCase().includes(query) ||
+      (getField(record, "watchedStatus") + "").toLowerCase().includes(query) ||
+      (getField(record, "recommendations") + "")
+        .toLowerCase()
+        .includes(query) ||
+      (getField(record, "synopsis") + "").toLowerCase().includes(query) ||
+      (getField(record, "releaseYear") + "").toString().includes(query) ||
+      (getField(record, "lengthEpisodes") + "").toString().includes(query)
+    );
+  });
+
+  // ----- Sort Records so that the Most Recent (by updated_at or date_added) Appears at the Top -----
+  const sortedRecords = [...filteredRecords].sort((a, b) => {
+    const dateA = a.updated_at
+      ? new Date(a.updated_at)
+      : new Date(a.date_added);
+    const dateB = b.updated_at
+      ? new Date(b.updated_at)
+      : new Date(b.date_added);
+    return dateB - dateA;
+  });
+
+  // ----- Handler for Sorting When Clicking on Table Header Cells -----
+  const handleSort = (column) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortColumn(column);
+      setSortDirection("asc");
+    }
+  };
+
+  // ----- Render the Admin Page -----
   return (
     <Container>
       <Navbar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
@@ -478,6 +544,7 @@ function Admin() {
             <SectionTitles>Create/Update Record</SectionTitles>
             {message && <Message>{message}</Message>}
             <FormGrid>
+              {/* Title Field */}
               <FormGroup>
                 <label>Title:</label>
                 <StyledInput
@@ -487,6 +554,7 @@ function Admin() {
                   required
                 />
               </FormGroup>
+              {/* Category Field */}
               <FormGroup>
                 <label>Category:</label>
                 <StyledSelect
@@ -501,6 +569,7 @@ function Admin() {
                   <option value="Other">Other</option>
                 </StyledSelect>
               </FormGroup>
+              {/* Type Field */}
               <FormGroup>
                 <label>Type:</label>
                 <StyledSelect
@@ -515,6 +584,7 @@ function Admin() {
                   <option value="Other">Other</option>
                 </StyledSelect>
               </FormGroup>
+              {/* Recommendations Field */}
               <FormGroup>
                 <label>Recommendations:</label>
                 <StyledSelect
@@ -532,6 +602,7 @@ function Admin() {
                   <option value="Utter trash">Utter trash</option>
                 </StyledSelect>
               </FormGroup>
+              {/* Watched Status Field */}
               <FormGroup>
                 <label>Watched Status:</label>
                 <StyledSelect
@@ -545,6 +616,7 @@ function Admin() {
                   <option value="Completed">Completed</option>
                 </StyledSelect>
               </FormGroup>
+              {/* Season & Episode Fields */}
               <FormGroup>
                 <NestedGrid>
                   <div>
@@ -567,6 +639,7 @@ function Admin() {
                   </div>
                 </NestedGrid>
               </FormGroup>
+              {/* Release Year, Length/Episodes, and Action Buttons */}
               <FormGroup>
                 <NestedGrid>
                   <div>
@@ -597,6 +670,7 @@ function Admin() {
                   </div>
                 </NestedGrid>
               </FormGroup>
+              {/* Synopsis and Comment Fields in the Same Grid Block */}
               <FormGroup span="2">
                 <label>Synopsis:</label>
                 <StyledTextarea
@@ -605,7 +679,15 @@ function Admin() {
                   required
                   rows="2"
                 />
+                {/* NEW: Comment Text Area */}
+                <label>Comment:</label>
+                <StyledTextarea
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  rows="2"
+                />
               </FormGroup>
+              {/* Image Upload / Paste Field */}
               <FormGroup>
                 <label>Image Upload / Paste:</label>
                 <StyledInput
@@ -666,6 +748,7 @@ function Admin() {
             Delete without confirmation
           </label>
         </div>
+        {/* Render MediaTable with action buttons on both sides for Admin */}
         <MediaTable
           records={sortedRecords}
           columnWidths={columnWidths}
@@ -677,8 +760,8 @@ function Admin() {
           handleMouseDown={handleMouseDown}
           handleEdit={handleEdit}
           handleDelete={handleDelete}
-          doubleActions={true}
-          handleRowClick={() => {}}
+          doubleActions={true} // Action buttons appear on both left and right in Admin view
+          handleRowClick={() => {}} // No row click action in Admin view
         />
       </Main>
       <ScrollToTop />
