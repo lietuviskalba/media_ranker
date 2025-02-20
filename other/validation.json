@@ -1,0 +1,39 @@
+{
+  "info": {
+    "_postman_id": "d0b5c9e4-1234-4567-890a-abcdef123456",
+    "name": "Media Ranker API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Create Media Record",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Inception\",\n  \"category\": \"Movie\",\n  \"type\": \"Live action\",\n  \"watched_status\": \"Not Started\",\n  \"recommendations\": \"Highly recommended\",\n  \"release_year\": 2010,\n  \"length_or_episodes\": 148,\n  \"synopsis\": \"A mind-bending thriller that explores dreams within dreams.\",\n  \"image\": \"data:image/png;base64,iVBORw0KGgoAAAANSUhEUg...\",\n  \"comment\": \"My favorite film.\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/media_records",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5000",
+          "path": [
+            "api",
+            "media_records"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
