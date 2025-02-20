@@ -140,88 +140,55 @@ const Message = styled.p`
   margin-top: 10px;
 `;
 
-// ----- Table Styled Components (for displaying records) -----
-const StyledTable = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
-  table-layout: fixed;
+// ----- Styled Components for Login -----
+const LoginContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: rgb(197, 7, 231);
 `;
 
-const StyledTd = styled.td`
+const LoginForm = styled.form`
+  background-color: rgb(46, 46, 46);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+`;
+
+const LoginInput = styled.input`
   padding: 10px;
-  border: 1px solid rgb(85, 85, 85);
-  text-align: center;
+  margin-bottom: 10px;
+  width: 300px;
+  border: 1px solid rgb(80, 80, 80);
+  border-radius: 4px;
+  background-color: rgb(58, 58, 58);
+  color: rgb(238, 238, 238);
 `;
 
-const StyledTr = styled.tr`
-  background-color: ${(props) => (props.index % 2 === 0 ? "#333" : "#2a2a2a")};
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
-  &:hover {
-    background-color: #777;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-  }
-`;
-
-const SynopsisTd = styled.td`
+const LoginButton = styled.button`
   padding: 10px;
-  border: 1px solid rgb(85, 85, 85);
-  text-align: left;
-  white-space: normal;
-  word-wrap: break-word;
-  max-width: 300px;
-`;
-
-const Image = styled.img`
-  width: 100px;
-  height: 100px;
-  transition: transform 0.3s ease;
-  transform-origin: center center;
-  &:hover {
-    transform: scale(5) translateX(-50%);
-    z-index: 10;
-    position: relative;
-  }
-`;
-
-const ResizableTh = styled.th`
-  position: relative;
-  padding: 10px;
+  width: 320px;
   background-color: rgb(68, 68, 68);
-  border: 1px solid rgb(85, 85, 85);
+  color: rgb(238, 238, 238);
+  border: none;
+  border-radius: 4px;
   cursor: pointer;
-  width: ${(props) => props.width}px;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  &:hover {
+    background-color: rgb(65, 113, 203);
+  }
 `;
 
-const Resizer = styled.div`
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: 5px;
-  cursor: col-resize;
-  user-select: none;
-`;
-
-// ----- Initial Column Widths for the MediaTable Component -----
-const initialColumnWidths = {
-  index: 10,
-  title: 120,
-  category: 20,
-  type: 20,
-  watchedStatus: 50,
-  recommendations: 50,
-  releaseYear: 20,
-  lengthEpisodes: 20,
-  synopsis: 100,
-  comment: 150,
-};
-
+// ----- Admin Component -----
 function Admin() {
+  // ----- Authentication State -----
+  const [token, setToken] = useState(
+    localStorage.getItem("adminToken") || null
+  );
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+
   // ----- Form State: Holds data for creating/updating a record -----
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
@@ -233,7 +200,6 @@ function Admin() {
   const [releaseYear, setReleaseYear] = useState("");
   const [lengthEpisodes, setLengthEpisodes] = useState("");
   const [synopsis, setSynopsis] = useState("");
-  // NEW: State for Comment field
   const [comment, setComment] = useState("");
   const [imageData, setImageData] = useState(null);
   const [message, setMessage] = useState("");
@@ -246,7 +212,18 @@ function Admin() {
   const [skipConfirm, setSkipConfirm] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [editId, setEditId] = useState(null);
-  const [columnWidths, setColumnWidths] = useState(initialColumnWidths);
+  const [columnWidths, setColumnWidths] = useState({
+    index: 30,
+    title: 100,
+    category: 100,
+    type: 100,
+    watchedStatus: 100,
+    recommendations: 80,
+    releaseYear: 100,
+    lengthEpisodes: 100,
+    synopsis: 300,
+    comment: 50,
+  });
 
   // ----- Load Saved Column Widths from localStorage -----
   useEffect(() => {
@@ -259,13 +236,17 @@ function Admin() {
     localStorage.setItem("adminColumnWidths", JSON.stringify(columnWidths));
   }, [columnWidths]);
 
-  // ----- Fetch Records from PostgreSQL API Endpoint -----
+  // ----- Fetch Records from API Endpoint (with JWT authentication) -----
   useEffect(() => {
-    fetch("/api/media_records")
-      .then((res) => res.json())
-      .then((data) => setRecords(data))
-      .catch((err) => console.error("Error fetching records:", err));
-  }, [message]);
+    if (token) {
+      fetch("/api/media_records", {
+        headers: { Authorization: "Bearer " + token },
+      })
+        .then((res) => res.json())
+        .then((data) => setRecords(data))
+        .catch((err) => console.error("Error fetching records:", err));
+    }
+  }, [message, token]);
 
   // ----- Handler for Resizing Table Columns -----
   const handleMouseDown = (e, column) => {
@@ -287,7 +268,7 @@ function Admin() {
     document.addEventListener("mouseup", handleMouseUp);
   };
 
-  // ----- Handler for File Input Changes (Image Upload) -----
+  // ----- Handlers for Image Upload/Paste -----
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -297,7 +278,6 @@ function Admin() {
     }
   };
 
-  // ----- Handler for Pasting an Image from the Clipboard -----
   const handlePaste = (e) => {
     const items = e.clipboardData.items;
     for (let i = 0; i < items.length; i++) {
@@ -312,7 +292,6 @@ function Admin() {
     }
   };
 
-  // ----- Handler to Remove the Preview Image -----
   const handleRemoveImage = () => setImageData(null);
 
   // ----- Handler to Fill the Form with Dummy Data (for testing) -----
@@ -327,7 +306,6 @@ function Admin() {
     setSynopsis(
       "Apocalypse Now is an engaging film that tells a compelling story with rich characters and dramatic moments."
     );
-    // Set a dummy comment as well
     setComment("Great movie!");
     setImageData(null);
     setSeason(1);
@@ -346,7 +324,7 @@ function Admin() {
     setReleaseYear("");
     setLengthEpisodes("");
     setSynopsis("");
-    setComment(""); // Clear the comment field
+    setComment("");
     setImageData(null);
     setEditMode(false);
     setEditId(null);
@@ -356,11 +334,9 @@ function Admin() {
   const handleSubmit = (e) => {
     e.preventDefault();
     let finalWatchedStatus = watchedStatus;
-    // Append season and episode info if category is "series"
     if (category.toLowerCase() === "series") {
       finalWatchedStatus = `${watchedStatus} (S${season} E${episode})`;
     }
-    // Include the comment in the payload
     const payload = {
       title,
       category,
@@ -370,19 +346,20 @@ function Admin() {
       release_year: Number(releaseYear),
       length_or_episodes: Number(lengthEpisodes),
       synopsis,
-      comment, // NEW: comment field added
+      comment,
       image: imageData || null,
     };
     if (editMode && editId) {
-      // Include updated_at timestamp in snake_case to match DB column
       const updatedPayload = {
         ...payload,
         updated_at: new Date().toISOString(),
       };
-      // Send a PUT request to update the record
       fetch(`/api/media_records/${editId}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token,
+        },
         body: JSON.stringify(updatedPayload),
       })
         .then((res) => {
@@ -405,10 +382,12 @@ function Admin() {
           setMessage(`Error updating record: ${err.message}`);
         });
     } else {
-      // Send a POST request to create a new record
       fetch("/api/media_records", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token,
+        },
         body: JSON.stringify(payload),
       })
         .then((res) => {
@@ -438,7 +417,6 @@ function Admin() {
     setCategory(getField(record, "category"));
     setType(getField(record, "type"));
     const ws = getField(record, "watchedStatus");
-    // If the category is "series" and watchedStatus contains season/episode info, extract it
     if (
       getField(record, "category").toLowerCase() === "series" &&
       ws.includes("S")
@@ -463,11 +441,10 @@ function Admin() {
     setLengthEpisodes(getField(record, "lengthEpisodes"));
     setSynopsis(getField(record, "synopsis"));
     setImageData(record.image || null);
-    // NEW: Populate the comment field for editing
     setComment(getField(record, "comment"));
   };
 
-  // ----- Handler for Deleting a Record after User Confirmation -----
+  // ----- Handler for Deleting a Record after Confirmation -----
   const handleDelete = (record) => {
     const proceed =
       skipConfirm ||
@@ -477,7 +454,10 @@ function Admin() {
         } "${getField(record, "title")}"?`
       );
     if (!proceed) return;
-    fetch(`/api/media_records/${record.id}`, { method: "DELETE" })
+    fetch(`/api/media_records/${record.id}`, {
+      method: "DELETE",
+      headers: { Authorization: "Bearer " + token },
+    })
       .then((res) => {
         if (!res.ok) {
           return res.json().then((data) => {
@@ -497,7 +477,37 @@ function Admin() {
       });
   };
 
-  // ----- Filter Records Based on the Search Query (Case-Insensitive) -----
+  // ----- Handler for Logging In -----
+  const handleLogin = (e) => {
+    e.preventDefault();
+    fetch("/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Invalid credentials");
+        }
+        return res.json();
+      })
+      .then((data) => {
+        setToken(data.token);
+        localStorage.setItem("adminToken", data.token);
+        setMessage("");
+      })
+      .catch((err) => {
+        setMessage("Login failed: " + err.message);
+      });
+  };
+
+  // ----- Handler for Logging Out -----
+  const handleLogout = () => {
+    setToken(null);
+    localStorage.removeItem("adminToken");
+  };
+
+  // ----- Filter Records Based on Search Query (Case-Insensitive) -----
   const filteredRecords = records.filter((record) => {
     const query = searchQuery.toLowerCase();
     return (
@@ -535,8 +545,8 @@ function Admin() {
     }
   };
 
-  // ----- Render the Admin Page -----
-  return (
+  // If no token, render the login form; otherwise render the Admin page
+  return token ? (
     <Container>
       <Navbar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
       <Main>
@@ -545,7 +555,6 @@ function Admin() {
             <SectionTitles>Create/Update Record</SectionTitles>
             {message && <Message>{message}</Message>}
             <FormGrid>
-              {/* Title Field */}
               <FormGroup>
                 <label>Title:</label>
                 <StyledInput
@@ -555,7 +564,6 @@ function Admin() {
                   required
                 />
               </FormGroup>
-              {/* Category Field */}
               <FormGroup>
                 <label>Category:</label>
                 <StyledSelect
@@ -570,7 +578,6 @@ function Admin() {
                   <option value="Other">Other</option>
                 </StyledSelect>
               </FormGroup>
-              {/* Type Field */}
               <FormGroup>
                 <label>Type:</label>
                 <StyledSelect
@@ -585,7 +592,6 @@ function Admin() {
                   <option value="Other">Other</option>
                 </StyledSelect>
               </FormGroup>
-              {/* Recommendations Field */}
               <FormGroup>
                 <label>Recommendations:</label>
                 <StyledSelect
@@ -603,7 +609,6 @@ function Admin() {
                   <option value="Utter trash">Utter trash</option>
                 </StyledSelect>
               </FormGroup>
-              {/* Watched Status Field */}
               <FormGroup>
                 <label>Watched Status:</label>
                 <StyledSelect
@@ -617,7 +622,6 @@ function Admin() {
                   <option value="Completed">Completed</option>
                 </StyledSelect>
               </FormGroup>
-              {/* Season & Episode Fields */}
               <FormGroup>
                 <NestedGrid>
                   <div>
@@ -640,7 +644,6 @@ function Admin() {
                   </div>
                 </NestedGrid>
               </FormGroup>
-              {/* Release Year, Length/Episodes, and Action Buttons */}
               <FormGroup>
                 <NestedGrid>
                   <div>
@@ -671,7 +674,6 @@ function Admin() {
                   </div>
                 </NestedGrid>
               </FormGroup>
-              {/* Synopsis and Comment Fields in the Same Grid Block */}
               <FormGroup span="2">
                 <label>Synopsis:</label>
                 <StyledTextarea
@@ -680,7 +682,6 @@ function Admin() {
                   required
                   rows="2"
                 />
-                {/* NEW: Comment Text Area */}
                 <label>Comment:</label>
                 <StyledTextarea
                   value={comment}
@@ -688,7 +689,6 @@ function Admin() {
                   rows="2"
                 />
               </FormGroup>
-              {/* Image Upload / Paste Field */}
               <FormGroup>
                 <label>Image Upload / Paste:</label>
                 <StyledInput
@@ -749,7 +749,6 @@ function Admin() {
             Delete without confirmation
           </label>
         </div>
-        {/* Render MediaTable with action buttons on both sides for Admin */}
         <MediaTable
           records={sortedRecords}
           columnWidths={columnWidths}
@@ -764,9 +763,35 @@ function Admin() {
           doubleActions={true} // Action buttons appear on both left and right in Admin view
           handleRowClick={() => {}} // No row click action in Admin view
         />
+        <div style={{ marginTop: "20px" }}>
+          <button onClick={handleLogout}>Log Out</button>
+        </div>
       </Main>
       <ScrollToTop />
     </Container>
+  ) : (
+    // Render Login Form if not authenticated
+    <LoginContainer>
+      <LoginForm onSubmit={handleLogin}>
+        <h2>Admin Login</h2>
+        {message && <Message>{message}</Message>}
+        <LoginInput
+          type="text"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+        />
+        <LoginInput
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+        <LoginButton type="submit">Log In</LoginButton>
+      </LoginForm>
+    </LoginContainer>
   );
 }
 
