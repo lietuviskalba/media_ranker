@@ -31,7 +31,7 @@ app.get("/api/media_records", async (req, res) => {
   }
 });
 
-// POST /api/media_records - Add a new record with validation
+// POST /api/media_records - Add a new record with validation and sanitization
 app.post(
   "/api/media_records",
   [
@@ -54,7 +54,7 @@ app.post(
       .isNumeric()
       .withMessage("Length or episodes must be a number"),
     body("synopsis").notEmpty().withMessage("Synopsis is required").trim(),
-    // image and comment are optional
+    // image and comment are optional; if needed, you could add additional sanitization here
   ],
   async (req, res) => {
     // Check for validation errors
@@ -62,6 +62,7 @@ app.post(
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
+
     const {
       title,
       category,
@@ -107,7 +108,7 @@ app.post(
   }
 );
 
-// PUT /api/media_records/:id - Update a record with validation
+// PUT /api/media_records/:id - Update a record with validation and sanitization
 app.put(
   "/api/media_records/:id",
   [

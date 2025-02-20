@@ -1,0 +1,33 @@
+{
+  "info": {
+    "_postman_id": "d7d6f9d1-1234-4567-890a-1234567890ab",
+    "name": "Media Ranker Sanitization Test",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Create Media Record - Sanitization Test",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"  <script>alert('XSS')</script>  Test Title  \",\n  \"category\": \"Movie\",\n  \"type\": \"Live action\",\n  \"watched_status\": \"Not Started\",\n  \"release_year\": 2020,\n  \"length_or_episodes\": 120,\n  \"synopsis\": \"   <b>Bold</b> synopsis with extra spaces   \",\n  \"image\": null,\n  \"comment\": \"Sample comment with <i>HTML</i> content\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/media_records",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "media_records"]
+        }
+      },
+      "response": []
+    }
+  ]
+}
