@@ -1,15 +1,17 @@
 // server/index.js
+require("dotenv").config(); // Load environment variables from .env file
 const express = require("express");
 const helmet = require("helmet");
 const cors = require("cors");
 const { body, validationResult } = require("express-validator");
 const { v4: uuidv4 } = require("uuid");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 const pool = require("./db");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const JWT_SECRET = process.env.JWT_SECRET || "your_secret_key_here"; // Use a secure key in production
+const JWT_SECRET = process.env.JWT_SECRET; // Use a secure key in production
 
 app.use(helmet());
 app.use(
@@ -32,25 +34,36 @@ function authenticateToken(req, res, next) {
   });
 }
 
-// Login endpoint – returns a JWT for valid credentials (for demo purposes, credentials are hard-coded)
+// Login endpoint – returns a JWT for valid credentials
 app.post(
   "/api/login",
   [
     body("username").notEmpty().trim().escape(),
     body("password").notEmpty().trim().escape(),
   ],
-  (req, res) => {
+  async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
     const { username, password } = req.body;
-    // Replace with real authentication logic as needed
-    if (username === "admin" && password === "admin") {
-      const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: "1h" });
-      return res.json({ token });
+    const storedUsername = process.env.ADMIN_USERNAME;
+    const storedHashedPassword = process.env.ADMIN_PASSWORD;
+
+    // Check if the username matches
+    if (username !== storedUsername) {
+      return res.status(401).json({ error: "Invalid credentials" });
     }
-    res.status(401).json({ error: "Invalid credentials" });
+
+    // Compare the provided password with the stored hashed password
+    const passwordMatch = await bcrypt.compare(password, storedHashedPassword);
+    if (!passwordMatch) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    // Generate JWT if credentials are valid
+    const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: "1h" });
+    return res.json({ token });
   }
 );
 
@@ -67,7 +80,7 @@ app.get("/api/media_records", async (req, res) => {
   }
 });
 
-// POST /api/media_records – Protected route; only accessible with a valid token
+// POST /api/media_records – Protected route
 app.post(
   "/api/media_records",
   authenticateToken,
@@ -95,7 +108,6 @@ app.post(
       .withMessage("Synopsis is required")
       .trim()
       .escape(),
-    // image and comment are optional
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -121,7 +133,7 @@ app.post(
     try {
       const query = `
         INSERT INTO media_records 
-        (id, title, category, type, watched_status, recommendations, release_year, length_or_episodes, synopsis, image, comment, date_added)
+          (id, title, category, type, watched_status, recommendations, release_year, length_or_episodes, synopsis, image, comment, date_added)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
         RETURNING *
       `;
@@ -148,7 +160,7 @@ app.post(
   }
 );
 
-// PUT /api/media_records/:id – Protected route; update a record after authentication
+// PUT /api/media_records/:id – Protected route; update a record
 app.put(
   "/api/media_records/:id",
   authenticateToken,
@@ -240,7 +252,7 @@ app.put(
   }
 );
 
-// DELETE /api/media_records/:id – Protected route; delete a record after authentication
+// DELETE /api/media_records/:id – Protected route; delete a record
 app.delete("/api/media_records/:id", authenticateToken, async (req, res) => {
   const recordId = req.params.id;
   try {
