@@ -1,0 +1,76 @@
+{
+  "info": {
+    "_postman_id": "a12b34cd-56ef-78gh-90ij-klmnopqrstuv",
+    "name": "Media Ranker API Collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Collection to test Media Ranker API endpoints including login, URL status caching, and search debouncing."
+  },
+  "item": [
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"username\": \"admin\",\n    \"password\": \"admin\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/login",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "login"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get URL Status",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/api/url-status?url=https://example.com",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "url-status"],
+          "query": [
+            {
+              "key": "url",
+              "value": "https://example.com"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Search Media Records",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/api/search?q=example",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "search"],
+          "query": [
+            {
+              "key": "q",
+              "value": "example"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

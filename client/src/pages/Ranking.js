@@ -149,6 +149,7 @@ function Ranking() {
       "Have you completed watching this series?"
     );
     if (!confirmFinish) return;
+
     const currentStatus = getField(record, "watchedStatus");
     const currentDate = new Date().toISOString().slice(0, 10); // yyyy-mm-dd format
     let newStatus = "";
@@ -161,6 +162,8 @@ function Ranking() {
     } else {
       newStatus = `Completed (1)\n${currentDate}`;
     }
+
+    // Construct payload with keys matching the DB columns
     const payload = {
       title: record.title,
       category: record.category,
@@ -173,19 +176,21 @@ function Ranking() {
       image: record.image || null,
       updated_at: new Date().toISOString(),
     };
-    // Use the correct endpoint for updating a record in the media_records table
-    fetch(`/api/media_records/${record.id}`, {
+
+    // Call the public update endpoint (no auth required)
+    fetch(`/api/public/media_records/${record.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     })
-      .then((res) => {
-        if (!res.ok) {
-          return res.json().then((data) => {
-            throw new Error(data.error || "Error updating record");
-          });
+      .then(async (res) => {
+        const text = await res.text();
+        try {
+          return JSON.parse(text);
+        } catch (e) {
+          console.error("Raw response:", text);
+          throw new Error("Invalid JSON in response");
         }
-        return res.json();
       })
       .then((data) => {
         alert(`Record "${data.title}" updated to:\n${data.watched_status}`);
