@@ -6,7 +6,7 @@ import styled from "styled-components";
 import ScrollToTop from "../components/ScrollToTop";
 import MediaTable from "../components/MediaTable";
 
-// Mapping from camelCase to DB keys
+// Mapping from camelCase keys to the underscore keys used in the database
 const fieldMapping = {
   releaseYear: "release_year",
   lengthEpisodes: "length_or_episodes",
@@ -250,7 +250,7 @@ function Admin() {
     localStorage.setItem("adminColumnWidths", JSON.stringify(columnWidths));
   }, [columnWidths]);
 
-  // Fetch records from API (requires token)
+  // Fetch records from API (with token)
   useEffect(() => {
     if (token) {
       fetch("/api/media_records", {
@@ -262,7 +262,7 @@ function Admin() {
     }
   }, [message, token]);
 
-  // Helper: Check auth response and auto logout if session expired
+  // Helper: Check auth response and auto-logout if session expired
   const checkAuthResponse = (res) => {
     if (res.status === 401 || res.status === 403) {
       handleLogout();
@@ -271,7 +271,7 @@ function Admin() {
     return res.json();
   };
 
-  // Handlers for column resizing, image upload, and clearing form
+  // Handlers for column resizing
   const handleMouseDown = (e, column) => {
     e.preventDefault();
     const startX = e.clientX;
@@ -291,6 +291,7 @@ function Admin() {
     document.addEventListener("mouseup", handleMouseUp);
   };
 
+  // Handlers for image upload/paste
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -416,7 +417,7 @@ function Admin() {
     }
   };
 
-  // Handler for editing a record (populate the form)
+  // Handler for editing a record (populate form)
   const handleEdit = (record) => {
     setEditMode(true);
     setEditId(record.id);
@@ -477,7 +478,7 @@ function Admin() {
       });
   };
 
-  // Handlers for login and logout
+  // Handler for logging in
   const handleLogin = (e) => {
     e.preventDefault();
     fetch("/api/login", {
@@ -499,6 +500,7 @@ function Admin() {
       });
   };
 
+  // Handler for logging out
   const handleLogout = () => {
     setToken(null);
     localStorage.removeItem("adminToken");
@@ -553,7 +555,6 @@ function Admin() {
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  required
                 />
               </FormGroup>
               <FormGroup>
@@ -561,7 +562,6 @@ function Admin() {
                 <StyledSelect
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  required
                 >
                   <option value="">Select</option>
                   <option value="Movie">Movie</option>
@@ -606,7 +606,6 @@ function Admin() {
                 <StyledSelect
                   value={watchedStatus}
                   onChange={(e) => setWatchedStatus(e.target.value)}
-                  required
                 >
                   <option value="">Select</option>
                   <option value="Not Started">Not Started</option>
@@ -644,7 +643,6 @@ function Admin() {
                       type="number"
                       value={releaseYear}
                       onChange={(e) => setReleaseYear(e.target.value)}
-                      required
                     />
                   </div>
                   <div>
@@ -653,7 +651,6 @@ function Admin() {
                       type="number"
                       value={lengthEpisodes}
                       onChange={(e) => setLengthEpisodes(e.target.value)}
-                      required
                     />
                   </div>
                   <div style={{ display: "flex", gap: "10px" }}>
@@ -671,7 +668,6 @@ function Admin() {
                 <StyledTextarea
                   value={synopsis}
                   onChange={(e) => setSynopsis(e.target.value)}
-                  required
                   rows="2"
                 />
                 <label>Comment:</label>
@@ -741,11 +737,9 @@ function Admin() {
             Delete without confirmation
           </label>
         </div>
-
         <div style={{ marginTop: "20px" }}>
           <button onClick={handleLogout}>Log Out</button>
         </div>
-
         <MediaTable
           records={sortedRecords}
           columnWidths={columnWidths}
@@ -773,14 +767,12 @@ function Admin() {
           placeholder="Username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          required
         />
         <LoginInput
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          required
         />
         <LoginButton type="submit">Log In</LoginButton>
       </LoginForm>

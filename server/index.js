@@ -20,6 +20,8 @@ const app = express();
 const PORT = process.env.PORT || 5002;
 const JWT_SECRET = process.env.JWT_SECRET; // Ensure this is set in .env
 
+app.use(express.json({ limit: "5mb" }));
+
 // Utility: Check if a port is in use to avoid EADDRINUSE errors
 const portInUse = (port) =>
   new Promise((resolve, reject) => {
