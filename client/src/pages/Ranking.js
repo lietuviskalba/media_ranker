@@ -5,6 +5,7 @@ import ScrollToTop from "../components/ScrollToTop";
 import Navbar from "../components/Navbar";
 import MediaTable from "../components/MediaTable";
 
+// Mapping from camelCase keys to the underscore keys used in the database
 const fieldMapping = {
   releaseYear: "release_year",
   lengthEpisodes: "length_or_episodes",
@@ -19,6 +20,7 @@ function getField(record, field) {
   return record[field.charAt(0).toUpperCase() + field.slice(1)] || "";
 }
 
+// Styled Components
 const Container = styled.div`
   background-color: rgb(47, 47, 47);
   color: rgb(183, 183, 183);
@@ -43,6 +45,7 @@ const Title = styled.h1`
   text-align: center;
 `;
 
+// Default column widths
 const initialColumnWidths = {
   index: 10,
   title: 120,
@@ -63,18 +66,21 @@ function Ranking() {
   const [sortDirection, setSortDirection] = useState("asc");
   const [columnWidths, setColumnWidths] = useState(initialColumnWidths);
 
+  // Load saved column widths from localStorage on mount
   useEffect(() => {
-    const savedWidths = localStorage.getItem("columnWidths");
-    if (savedWidths) setColumnWidths(JSON.parse(savedWidths));
+    const saved = localStorage.getItem("columnWidths");
+    if (saved) setColumnWidths(JSON.parse(saved));
   }, []);
 
+  // Fetch all records (public endpoint)
   useEffect(() => {
     fetch("/api/media_records")
-      .then((response) => response.json())
+      .then((res) => res.json())
       .then((data) => setRecords(data))
       .catch((err) => console.error("Error fetching records:", err));
   }, []);
 
+  // Filter records based on the search query
   const filteredRecords = records.filter((record) => {
     const query = searchQuery.toLowerCase();
     return (
@@ -91,7 +97,7 @@ function Ranking() {
     );
   });
 
-  // If no sort column is selected, sort by updated_at (or date_added) descending.
+  // Sort records (if no sort column is selected, sort by most recent update or addition)
   const sortedRecords =
     sortColumn === null
       ? [...filteredRecords].sort((a, b) => {
@@ -127,8 +133,8 @@ function Ranking() {
     e.preventDefault();
     const startX = e.clientX;
     const startWidth = columnWidths[column];
-    const handleMouseMove = (e) => {
-      const newWidth = startWidth + (e.clientX - startX);
+    const handleMouseMove = (moveEvent) => {
+      const newWidth = startWidth + (moveEvent.clientX - startX);
       setColumnWidths((prev) => ({
         ...prev,
         [column]: newWidth > 20 ? newWidth : 20,
@@ -143,7 +149,7 @@ function Ranking() {
     document.addEventListener("mouseup", handleMouseUp);
   };
 
-  // When a row is clicked, update the record's watched_status.
+  // Handler for clicking a record row to update its watched status
   const handleRowClick = (record) => {
     const confirmFinish = window.confirm(
       "Have you completed watching this series?"
@@ -151,7 +157,7 @@ function Ranking() {
     if (!confirmFinish) return;
 
     const currentStatus = getField(record, "watchedStatus");
-    const currentDate = new Date().toISOString().slice(0, 10); // yyyy-mm-dd format
+    const currentDate = new Date().toISOString().slice(0, 10); // Format: yyyy-mm-dd
     let newStatus = "";
     const regex = /^Completed\s*\((\d+)\)(?:\n(.*))?$/i;
     const match = currentStatus.match(regex);
@@ -163,7 +169,6 @@ function Ranking() {
       newStatus = `Completed (1)\n${currentDate}`;
     }
 
-    // Construct payload with keys matching the DB columns
     const payload = {
       title: record.title,
       category: record.category,
@@ -177,26 +182,23 @@ function Ranking() {
       updated_at: new Date().toISOString(),
     };
 
-    // Call the public update endpoint (no auth required)
     fetch(`/api/public/media_records/${record.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     })
-      .then(async (res) => {
-        const text = await res.text();
+      .then((res) => res.text())
+      .then((text) => {
         try {
-          return JSON.parse(text);
-        } catch (e) {
+          const data = JSON.parse(text);
+          alert(`Record "${data.title}" updated to:\n${data.watched_status}`);
+          setRecords((prev) =>
+            prev.map((r) => (r.id === record.id ? data : r))
+          );
+        } catch (error) {
           console.error("Raw response:", text);
-          throw new Error("Invalid JSON in response");
+          alert("Error updating record: Invalid JSON in response");
         }
-      })
-      .then((data) => {
-        alert(`Record "${data.title}" updated to:\n${data.watched_status}`);
-        setRecords((prevRecords) =>
-          prevRecords.map((r) => (r.id === record.id ? data : r))
-        );
       })
       .catch((err) => {
         console.error("Error updating record:", err);
