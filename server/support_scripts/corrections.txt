@@ -1,0 +1,85 @@
+The North Man,2017,134,The North Man is an engaging film that tells a compelling story with rich characters and dramatic moments.
+Apocalypse Now,1979,153,Apocalypse Now is an engaging film that tells a compelling story with rich characters and dramatic moments.
+Clock Work Orange,1971,136,Clock Work Orange is an engaging film that tells a compelling story with rich characters and dramatic moments.
+Blade Runner 2048,2017,163,Blade Runner 2048 is an engaging film that tells a compelling story with rich characters and dramatic moments.
+All of Us Are Dead,2022,12,All of Us Are Dead is a unique piece of entertainment that has captivated audiences with its storytelling and artistic elements.
+12 Angry Men,1957,96,12 Angry Men is an engaging film that tells a compelling story with rich characters and dramatic moments.
+The Mad Men,2007,92,The Mad Men is a thrilling series filled with unexpected twists, deep storytelling, and character development.
+Barry 2018,2018,12,Barry 2018 is a thrilling series filled with unexpected twists, deep storytelling, and character development.
+Your Lie in April,2016,22,Your Lie in April is a captivating anime that blends action, drama, and stunning animation into an unforgettable experience.
+Johnny Bolt,2021,13,Johnny Bolt is a fun and creative cartoon that brings humor and excitement to viewers of all ages.
+Better Call Saul,2015,63,Better Call Saul is a thrilling series filled with unexpected twists, deep storytelling, and character development.
+Evangelion,1995,26,Evangelion is a captivating anime that blends action, drama, and stunning animation into an unforgettable experience.
+Jackass Forever,2022,96,Jackass Forever is an engaging film that tells a compelling story with rich characters and dramatic moments.
+Everything Everywhere All at Once,2022,139,Everything Everywhere All at Once is an engaging film that tells a compelling story with rich characters and dramatic moments.
+Odd Taxi,2021,13,Odd Taxi is a captivating anime that blends action, drama, and stunning animation into an unforgettable experience.
+Airplane,1980,88,Airplane is an engaging film that tells a compelling story with rich characters and dramatic moments.
+Monty Python,1975,91,Monty Python is an engaging film that tells a compelling story with rich characters and dramatic moments.
+Idiocracy,2006,84,Idiocracy is an engaging film that tells a compelling story with rich characters and dramatic moments.
+Spaceballs,1987,96,Spaceballs is an engaging film that tells a compelling story with rich characters and dramatic moments.
+The Shining,1980,146,The Shining is an engaging film that tells a compelling story with rich characters and dramatic moments.
+Smiling Friends,2022,8,Smiling Friends is a fun and creative cartoon that brings humor and excitement to viewers of all ages.
+Westworld,2016,36,Westworld is a thrilling series filled with unexpected twists, deep storytelling, and character development.
+One Piece,1999,1000,One Piece is a captivating anime that blends action, drama, and stunning animation into an unforgettable experience.
+Disenchantment,2018,40,Disenchantment is a fun and creative cartoon that brings humor and excitement to viewers of all ages.
+Young Justice,2010,46,Young Justice is a fun and creative cartoon that brings humor and excitement to viewers of all ages.
+That Time I Got Turned Into a Slime,2018,48,That Time I Got Turned Into a Slime is a captivating anime that blends action, drama, and stunning animation into an unforgettable experience.
+The Promised Neverland,2019,23,The Promised Neverland is a captivating anime that blends action, drama, and stunning animation into an unforgettable experience.
+The Rising of the Shield Hero,2019,25,The Rising of the Shield Hero is a captivating anime that blends action, drama, and stunning animation into an unforgettable experience.
+Goblin Slayer,2018,12,Goblin Slayer is a captivating anime that blends action, drama, and stunning animation into an unforgettable experience.
+Tokyo Ghoul:re,2018,24,Tokyo Ghoul:re is a captivating anime that blends action, drama, and stunning animation into an unforgettable experience.
+Attack on Titan,2013,87,Attack on Titan is a thrilling and engaging series filled with rich characters and compelling storytelling.
+Seven Deadly Sins,2014,100,Seven Deadly Sins is a thrilling and engaging series filled with rich characters and compelling storytelling.
+Overlord,2015,52,Overlord is a thrilling and engaging series filled with rich characters and compelling storytelling.
+JoJo's Bizarre Adventure,2012,190,JoJo's Bizarre Adventure is a thrilling and engaging series filled with rich characters and compelling storytelling.
+Hunter x Hunter,1999,148,Hunter x Hunter is a thrilling and engaging series filled with rich characters and compelling storytelling.
+My Hero Academia,2016,138,My Hero Academia is a thrilling and engaging series filled with rich characters and compelling storytelling.
+Mob Psycho 100,2016,37,Mob Psycho 100 is a thrilling and engaging series filled with rich characters and compelling storytelling.
+F is for Family,2015,44,F is for Family is a thrilling and engaging series filled with rich characters and compelling storytelling.
+Akame ga Kill,2014,24,Akame ga Kill is a thrilling and engaging series filled with rich characters and compelling storytelling.
+Another,2012,12,Another is a thrilling and engaging series filled with rich characters and compelling storytelling.
+Re:Zero,2016,50,Re:Zero is a thrilling and engaging series filled with rich characters and compelling storytelling.
+Parasyte the Maxim,2014,24,Parasyte the Maxim is a thrilling and engaging series filled with rich characters and compelling storytelling.
+Gurren Lagann,2007,27,Gurren Lagann is a thrilling and engaging series filled with rich characters and compelling storytelling.
+Erased,2016,12,Erased is a thrilling and engaging series filled with rich characters and compelling storytelling.
+Log Horizon,2013,62,Log Horizon is a thrilling and engaging series filled with rich characters and compelling storytelling.
+Steins Gate 0,2011,24,Steins Gate 0 is a thrilling and engaging series filled with rich characters and compelling storytelling.
+Full Metal Alchemist Brotherhood,2009,64,Alchemy and brotherhood.
+Angel Beats,2010,13,Afterlife battles.
+Afro Samurai,2007,90,Afrо Samurai is a film where a samurai seeks revenge.
+Mirai Nikki (Future Diary),2011,26,Mirai Nikki (Future Diary) is a captivating anime that blends action, drama, and stunning animation into an unforgettable experience.
+Tales of Borderlands,2014,-1,A thrilling narrative adventure.
+Stranger Things,2016,34,Supernatural mysteries in a small town.
+Brooklyn 99,2013,153,Hilarious police sitcom.
+Insatiable,2018,24,A dark comedy about revenge.
+The Mist,2017,10,A mysterious fog envelops a town.
+Lord of War,2005,122,An arms dealer struggles with morality while profiting from global conflicts.
+Whiplash,2014,106,A young jazz drummer pushes his limits under an abusive instructor.
+No Country for Old Men,2007,122,A hunter stumbles upon a drug deal gone wrong and is pursued by a relentless killer.
+Full Metal Jacket,1987,116,Follows U.S. Marines from boot camp to the Vietnam War.
+Jojo Rabbit,2019,108,A young boy in Nazi Germany discovers his mother is hiding a Jewish girl.
+1917,2019,119,Two British soldiers race against time to deliver a message during World War I.
+Parasyte,2014,24,Parasyte is a thrilling and engaging series filled with rich characters and compelling storytelling.
+Dragon Ball Broly,2018,100,Dragon Ball Broly is a movie featuring intense battles.
+Goodfellas,1990,146,A man rises through the ranks of the mafia but struggles with betrayal and loyalty.
+Alita: Battle Angel,2019,122,A cyborg with no memory tries to uncover her past in a dystopian future.
+Silence of the Lambs,1991,118,A young FBI trainee seeks the help of a manipulative serial killer to catch another killer on the loose.
+Baby Driver,2017,113,A talented getaway driver finds himself in deep trouble when a heist goes wrong.
+Inglourious Basterds,2009,153,A group of Jewish-American soldiers plot to assassinate Nazi leaders in German-occupied France.
+Incredibles 2,2018,118,The superhero family must adjust to a new dynamic while fighting a new villain.
+Deadpool 2,2018,119,The wise-cracking antihero Deadpool forms his own team to protect a young mutant from a deadly cyborg.
+Green Mile,1999,189,A death row prison guard discovers that a condemned man has supernatural healing abilities.
+Shawshank Redemption,1994,142,A banker is wrongfully imprisoned and forms a bond with another inmate while planning his escape.
+John Wick 3,2019,131,John Wick is on the run with a massive bounty on his head after breaking the rules of the assassin world.
+Black Mirror,2011,22,A sci-fi anthology series that explores the dark side of technology and human nature.
+Ex Machina,2014,108,A young programmer is selected to participate in a groundbreaking experiment in artificial intelligence involving a highly advanced female humanoid.
+Bridge to Terabithia,2007,96,A young boy befriends a girl who introduces him to a magical world of imagination, but tragedy strikes, changing his life forever.
+Watership Down,2018,99,A group of rabbits embarks on a perilous journey to find a new home while facing numerous dangers.
+Plague Dogs,1982,103,Two dogs escape from a research laboratory and struggle to survive in the wilderness while being hunted.
+Leon the Professional,1994,110,A hitman reluctantly takes in a young girl after her family is murdered, forming an unlikely bond.
+The Shape of Voice,2016,130,A former bully seeks redemption by reconnecting with a deaf girl he tormented in elementary school.
+Shaolin Soccer,2001,113,A former soccer player teaches a group of Shaolin monks to use their kung fu skills to dominate the game.
+Groundhog Day,1993,101,A cynical weatherman finds himself reliving the same day over and over again in a small town.
+Prison School,2015,12,Five male students enroll in an all-girls school with a strict underground prison for rule breakers.
+All Quiet on the Western Front,2022,148,A young German soldier experiences the horrors of World War I on the Western Front.
+Oldboy,2003,120,After being imprisoned in a cell for 15 years without knowing why, a man is released and given five days to uncover the truth.
