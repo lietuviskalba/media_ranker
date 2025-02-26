@@ -1,12 +1,12 @@
 // client/src/Admin.js
 import React, { useState, useEffect } from "react";
-import jwtDecode from "jwt-decode"; // Import as default
+import { jwtDecode } from "jwt-decode";
 import Navbar from "../components/Navbar";
 import styled from "styled-components";
 import ScrollToTop from "../components/ScrollToTop";
 import MediaTable from "../components/MediaTable";
 
-// Mapping from camelCase keys to the underscore keys used in the database
+// Mapping from camelCase to DB keys
 const fieldMapping = {
   releaseYear: "release_year",
   lengthEpisodes: "length_or_episodes",
@@ -241,7 +241,7 @@ function Admin() {
     comment: 50,
   });
 
-  // Persist Column Widths
+  // Persist column widths in localStorage
   useEffect(() => {
     const savedWidths = localStorage.getItem("adminColumnWidths");
     if (savedWidths) setColumnWidths(JSON.parse(savedWidths));
@@ -250,7 +250,7 @@ function Admin() {
     localStorage.setItem("adminColumnWidths", JSON.stringify(columnWidths));
   }, [columnWidths]);
 
-  // Fetch Records (requires valid token)
+  // Fetch records from API (requires token)
   useEffect(() => {
     if (token) {
       fetch("/api/media_records", {
@@ -262,7 +262,7 @@ function Admin() {
     }
   }, [message, token]);
 
-  // Helper: Check authentication in response
+  // Helper: Check auth response and auto logout if session expired
   const checkAuthResponse = (res) => {
     if (res.status === 401 || res.status === 403) {
       handleLogout();
@@ -271,36 +271,97 @@ function Admin() {
     return res.json();
   };
 
-  // Handlers for column resizing, image upload, dummy data, clearing form...
+  // Handlers for column resizing, image upload, and clearing form
   const handleMouseDown = (e, column) => {
-    /* ... as before ... */
-  };
-  const handleFileChange = (e) => {
-    /* ... as before ... */
-  };
-  const handlePaste = (e) => {
-    /* ... as before ... */
-  };
-  const handleRemoveImage = () => setImageData(null);
-  const handleFillDummy = () => {
-    /* ... as before ... */
-  };
-  const clearForm = () => {
-    /* ... as before ... */
+    e.preventDefault();
+    const startX = e.clientX;
+    const startWidth = columnWidths[column];
+    const handleMouseMove = (moveEvent) => {
+      const newWidth = startWidth + (moveEvent.clientX - startX);
+      setColumnWidths((prev) => ({
+        ...prev,
+        [column]: newWidth > 20 ? newWidth : 20,
+      }));
+    };
+    const handleMouseUp = () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
   };
 
-  // Handler for Submitting a Record (Create or Update)
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => setImageData(reader.result);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handlePaste = (e) => {
+    const items = e.clipboardData.items;
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.type.indexOf("image") !== -1) {
+        const file = item.getAsFile();
+        const reader = new FileReader();
+        reader.onloadend = () => setImageData(reader.result);
+        reader.readAsDataURL(file);
+        break;
+      }
+    }
+  };
+
+  const handleRemoveImage = () => setImageData(null);
+
+  const handleFillDummy = () => {
+    setTitle("Apocalypse Now");
+    setCategory("Movie");
+    setType("Live action");
+    setWatchedStatus("Not Started");
+    setRecommendations("Me no like");
+    setReleaseYear("1979");
+    setLengthEpisodes("153");
+    setSynopsis(
+      "Apocalypse Now is an engaging film that tells a compelling story with rich characters and dramatic moments."
+    );
+    setComment("Great movie!");
+    setImageData(null);
+    setSeason(1);
+    setEpisode(1);
+  };
+
+  const clearForm = () => {
+    setTitle("");
+    setCategory("");
+    setType("Live action");
+    setWatchedStatus("");
+    setSeason(1);
+    setEpisode(1);
+    setRecommendations("");
+    setReleaseYear("");
+    setLengthEpisodes("");
+    setSynopsis("");
+    setComment("");
+    setImageData(null);
+    setEditMode(false);
+    setEditId(null);
+  };
+
+  // Handler for submitting a record (create or update)
   const handleSubmit = (e) => {
     e.preventDefault();
-    let finalWatchedStatus = watchedStatus;
+    let finalStatus = watchedStatus;
     if (category.toLowerCase() === "series") {
-      finalWatchedStatus = `${watchedStatus} (S${season} E${episode})`;
+      finalStatus = `${watchedStatus} (S${season} E${episode})`;
     }
     const payload = {
       title,
       category,
       type,
-      watched_status: finalWatchedStatus,
+      watched_status: finalStatus,
       recommendations,
       release_year: Number(releaseYear),
       length_or_episodes: Number(lengthEpisodes),
@@ -308,6 +369,7 @@ function Admin() {
       comment,
       image: imageData || null,
     };
+
     if (editMode && editId) {
       const updatedPayload = {
         ...payload,
@@ -354,21 +416,51 @@ function Admin() {
     }
   };
 
-  // Handler for Editing a Record
+  // Handler for editing a record (populate the form)
   const handleEdit = (record) => {
-    /* ... as before ... */
+    setEditMode(true);
+    setEditId(record.id);
+    setTitle(getField(record, "title"));
+    setCategory(getField(record, "category"));
+    setType(getField(record, "type"));
+    const ws = getField(record, "watchedStatus");
+    if (
+      getField(record, "category").toLowerCase() === "series" &&
+      ws.includes("S")
+    ) {
+      const match = ws.match(
+        /(Not Started|In Progress|Completed)\s*\(S(\d+)\s*E(\d+)\)/i
+      );
+      if (match) {
+        setWatchedStatus(match[1]);
+        setSeason(Number(match[2]));
+        setEpisode(Number(match[3]));
+      } else {
+        setWatchedStatus(ws);
+        setSeason(1);
+        setEpisode(1);
+      }
+    } else {
+      setWatchedStatus(ws);
+    }
+    setRecommendations(getField(record, "recommendations"));
+    setReleaseYear(getField(record, "releaseYear"));
+    setLengthEpisodes(getField(record, "lengthEpisodes"));
+    setSynopsis(getField(record, "synopsis"));
+    setImageData(record.image || null);
+    setComment(getField(record, "comment"));
   };
 
-  // Handler for Deleting a Record
+  // Handler for deleting a record
   const handleDelete = (record) => {
-    const proceed =
-      skipConfirm ||
-      window.confirm(
+    if (!skipConfirm) {
+      const confirmDelete = window.confirm(
         `Are you sure you want to delete record #${
           records.findIndex((r) => r.id === record.id) + 1
         } "${getField(record, "title")}"?`
       );
-    if (!proceed) return;
+      if (!confirmDelete) return;
+    }
     fetch(`/api/media_records/${record.id}`, {
       method: "DELETE",
       headers: { Authorization: "Bearer " + token },
@@ -385,7 +477,7 @@ function Admin() {
       });
   };
 
-  // Handler for Login
+  // Handlers for login and logout
   const handleLogin = (e) => {
     e.preventDefault();
     fetch("/api/login", {
@@ -394,9 +486,7 @@ function Admin() {
       body: JSON.stringify({ username, password }),
     })
       .then((res) => {
-        if (!res.ok) {
-          throw new Error("Invalid credentials");
-        }
+        if (!res.ok) throw new Error("Invalid credentials");
         return res.json();
       })
       .then((data) => {
@@ -409,13 +499,12 @@ function Admin() {
       });
   };
 
-  // Handler for Logout
   const handleLogout = () => {
     setToken(null);
     localStorage.removeItem("adminToken");
   };
 
-  // Filter and Sort Records
+  // Filter and sort records
   const filteredRecords = records.filter((record) => {
     const query = searchQuery.toLowerCase();
     return (
@@ -458,7 +547,186 @@ function Admin() {
             <SectionTitles>Create/Update Record</SectionTitles>
             {message && <Message>{message}</Message>}
             <FormGrid>
-              {/* ... Render your form fields as shown above ... */}
+              <FormGroup>
+                <label>Title:</label>
+                <StyledInput
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  required
+                />
+              </FormGroup>
+              <FormGroup>
+                <label>Category:</label>
+                <StyledSelect
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  required
+                >
+                  <option value="">Select</option>
+                  <option value="Movie">Movie</option>
+                  <option value="Series">Series</option>
+                  <option value="Game">Game</option>
+                  <option value="Other">Other</option>
+                </StyledSelect>
+              </FormGroup>
+              <FormGroup>
+                <label>Type:</label>
+                <StyledSelect
+                  value={type}
+                  onChange={(e) => setType(e.target.value)}
+                >
+                  <option value="Live action">Live action</option>
+                  <option value="Cartoon">Cartoon</option>
+                  <option value="Anime">Anime</option>
+                  <option value="3D Animation">3D Animation</option>
+                  <option value="Mix">Mix</option>
+                  <option value="Other">Other</option>
+                </StyledSelect>
+              </FormGroup>
+              <FormGroup>
+                <label>Recommendations:</label>
+                <StyledSelect
+                  value={recommendations}
+                  onChange={(e) => setRecommendations(e.target.value)}
+                >
+                  <option value="">Select</option>
+                  <option value="El Epico">El Epico</option>
+                  <option value="Good; liked it">Good; liked it</option>
+                  <option value="Good; did not like">Good; did not like</option>
+                  <option value="Mixed">Mixed</option>
+                  <option value="Fell off">Fell off</option>
+                  <option value="Bad; liked it">Bad; liked it</option>
+                  <option value="Bad; did not like">Bad; did not like</option>
+                  <option value="Utter trash">Utter trash</option>
+                </StyledSelect>
+              </FormGroup>
+              <FormGroup>
+                <label>Watched Status:</label>
+                <StyledSelect
+                  value={watchedStatus}
+                  onChange={(e) => setWatchedStatus(e.target.value)}
+                  required
+                >
+                  <option value="">Select</option>
+                  <option value="Not Started">Not Started</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Completed">Completed</option>
+                </StyledSelect>
+              </FormGroup>
+              <FormGroup>
+                <NestedGrid>
+                  <div>
+                    <label>Season:</label>
+                    <StyledInput
+                      type="number"
+                      value={season}
+                      min="1"
+                      onChange={(e) => setSeason(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label>Episode:</label>
+                    <StyledInput
+                      type="number"
+                      value={episode}
+                      min="1"
+                      onChange={(e) => setEpisode(e.target.value)}
+                    />
+                  </div>
+                </NestedGrid>
+              </FormGroup>
+              <FormGroup>
+                <NestedGrid>
+                  <div>
+                    <label>Release Year:</label>
+                    <StyledInput
+                      type="number"
+                      value={releaseYear}
+                      onChange={(e) => setReleaseYear(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label>Length/Episodes:</label>
+                    <StyledInput
+                      type="number"
+                      value={lengthEpisodes}
+                      onChange={(e) => setLengthEpisodes(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div style={{ display: "flex", gap: "10px" }}>
+                    <SubmitButton type="submit">
+                      {editMode ? "Update Record" : "Add Record"}
+                    </SubmitButton>
+                    <DummyButton type="button" onClick={handleFillDummy}>
+                      Fill Dummy Data
+                    </DummyButton>
+                  </div>
+                </NestedGrid>
+              </FormGroup>
+              <FormGroup span="2">
+                <label>Synopsis:</label>
+                <StyledTextarea
+                  value={synopsis}
+                  onChange={(e) => setSynopsis(e.target.value)}
+                  required
+                  rows="2"
+                />
+                <label>Comment:</label>
+                <StyledTextarea
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  rows="2"
+                />
+              </FormGroup>
+              <FormGroup>
+                <label>Image Upload / Paste:</label>
+                <StyledInput
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                />
+                <div
+                  style={{
+                    border: "1px dashed rgb(204,204,204)",
+                    padding: "10px",
+                    marginTop: "10px",
+                    cursor: "text",
+                  }}
+                  onPaste={handlePaste}
+                >
+                  Click here and press Ctrl+V to paste an image
+                </div>
+                {imageData && (
+                  <div style={{ position: "relative", marginTop: "10px" }}>
+                    <img
+                      src={imageData}
+                      alt="Preview"
+                      style={{ maxWidth: "200px", display: "block" }}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleRemoveImage}
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        right: 0,
+                        background: "rgb(255,0,0)",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "50%",
+                        width: "24px",
+                        height: "24px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      X
+                    </button>
+                  </div>
+                )}
+              </FormGroup>
             </FormGrid>
           </form>
         </CreationFormContainer>
@@ -473,6 +741,11 @@ function Admin() {
             Delete without confirmation
           </label>
         </div>
+
+        <div style={{ marginTop: "20px" }}>
+          <button onClick={handleLogout}>Log Out</button>
+        </div>
+
         <MediaTable
           records={sortedRecords}
           columnWidths={columnWidths}
@@ -487,9 +760,6 @@ function Admin() {
           doubleActions={true}
           handleRowClick={() => {}}
         />
-        <div style={{ marginTop: "20px" }}>
-          <button onClick={handleLogout}>Log Out</button>
-        </div>
       </Main>
       <ScrollToTop />
     </Container>
