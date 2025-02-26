@@ -69,19 +69,6 @@ const Resizer = styled.div`
   user-select: none;
 `;
 
-const initialColumnWidths = {
-  index: 10,
-  title: 120,
-  category: 20,
-  type: 20,
-  watchedStatus: 50,
-  recommendations: 50,
-  releaseYear: 20,
-  lengthEpisodes: 20,
-  synopsis: 100,
-  comment: 150,
-};
-
 const MediaTable = ({
   records,
   columnWidths,

@@ -1,5 +1,6 @@
 // client/src/Admin.js
 import React, { useState, useEffect } from "react";
+import { jwtDecode } from "jwt-decode";
 import Navbar from "../components/Navbar";
 import styled from "styled-components";
 import ScrollToTop from "../components/ScrollToTop";
@@ -13,7 +14,6 @@ const fieldMapping = {
   dateAdded: "date_added",
 };
 
-// Helper function to get a field value from a record using our mapping
 function getField(record, field) {
   if (record[field] !== undefined) return record[field];
   if (fieldMapping[field] && record[fieldMapping[field]] !== undefined)
@@ -189,7 +189,25 @@ function Admin() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  // ----- Form State: Holds data for creating/updating a record -----
+  // ----- Check Token Expiration on Mount -----
+  useEffect(() => {
+    if (token) {
+      try {
+        const payload = jwtDecode(token);
+        if (payload.exp * 1000 < Date.now()) {
+          // Token expired; clear token and show login
+          setToken(null);
+          localStorage.removeItem("adminToken");
+        }
+      } catch (err) {
+        console.error("Error decoding token:", err);
+        setToken(null);
+        localStorage.removeItem("adminToken");
+      }
+    }
+  }, [token]);
+
+  // ----- Form State for Record Management -----
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [type, setType] = useState("Live action");
@@ -204,7 +222,7 @@ function Admin() {
   const [imageData, setImageData] = useState(null);
   const [message, setMessage] = useState("");
 
-  // ----- Table State: Holds fetched records and controls search/sort functionality -----
+  // ----- Table State for Records -----
   const [records, setRecords] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortColumn, setSortColumn] = useState(null);
@@ -225,18 +243,17 @@ function Admin() {
     comment: 50,
   });
 
-  // ----- Load Saved Column Widths from localStorage -----
+  // ----- Persist Column Widths in localStorage -----
   useEffect(() => {
     const savedWidths = localStorage.getItem("adminColumnWidths");
     if (savedWidths) setColumnWidths(JSON.parse(savedWidths));
   }, []);
 
-  // ----- Persist Column Widths to localStorage when changed -----
   useEffect(() => {
     localStorage.setItem("adminColumnWidths", JSON.stringify(columnWidths));
   }, [columnWidths]);
 
-  // ----- Fetch Records from API Endpoint (with JWT authentication) -----
+  // ----- Fetch Records from API (with authentication) -----
   useEffect(() => {
     if (token) {
       fetch("/api/media_records", {
@@ -294,7 +311,7 @@ function Admin() {
 
   const handleRemoveImage = () => setImageData(null);
 
-  // ----- Handler to Fill the Form with Dummy Data (for testing) -----
+  // ----- Handler to Fill Dummy Data (for testing) -----
   const handleFillDummy = () => {
     setTitle("Apocalypse Now");
     setCategory("Movie");
@@ -312,7 +329,7 @@ function Admin() {
     setEpisode(1);
   };
 
-  // ----- Clears the Form and Resets Edit Mode -----
+  // ----- Clear the Form and Reset Edit Mode -----
   const clearForm = () => {
     setTitle("");
     setCategory("");
@@ -330,7 +347,7 @@ function Admin() {
     setEditId(null);
   };
 
-  // ----- Handler for Form Submission (Create or Update Record) -----
+  // ----- Handler for Record Submission (Create or Update) -----
   const handleSubmit = (e) => {
     e.preventDefault();
     let finalWatchedStatus = watchedStatus;
@@ -362,14 +379,7 @@ function Admin() {
         },
         body: JSON.stringify(updatedPayload),
       })
-        .then((res) => {
-          if (!res.ok) {
-            return res.json().then((data) => {
-              throw new Error(data.error || "Error updating record");
-            });
-          }
-          return res.json();
-        })
+        .then(checkAuthResponse)
         .then((data) => {
           const index = records.findIndex((r) => r.id === editId);
           setMessage(
@@ -390,14 +400,7 @@ function Admin() {
         },
         body: JSON.stringify(payload),
       })
-        .then((res) => {
-          if (!res.ok) {
-            return res.json().then((data) => {
-              throw new Error(data.error || "Error creating record");
-            });
-          }
-          return res.json();
-        })
+        .then(checkAuthResponse)
         .then((data) => {
           setMessage(`Record added successfully with ID: ${data.id}`);
           clearForm();
@@ -409,7 +412,7 @@ function Admin() {
     }
   };
 
-  // ----- Handler to Populate the Form with an Existing Record for Editing -----
+  // ----- Handler for Editing an Existing Record -----
   const handleEdit = (record) => {
     setEditMode(true);
     setEditId(record.id);
@@ -444,7 +447,7 @@ function Admin() {
     setComment(getField(record, "comment"));
   };
 
-  // ----- Handler for Deleting a Record after Confirmation -----
+  // ----- Handler for Deleting a Record -----
   const handleDelete = (record) => {
     const proceed =
       skipConfirm ||
@@ -458,14 +461,7 @@ function Admin() {
       method: "DELETE",
       headers: { Authorization: "Bearer " + token },
     })
-      .then((res) => {
-        if (!res.ok) {
-          return res.json().then((data) => {
-            throw new Error(data.error || "Error deleting record");
-          });
-        }
-        return res.json();
-      })
+      .then(checkAuthResponse)
       .then(() => {
         setMessage(
           `Record "${getField(record, "title")}" deleted successfully.`
@@ -507,7 +503,15 @@ function Admin() {
     localStorage.removeItem("adminToken");
   };
 
-  // ----- Filter Records Based on Search Query (Case-Insensitive) -----
+  const checkAuthResponse = (res) => {
+    if (res.status === 401 || res.status === 403) {
+      handleLogout();
+      throw new Error("Session expired, please log in again.");
+    }
+    return res.json();
+  };
+
+  // ----- Filter and Sort Records -----
   const filteredRecords = records.filter((record) => {
     const query = searchQuery.toLowerCase();
     return (
@@ -524,7 +528,6 @@ function Admin() {
     );
   });
 
-  // ----- Sort Records so that the Most Recent (by updated_at or date_added) Appears at the Top -----
   const sortedRecords = [...filteredRecords].sort((a, b) => {
     const dateA = a.updated_at
       ? new Date(a.updated_at)
@@ -535,7 +538,6 @@ function Admin() {
     return dateB - dateA;
   });
 
-  // ----- Handler for Sorting When Clicking on Table Header Cells -----
   const handleSort = (column) => {
     if (sortColumn === column) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
@@ -545,7 +547,7 @@ function Admin() {
     }
   };
 
-  // If no token, render the login form; otherwise render the Admin page
+  // Render the Admin view if a valid token exists; otherwise, show the login form.
   return token ? (
     <Container>
       <Navbar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
@@ -760,7 +762,7 @@ function Admin() {
           handleMouseDown={handleMouseDown}
           handleEdit={handleEdit}
           handleDelete={handleDelete}
-          doubleActions={true} // Action buttons appear on both left and right in Admin view
+          doubleActions={true} // Action buttons appear on both sides
           handleRowClick={() => {}} // No row click action in Admin view
         />
         <div style={{ marginTop: "20px" }}>

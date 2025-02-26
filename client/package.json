@@ -5,6 +5,7 @@
   "proxy": "http://localhost:5004",
   "dependencies": {
     "cra-template": "1.2.0",
+    "jwt-decode": "^4.0.0",
     "process": "^0.11.10",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -15,7 +16,6 @@
     "web-vitals": "^4.2.4"
   },
   "scripts": {
-    "preinstall": "npx npm-force-resolutions",
     "start": "set NODE_OPTIONS=--openssl-legacy-provider && react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
