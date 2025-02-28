@@ -4,9 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "postinstall": "npm install --prefix server && npm install --prefix client",
-    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "postinstall": "npm run build --prefix client",
+    "start": "node server/index.js",
     "server": "node server/index.js",
     "client": "npm start --prefix client"
   },
