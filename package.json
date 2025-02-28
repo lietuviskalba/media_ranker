@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "postinstall": "npm run build --prefix client",
+    "postinstall": "cd client && yarn install && yarn build",
     "start": "node server/index.js",
+    "devstart": "concurrently \"npm run server\" \"npm run client\"",
     "server": "node server/index.js",
     "client": "npm start --prefix client"
   },
