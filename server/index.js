@@ -1,5 +1,5 @@
 // server/index.js
-require("dotenv").config(); // Load environment variables from .env
+require("dotenv").config({ path: "./.env" });
 const express = require("express");
 const helmet = require("helmet");
 const cors = require("cors");
