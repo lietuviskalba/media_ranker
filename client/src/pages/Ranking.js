@@ -47,16 +47,16 @@ const Title = styled.h1`
 
 // Default column widths
 const initialColumnWidths = {
-  index: 10,
-  title: 120,
-  category: 20,
+  index: 30,
+  title: 40,
+  category: 30,
   type: 20,
-  watchedStatus: 50,
-  recommendations: 50,
+  watchedStatus: 30,
+  recommendations: 30,
   releaseYear: 20,
   lengthEpisodes: 20,
-  synopsis: 100,
-  comment: 150,
+  synopsis: 300,
+  comment: 300,
 };
 
 function Ranking() {

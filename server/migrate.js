@@ -9,9 +9,9 @@ const { v4: uuidv4 } = require("uuid");
 const pool = new Pool({
   user: "postgres",
   host: "localhost",
-  database: "db_my",
-  password: "mypass",
-  port: 5432,
+  database: "mydb",
+  password: "mycookies",
+  port: 5455,
 });
 
 // Path to your JSON file

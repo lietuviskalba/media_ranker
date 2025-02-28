@@ -230,15 +230,15 @@ function Admin() {
   const [editId, setEditId] = useState(null);
   const [columnWidths, setColumnWidths] = useState({
     index: 30,
-    title: 100,
-    category: 100,
-    type: 100,
-    watchedStatus: 100,
-    recommendations: 80,
-    releaseYear: 100,
-    lengthEpisodes: 100,
+    title: 40,
+    category: 30,
+    type: 20,
+    watchedStatus: 30,
+    recommendations: 30,
+    releaseYear: 20,
+    lengthEpisodes: 20,
     synopsis: 300,
-    comment: 50,
+    comment: 300,
   });
 
   // Persist column widths in localStorage

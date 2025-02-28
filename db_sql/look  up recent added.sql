@@ -1,0 +1,1 @@
+select date_added, * from media_records order by date_added desc

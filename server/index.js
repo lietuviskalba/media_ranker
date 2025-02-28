@@ -11,6 +11,7 @@ const sharp = require("sharp");
 const pool = require("./db");
 const NodeCache = require("node-cache");
 const net = require("net");
+const path = require("path");
 
 // Create caches (TTL in seconds)
 const urlCache = new NodeCache({ stdTTL: 600 });
@@ -20,23 +21,10 @@ const app = express();
 const PORT = process.env.PORT || 5002;
 const JWT_SECRET = process.env.JWT_SECRET; // Ensure this is set in .env
 
+// Increase JSON body limit (e.g., for image uploads)
 app.use(express.json({ limit: "5mb" }));
 
-// Utility: Check if a port is in use to avoid EADDRINUSE errors
-const portInUse = (port) =>
-  new Promise((resolve, reject) => {
-    const tester = net
-      .createServer()
-      .once("error", (err) => {
-        if (err.code === "EADDRINUSE") resolve(true);
-        else reject(err);
-      })
-      .once("listening", () => {
-        tester.once("close", () => resolve(false)).close();
-      })
-      .listen(port);
-  });
-
+// Set up Helmet and CORS
 app.use(helmet());
 app.use(
   cors({
@@ -44,7 +32,10 @@ app.use(
     optionsSuccessStatus: 200,
   })
 );
-app.use(express.json());
+
+// -----------------------
+// API Endpoints (Routes)
+// -----------------------
 
 // JWT authentication middleware
 function authenticateToken(req, res, next) {
@@ -173,48 +164,48 @@ app.post(
   "/api/media_records",
   authenticateToken,
   [
+    // Only title is required; other fields are optional.
     body("title").notEmpty().withMessage("Title is required").trim().escape(),
-    body("category")
-      .notEmpty()
-      .withMessage("Category is required")
-      .trim()
-      .escape(),
-    body("type").notEmpty().withMessage("Type is required").trim().escape(),
-    body("watched_status")
-      .notEmpty()
-      .withMessage("Watched status is required")
-      .trim()
-      .escape(),
+    body("category").optional({ checkFalsy: true }).trim().escape(),
+    body("type").optional({ checkFalsy: true }).trim().escape(),
+    body("watched_status").optional({ checkFalsy: true }).trim().escape(),
     body("release_year")
+      .optional({ checkFalsy: true })
       .isNumeric()
       .withMessage("Release year must be a number"),
     body("length_or_episodes")
+      .optional({ checkFalsy: true })
       .isNumeric()
       .withMessage("Length or episodes must be a number"),
-    body("synopsis")
-      .notEmpty()
-      .withMessage("Synopsis is required")
-      .trim()
-      .escape(),
+    body("synopsis").optional({ checkFalsy: true }).trim().escape(),
   ],
   async (req, res) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty())
+    if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
-
+    }
+    // Destructure with default values
     let {
       title,
-      category,
-      type,
-      watched_status,
-      recommendations,
-      release_year,
-      length_or_episodes,
-      synopsis,
+      category = "",
+      type = "",
+      watched_status = "",
+      recommendations = "",
+      release_year = 0,
+      length_or_episodes = 0,
+      synopsis = "",
       image,
-      comment,
+      comment = "",
     } = req.body;
 
+    // Convert numeric fields
+    release_year = Number(release_year);
+    length_or_episodes = Number(length_or_episodes);
+
+    const id = uuidv4();
+    const date_added = new Date().toISOString();
+
+    // (Image compression code remains unchanged)
     if (image) {
       try {
         const matches = image.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
@@ -232,9 +223,6 @@ app.post(
       }
     }
 
-    const id = uuidv4();
-    const date_added = new Date().toISOString();
-
     try {
       const query = `
         INSERT INTO media_records 
@@ -248,12 +236,12 @@ app.post(
         category,
         type,
         watched_status,
-        recommendations || "",
+        recommendations,
         release_year,
         length_or_episodes,
         synopsis,
         image || null,
-        comment || "",
+        comment,
         date_added,
       ];
       const result = await pool.query(query, values);
@@ -265,54 +253,50 @@ app.post(
   }
 );
 
-// Protected endpoint: Update existing record (with validation, sanitization, and image compression)
+// Protected endpoint: Update existing record (with optional fields, sanitization, and image compression)
 app.put(
   "/api/media_records/:id",
   authenticateToken,
   [
     body("title").notEmpty().withMessage("Title is required").trim().escape(),
-    body("category")
-      .notEmpty()
-      .withMessage("Category is required")
-      .trim()
-      .escape(),
-    body("type").notEmpty().withMessage("Type is required").trim().escape(),
-    body("watched_status")
-      .notEmpty()
-      .withMessage("Watched status is required")
-      .trim()
-      .escape(),
+    body("category").optional({ checkFalsy: true }).trim().escape(),
+    body("type").optional({ checkFalsy: true }).trim().escape(),
+    body("watched_status").optional({ checkFalsy: true }).trim().escape(),
     body("release_year")
+      .optional({ checkFalsy: true })
       .isNumeric()
       .withMessage("Release year must be a number"),
     body("length_or_episodes")
+      .optional({ checkFalsy: true })
       .isNumeric()
       .withMessage("Length or episodes must be a number"),
-    body("synopsis")
-      .notEmpty()
-      .withMessage("Synopsis is required")
-      .trim()
-      .escape(),
+    body("synopsis").optional({ checkFalsy: true }).trim().escape(),
   ],
   async (req, res) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty())
+    if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
-
+    }
     const recordId = req.params.id;
+    // Destructure with defaults if missing
     let {
       title,
-      category,
-      type,
-      watched_status,
-      recommendations,
-      release_year,
-      length_or_episodes,
-      synopsis,
+      category = "",
+      type = "",
+      watched_status = "",
+      recommendations = "",
+      release_year = 0,
+      length_or_episodes = 0,
+      synopsis = "",
       image,
-      comment,
+      comment = "",
     } = req.body;
 
+    // Convert numeric fields
+    release_year = Number(release_year);
+    length_or_episodes = Number(length_or_episodes);
+
+    // If an image is provided, compress it using Sharp
     if (image) {
       try {
         const matches = image.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
@@ -352,12 +336,12 @@ app.put(
         category,
         type,
         watched_status,
-        recommendations || "",
+        recommendations,
         release_year,
         length_or_episodes,
         synopsis,
         image || null,
-        comment || "",
+        comment,
         new Date().toISOString(),
         recordId,
       ];
@@ -386,6 +370,34 @@ app.delete("/api/media_records/:id", authenticateToken, async (req, res) => {
     res.status(500).json({ error: "Error deleting record" });
   }
 });
+
+// -------------------------
+// Static File Serving
+// -------------------------
+// Serve static files from the React app's build directory
+app.use(express.static(path.join(__dirname, "../client/build")));
+
+// Catch-all route: for any route not handled above, serve index.html from the build folder
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../client/build", "index.html"));
+});
+
+// ------------------------------------
+// Utility: Check if a port is in use
+// ------------------------------------
+const portInUse = (port) =>
+  new Promise((resolve, reject) => {
+    const tester = net
+      .createServer()
+      .once("error", (err) => {
+        if (err.code === "EADDRINUSE") resolve(true);
+        else reject(err);
+      })
+      .once("listening", () => {
+        tester.once("close", () => resolve(false)).close();
+      })
+      .listen(port);
+  });
 
 // Start the server only if the port is free
 portInUse(PORT).then((inUse) => {
