@@ -13,6 +13,7 @@ const connectionString = isProduction
 
 const pool = new Pool({
   connectionString,
+  host: "127.0.0.1",
   ssl: isProduction ? { rejectUnauthorized: false } : false,
 });
 
