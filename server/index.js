@@ -90,8 +90,10 @@ app.get("/api/media_records", async (req, res) => {
     );
     res.json(result.rows);
   } catch (err) {
-    console.error("Error fetching media_records:", err);
-    res.status(500).json({ error: "Error fetching media_records" });
+    console.error("Error fetching media_records:", err.message, err);
+    res
+      .status(500)
+      .json({ error: "Error fetching media_records", details: err.message });
   }
 });
 
