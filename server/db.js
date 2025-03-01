@@ -1,14 +1,16 @@
-// db.js
-require("dotenv").config();
+// server/db.js
+require("dotenv").config(); // Load environment variables from .env
 
 const { Pool } = require("pg");
 
-// Determine whether we're running locally or in production
-const connectionString = process.env.DATABASE_URL;
-
 const pool = new Pool({
-  connectionString,
-  ssl: isProduction ? { rejectUnauthorized: false } : false,
+  // user: process.env.PGUSER,
+  // host: process.env.PGHOST,
+  // database: process.env.PGDATABASE,
+  // password: process.env.PGPASSWORD,
+  // port: process.env.PGPORT,
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
 });
 
 module.exports = pool;
