@@ -45,7 +45,6 @@ const Title = styled.h1`
   text-align: center;
 `;
 
-// Default column widths
 const initialColumnWidths = {
   index: 30,
   title: 40,
@@ -72,11 +71,24 @@ function Ranking() {
     if (saved) setColumnWidths(JSON.parse(saved));
   }, []);
 
-  // Fetch all records (public endpoint)
+  // Fetch all records (using defensive JSON parsing)
   useEffect(() => {
     fetch("/api/media_records")
-      .then((res) => res.json())
-      .then((data) => setRecords(data))
+      .then((response) => response.text())
+      .then((text) => {
+        try {
+          const data = JSON.parse(text);
+          if (!Array.isArray(data)) {
+            console.error("Expected array but got:", data);
+            setRecords([]);
+          } else {
+            setRecords(data);
+          }
+        } catch (e) {
+          console.error("Error parsing JSON from /api/media_records:", text);
+          setRecords([]);
+        }
+      })
       .catch((err) => console.error("Error fetching records:", err));
   }, []);
 
@@ -149,7 +161,7 @@ function Ranking() {
     document.addEventListener("mouseup", handleMouseUp);
   };
 
-  // Handler for clicking a record row to update its watched status
+  // Handler for clicking a record row to update its watched_status
   const handleRowClick = (record) => {
     const confirmFinish = window.confirm(
       "Have you completed watching this series?"
