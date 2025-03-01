@@ -1,4 +1,3 @@
-// server/index.js
 require("dotenv").config({ path: "./.env" });
 const express = require("express");
 const helmet = require("helmet");
@@ -31,15 +30,11 @@ app.use(
     origin: [
       "http://localhost:5173",
       "https://mediaranker-production.up.railway.app",
-    ], // Adjust based on frontend URLs
+    ],
     methods: "GET,POST,PUT,DELETE",
     allowedHeaders: "Content-Type,Authorization",
-    credentials: true, // Allow credentials (cookies, authorization headers)
+    credentials: true,
   })
-);
-
-app.listen(PORT, "0.0.0.0", () =>
-  console.log(`Server is running on port ${PORT}`)
 );
 
 // -----------------------
@@ -168,12 +163,11 @@ app.put("/api/public/media_records/:id", async (req, res) => {
   }
 });
 
-// Protected endpoint: Add new record (with validation, sanitization, and image compression)
+// Protected endpoint: Add new record
 app.post(
   "/api/media_records",
   authenticateToken,
   [
-    // Only title is required; other fields are optional.
     body("title").notEmpty().withMessage("Title is required").trim().escape(),
     body("category").optional({ checkFalsy: true }).trim().escape(),
     body("type").optional({ checkFalsy: true }).trim().escape(),
@@ -190,10 +184,9 @@ app.post(
   ],
   async (req, res) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) {
+    if (!errors.isEmpty())
       return res.status(400).json({ errors: errors.array() });
-    }
-    // Destructure with default values
+
     let {
       title,
       category = "",
@@ -207,14 +200,12 @@ app.post(
       comment = "",
     } = req.body;
 
-    // Convert numeric fields
     release_year = Number(release_year);
     length_or_episodes = Number(length_or_episodes);
 
     const id = uuidv4();
     const date_added = new Date().toISOString();
 
-    // (Image compression code remains unchanged)
     if (image) {
       try {
         const matches = image.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
@@ -262,7 +253,7 @@ app.post(
   }
 );
 
-// Protected endpoint: Update existing record (with optional fields, sanitization, and image compression)
+// Protected endpoint: Update existing record
 app.put(
   "/api/media_records/:id",
   authenticateToken,
@@ -283,11 +274,10 @@ app.put(
   ],
   async (req, res) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) {
+    if (!errors.isEmpty())
       return res.status(400).json({ errors: errors.array() });
-    }
+
     const recordId = req.params.id;
-    // Destructure with defaults if missing
     let {
       title,
       category = "",
@@ -301,11 +291,9 @@ app.put(
       comment = "",
     } = req.body;
 
-    // Convert numeric fields
     release_year = Number(release_year);
     length_or_episodes = Number(length_or_episodes);
 
-    // If an image is provided, compress it using Sharp
     if (image) {
       try {
         const matches = image.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
@@ -383,10 +371,8 @@ app.delete("/api/media_records/:id", authenticateToken, async (req, res) => {
 // -------------------------
 // Static File Serving
 // -------------------------
-// Serve static files from the React app's build directory
 app.use(express.static(path.join(__dirname, "../client/build")));
 
-// Catch-all route: for any route not handled above, serve index.html from the build folder
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "../client/build", "index.html"));
 });
@@ -414,6 +400,8 @@ portInUse(PORT).then((inUse) => {
     console.error(`Port ${PORT} is already in use!`);
     process.exit(1);
   } else {
-    app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+    app.listen(PORT, "0.0.0.0", () =>
+      console.log(`Server is running on port ${PORT}`)
+    );
   }
 });
