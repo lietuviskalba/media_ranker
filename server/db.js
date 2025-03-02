@@ -1,21 +1,20 @@
-// server/db.js
-require("dotenv").config(); // Load env variables
+// db.js
+require("dotenv").config();
 
 const { Pool } = require("pg");
 
-// Always use DATABASE_URL (set in Railway)
-const connectionString = process.env.DATABASE_URL;
+// Determine whether we're running locally or in production
+const isProduction = process.env.NODE_ENV === "production";
 
-console.log("Using connectionString:", connectionString);
-
-if (!connectionString) {
-  console.error("DATABASE_URL is not set!");
-}
+// Use a local connection string when not in production
+const connectionString = isProduction
+  ? process.env.DATABASE_URL
+  : process.env.LOCAL_DATABASE_URL;
 
 const pool = new Pool({
   connectionString,
-  // Always require SSL in production:
-  ssl: { rejectUnauthorized: false },
+  host: "127.0.0.1",
+  ssl: isProduction ? { rejectUnauthorized: false } : false,
 });
 
 pool
