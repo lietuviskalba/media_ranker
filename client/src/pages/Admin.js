@@ -21,6 +21,48 @@ function getField(record, field) {
   return record[field.charAt(0).toUpperCase() + field.slice(1)] || "";
 }
 
+// Helper functions for dropdown options
+
+// Generate year options from 1980 to (current year + 5) and reverse so that recent years are on top.
+function getYearOptions() {
+  const currentYear = new Date().getFullYear();
+  // Adjust these numbers as needed:
+  const startYear = currentYear - 50;
+  const endYear = currentYear + 10;
+  const years = [];
+  // Generate the list so that the highest (most future) year appears first:
+  for (let y = endYear; y >= startYear; y--) {
+    years.push(y);
+  }
+  return years;
+}
+
+const getEpisodeOptions = (max, currentValue) => {
+  let options = [];
+  for (let i = 1; i <= max; i++) {
+    options.push(i);
+  }
+  // Optionally, if you want to ensure the current value is in the list:
+  if (currentValue > max && !options.includes(currentValue)) {
+    options.push(currentValue);
+    options.sort((a, b) => a - b);
+  }
+  return options.reverse(); // Reverse to have highest numbers at the top
+};
+
+const getNumberOptions = (max, currentValue) => {
+  // Create options from 1 to max; if currentValue exceeds max, include it.
+  let options = [];
+  for (let i = 1; i <= max; i++) {
+    options.push(i);
+  }
+  if (currentValue > max && !options.includes(currentValue)) {
+    options.push(currentValue);
+    options.sort((a, b) => a - b);
+  }
+  return options;
+};
+
 // Styled Components
 const Container = styled.div`
   background-color: rgb(197, 7, 231);
@@ -250,7 +292,7 @@ function Admin() {
     localStorage.setItem("adminColumnWidths", JSON.stringify(columnWidths));
   }, [columnWidths]);
 
-  // Fetch records from API (requires token)
+  // Fetch records from API (with token)
   useEffect(() => {
     if (token) {
       fetch("/api/media_records", {
@@ -270,6 +312,15 @@ function Admin() {
     }
     return res.json();
   };
+
+  // --- New UI for Year Dropdown (reversed) ---
+  const yearOptions = getYearOptions();
+
+  // Always show Season and Episode dropdowns (using helper for options)
+  const seasonOptions = getNumberOptions(10, season);
+  const episodeOptions = getNumberOptions(26, episode);
+  // For Length/Episodes dropdown (for series), options 1-30:
+  const lengthOptions = getNumberOptions(30, Number(lengthEpisodes));
 
   // Handlers for column resizing
   const handleMouseDown = (e, column) => {
@@ -291,7 +342,7 @@ function Admin() {
     document.addEventListener("mouseup", handleMouseUp);
   };
 
-  // Handlers for image upload/paste
+  // Handlers for file upload/paste
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -354,24 +405,41 @@ function Admin() {
   // Handler for submitting a record (create or update)
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Append season and episode details only if category is "Series" or "One off series"
-    // and the watched status is "In Progress" (case insensitive)
+    // If category is Series or One off series and watched status is "In Progress",
+    // append season/episode to watched status.
     let finalStatus = watchedStatus;
-    const lowerCat = category.toLowerCase();
     if (
-      (lowerCat === "series" || lowerCat === "one off series") &&
+      (category.toLowerCase() === "series" ||
+        category.toLowerCase() === "one off series") &&
       watchedStatus.toLowerCase() === "in progress"
     ) {
       finalStatus = `${watchedStatus} (S${season} E${episode})`;
     }
+    // Append season to title for series categories.
+    let finalTitle = title;
+    if (
+      category.toLowerCase() === "series" ||
+      category.toLowerCase() === "one off series"
+    ) {
+      finalTitle = `${title} - Season ${season}`;
+    }
+    // For Length/Episodes: if the category is series, treat as episode count;
+    // otherwise, use as entered (for movies, minutes).
+    const finalLength =
+      (category.toLowerCase() === "series" ||
+        category.toLowerCase() === "one off series") &&
+      lengthEpisodes
+        ? Number(lengthEpisodes)
+        : Number(lengthEpisodes);
+
     const payload = {
-      title,
+      title: finalTitle,
       category,
       type,
       watched_status: finalStatus,
       recommendations,
       release_year: Number(releaseYear),
-      length_or_episodes: Number(lengthEpisodes),
+      length_or_episodes: finalLength,
       synopsis,
       comment,
       image: imageData || null,
@@ -427,14 +495,14 @@ function Admin() {
   const handleEdit = (record) => {
     setEditMode(true);
     setEditId(record.id);
-    setTitle(getField(record, "title"));
+    // Remove appended season text from title if present.
+    setTitle(getField(record, "title").replace(/ - Season\s*\d+$/, ""));
     setCategory(getField(record, "category"));
     setType(getField(record, "type"));
     const ws = getField(record, "watchedStatus");
-    const lowerCat = getField(record, "category").toLowerCase();
-    // Only parse season/episode details if status is "In Progress" for Series or One off series
     if (
-      (lowerCat === "series" || lowerCat === "one off series") &&
+      (getField(record, "category").toLowerCase() === "series" ||
+        getField(record, "category").toLowerCase() === "one off series") &&
       ws.toLowerCase().includes("in progress")
     ) {
       const match = ws.match(/(In Progress)\s*\(S(\d+)\s*E(\d+)\)/i);
@@ -620,25 +688,34 @@ function Admin() {
                   <option value="Completed">Completed</option>
                 </StyledSelect>
               </FormGroup>
+              {/* Always show Season and Episode dropdowns */}
               <FormGroup>
                 <NestedGrid>
                   <div>
                     <label>Season:</label>
-                    <StyledInput
-                      type="number"
+                    <StyledSelect
                       value={season}
-                      min="1"
-                      onChange={(e) => setSeason(e.target.value)}
-                    />
+                      onChange={(e) => setSeason(Number(e.target.value))}
+                    >
+                      {seasonOptions.map((num) => (
+                        <option key={num} value={num}>
+                          {num}
+                        </option>
+                      ))}
+                    </StyledSelect>
                   </div>
                   <div>
                     <label>Episode:</label>
-                    <StyledInput
-                      type="number"
+                    <StyledSelect
                       value={episode}
-                      min="1"
-                      onChange={(e) => setEpisode(e.target.value)}
-                    />
+                      onChange={(e) => setEpisode(Number(e.target.value))}
+                    >
+                      {episodeOptions.map((num) => (
+                        <option key={num} value={num}>
+                          {num}
+                        </option>
+                      ))}
+                    </StyledSelect>
                   </div>
                 </NestedGrid>
               </FormGroup>
@@ -646,19 +723,43 @@ function Admin() {
                 <NestedGrid>
                   <div>
                     <label>Release Year:</label>
-                    <StyledInput
-                      type="number"
+                    <StyledSelect
                       value={releaseYear}
                       onChange={(e) => setReleaseYear(e.target.value)}
-                    />
+                    >
+                      <option value="">Select Year</option>
+                      {yearOptions.map((yr) => (
+                        <option key={yr} value={yr}>
+                          {yr}
+                        </option>
+                      ))}
+                    </StyledSelect>
                   </div>
                   <div>
-                    <label>Length/Episodes:</label>
-                    <StyledInput
-                      type="number"
-                      value={lengthEpisodes}
-                      onChange={(e) => setLengthEpisodes(e.target.value)}
-                    />
+                    <label>
+                      {category.toLowerCase() === "movie"
+                        ? "Length (minutes):"
+                        : "Episodes Count:"}
+                    </label>
+                    {category.toLowerCase() === "movie" ? (
+                      <StyledInput
+                        type="number"
+                        value={lengthEpisodes}
+                        onChange={(e) => setLengthEpisodes(e.target.value)}
+                      />
+                    ) : (
+                      <StyledSelect
+                        value={lengthEpisodes}
+                        onChange={(e) => setLengthEpisodes(e.target.value)}
+                      >
+                        <option value="">Select Episodes</option>
+                        {lengthOptions.map((num) => (
+                          <option key={num} value={num}>
+                            {num}
+                          </option>
+                        ))}
+                      </StyledSelect>
+                    )}
                   </div>
                   <div style={{ display: "flex", gap: "10px" }}>
                     <SubmitButton type="submit">

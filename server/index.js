@@ -1,5 +1,6 @@
 // server/index.js
 require("dotenv").config({ path: "./.env" });
+const { decode } = require("html-entities");
 const express = require("express");
 const helmet = require("helmet");
 const cors = require("cors");
@@ -88,6 +89,7 @@ app.get("/api/media_records", async (req, res) => {
     const result = await pool.query(
       "SELECT * FROM media_records ORDER BY COALESCE(updated_at, date_added) DESC"
     );
+
     res.json(result.rows);
   } catch (err) {
     console.error("Error fetching media_records:", err.message, err);
