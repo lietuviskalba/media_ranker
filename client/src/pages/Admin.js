@@ -749,13 +749,13 @@ function Admin() {
                       />
                     ) : (
                       <StyledSelect
-                        value={lengthEpisodes}
-                        onChange={(e) => setLengthEpisodes(e.target.value)}
+                        value={episode}
+                        onChange={(e) => setEpisode(Number(e.target.value))}
                       >
                         <option value="">Select Episodes</option>
-                        {lengthOptions.map((num) => (
-                          <option key={num} value={num}>
-                            {num}
+                        {getEpisodeOptions(30).map((ep) => (
+                          <option key={ep} value={ep}>
+                            {ep}
                           </option>
                         ))}
                       </StyledSelect>

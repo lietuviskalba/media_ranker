@@ -89,8 +89,14 @@ app.get("/api/media_records", async (req, res) => {
     const result = await pool.query(
       "SELECT * FROM media_records ORDER BY COALESCE(updated_at, date_added) DESC"
     );
-
-    res.json(result.rows);
+    // Decode fields you know might include HTML entities:
+    const decodedRows = result.rows.map((record) => ({
+      ...record,
+      title: record.title ? decode(record.title) : record.title,
+      comment: record.comment ? decode(record.comment) : record.comment,
+      synopsis: record.synopsis ? decode(record.synopsis) : record.synopsis,
+    }));
+    res.json(decodedRows);
   } catch (err) {
     console.error("Error fetching media_records:", err.message, err);
     res
