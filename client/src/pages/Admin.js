@@ -250,7 +250,7 @@ function Admin() {
     localStorage.setItem("adminColumnWidths", JSON.stringify(columnWidths));
   }, [columnWidths]);
 
-  // Fetch records from API (with token)
+  // Fetch records from API (requires token)
   useEffect(() => {
     if (token) {
       fetch("/api/media_records", {
@@ -354,8 +354,14 @@ function Admin() {
   // Handler for submitting a record (create or update)
   const handleSubmit = (e) => {
     e.preventDefault();
+    // Append season and episode details only if category is "Series" or "One off series"
+    // and the watched status is "In Progress" (case insensitive)
     let finalStatus = watchedStatus;
-    if (category.toLowerCase() === "series") {
+    const lowerCat = category.toLowerCase();
+    if (
+      (lowerCat === "series" || lowerCat === "one off series") &&
+      watchedStatus.toLowerCase() === "in progress"
+    ) {
       finalStatus = `${watchedStatus} (S${season} E${episode})`;
     }
     const payload = {
@@ -425,13 +431,13 @@ function Admin() {
     setCategory(getField(record, "category"));
     setType(getField(record, "type"));
     const ws = getField(record, "watchedStatus");
+    const lowerCat = getField(record, "category").toLowerCase();
+    // Only parse season/episode details if status is "In Progress" for Series or One off series
     if (
-      getField(record, "category").toLowerCase() === "series" &&
-      ws.includes("S")
+      (lowerCat === "series" || lowerCat === "one off series") &&
+      ws.toLowerCase().includes("in progress")
     ) {
-      const match = ws.match(
-        /(Not Started|In Progress|Completed)\s*\(S(\d+)\s*E(\d+)\)/i
-      );
+      const match = ws.match(/(In Progress)\s*\(S(\d+)\s*E(\d+)\)/i);
       if (match) {
         setWatchedStatus(match[1]);
         setSeason(Number(match[2]));
@@ -566,6 +572,7 @@ function Admin() {
                   <option value="">Select</option>
                   <option value="Movie">Movie</option>
                   <option value="Series">Series</option>
+                  <option value="One off series">One off series</option>
                   <option value="Game">Game</option>
                   <option value="Other">Other</option>
                 </StyledSelect>
