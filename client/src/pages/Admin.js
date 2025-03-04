@@ -319,8 +319,6 @@ function Admin() {
   // Always show Season and Episode dropdowns (using helper for options)
   const seasonOptions = getNumberOptions(10, season);
   const episodeOptions = getNumberOptions(26, episode);
-  // For Length/Episodes dropdown (for series), options 1-30:
-  const lengthOptions = getNumberOptions(30, Number(lengthEpisodes));
 
   // Handlers for column resizing
   const handleMouseDown = (e, column) => {
