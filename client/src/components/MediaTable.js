@@ -25,6 +25,7 @@ const StyledTr = styled.tr`
   }
 `;
 
+// For Synopsis column
 const SynopsisTd = styled.td`
   padding: 10px;
   border: 1px solid rgb(85, 85, 85);
@@ -68,6 +69,16 @@ const Resizer = styled.div`
   cursor: col-resize;
   user-select: none;
 `;
+
+// Helper to format comment text:
+// It splits the text by newline, prepends a dash to each line, and joins them with newlines.
+const formatComment = (text) => {
+  if (!text) return "";
+  return text
+    .split("\n")
+    .map((line) => `- ${line}`)
+    .join("\n");
+};
 
 const MediaTable = ({
   records,
@@ -252,7 +263,9 @@ const MediaTable = ({
             <SynopsisTd title={getField(record, "synopsis")}>
               {getField(record, "synopsis")}
             </SynopsisTd>
-            <StyledTd>{getField(record, "comment")}</StyledTd>
+            <StyledTd style={{ textAlign: "left", whiteSpace: "pre-wrap" }}>
+              {formatComment(getField(record, "comment"))}
+            </StyledTd>
             <StyledTd style={{ overflow: "visible" }}>
               {record.image ? (
                 <Image src={record.image} alt={getField(record, "title")} />
