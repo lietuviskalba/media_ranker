@@ -21,9 +21,9 @@ function getField(record, field) {
   return record[field.charAt(0).toUpperCase() + field.slice(1)] || "";
 }
 
-// --- Helper functions for dropdown options ---
+// Helper functions for dropdown options
 
-// Generate year options from (current year + 10) down to (current year - 50)
+// Generate year options from (currentYear+10) down to (currentYear-50)
 function getYearOptions() {
   const currentYear = new Date().getFullYear();
   const startYear = currentYear - 50;
@@ -44,7 +44,7 @@ function getEpisodeCountOptions(max = 29) {
   return options;
 }
 
-// Helper for season dropdown (ascending order)
+// Helper for season dropdown (1 to max)
 const getNumberOptions = (max, currentValue) => {
   let options = [];
   for (let i = 1; i <= max; i++) {
@@ -57,8 +57,7 @@ const getNumberOptions = (max, currentValue) => {
   return options;
 };
 
-// --- Styled Components ---
-
+// Styled Components
 const Container = styled.div`
   background-color: rgb(197, 7, 231);
   color: rgb(183, 183, 183);
@@ -225,43 +224,43 @@ function Admin() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  // Check token expiration on mount
-  useEffect(() => {
-    if (token) {
-      try {
-        const payload = jwtDecode(token);
-        if (payload.exp * 1000 < Date.now()) {
-          setToken(null);
-          localStorage.removeItem("adminToken");
-        }
-      } catch (err) {
-        console.error("Error decoding token:", err);
-        setToken(null);
-        localStorage.removeItem("adminToken");
-      }
-    }
-  }, [token]);
-
-  // Form State for Record Management
-  const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("");
-  const [type, setType] = useState("Live action");
-  const [watchedStatus, setWatchedStatus] = useState("");
-  const [season, setSeason] = useState(1);
-  const [episode, setEpisode] = useState(1);
-  const [recommendations, setRecommendations] = useState("");
-  const [releaseYear, setReleaseYear] = useState("");
-  const [lengthEpisodes, setLengthEpisodes] = useState("");
-  const [synopsis, setSynopsis] = useState("");
-  const [comment, setComment] = useState("");
-  const [imageData, setImageData] = useState(null);
+  // Persistent fields state (load from localStorage if available)
   const [message, setMessage] = useState("");
 
-  // Additional state for custom episode count if "30+" is selected
+  const [category, setCategory] = useState(
+    localStorage.getItem("lastCategory") || ""
+  );
+  const [type, setType] = useState(
+    localStorage.getItem("lastType") || "Live action"
+  );
+  const [watchedStatus, setWatchedStatus] = useState(
+    localStorage.getItem("lastWatchedStatus") || ""
+  );
+  const [season, setSeason] = useState(
+    Number(localStorage.getItem("lastSeason")) || 1
+  );
+  const [episode, setEpisode] = useState(
+    Number(localStorage.getItem("lastEpisode")) || 1
+  );
+  const [releaseYear, setReleaseYear] = useState(
+    localStorage.getItem("lastReleaseYear") || ""
+  );
+  const [lengthEpisodes, setLengthEpisodes] = useState(
+    localStorage.getItem("lastLengthEpisodes") || ""
+  );
+
+  // Reset fields state
+  const [title, setTitle] = useState("");
+  const [recommendations, setRecommendations] = useState("");
+  const [synopsis, setSynopsis] = useState("");
+  const [comment, setComment] = useState("");
+  const [imageData, setImageData] = useState("");
+
+  // Additional state for the Episode Count dropdown
   const [episodeCount, setEpisodeCount] = useState("");
   const [manualEpisodeCount, setManualEpisodeCount] = useState("");
 
-  // Table State for Records
+  // Table and UI state
   const [records, setRecords] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortColumn, setSortColumn] = useState(null);
@@ -282,14 +281,51 @@ function Admin() {
     comment: 300,
   });
 
-  // Persist column widths in localStorage
+  // Persist persistent fields to localStorage whenever they change
   useEffect(() => {
-    const savedWidths = localStorage.getItem("adminColumnWidths");
-    if (savedWidths) setColumnWidths(JSON.parse(savedWidths));
-  }, []);
+    localStorage.setItem("lastCategory", category);
+  }, [category]);
+
   useEffect(() => {
-    localStorage.setItem("adminColumnWidths", JSON.stringify(columnWidths));
-  }, [columnWidths]);
+    localStorage.setItem("lastType", type);
+  }, [type]);
+
+  useEffect(() => {
+    localStorage.setItem("lastWatchedStatus", watchedStatus);
+  }, [watchedStatus]);
+
+  useEffect(() => {
+    localStorage.setItem("lastSeason", season);
+  }, [season]);
+
+  useEffect(() => {
+    localStorage.setItem("lastEpisode", episode);
+  }, [episode]);
+
+  useEffect(() => {
+    localStorage.setItem("lastReleaseYear", releaseYear);
+  }, [releaseYear]);
+
+  useEffect(() => {
+    localStorage.setItem("lastLengthEpisodes", lengthEpisodes);
+  }, [lengthEpisodes]);
+
+  // Check token expiration on mount
+  useEffect(() => {
+    if (token) {
+      try {
+        const payload = jwtDecode(token);
+        if (payload.exp * 1000 < Date.now()) {
+          setToken(null);
+          localStorage.removeItem("adminToken");
+        }
+      } catch (err) {
+        console.error("Error decoding token:", err);
+        setToken(null);
+        localStorage.removeItem("adminToken");
+      }
+    }
+  }, [token]);
 
   // Fetch records from API (with token)
   useEffect(() => {
@@ -301,7 +337,7 @@ function Admin() {
         .then((data) => setRecords(data))
         .catch((err) => console.error("Error fetching records:", err));
     }
-  }, [message, token]);
+  }, [token]);
 
   // Helper: Check auth response and auto-logout if session expired
   const checkAuthResponse = (res) => {
@@ -315,8 +351,6 @@ function Admin() {
   // --- New Dropdown Options ---
   const yearOptions = getYearOptions();
   const seasonOptions = getNumberOptions(10, season);
-  // Episode count dropdown: descending order with "30+" first
-  const episodeOptions = getEpisodeCountOptions(29);
 
   // --- Handlers for Column Resizing ---
   const handleMouseDown = (e, column) => {
@@ -362,13 +396,11 @@ function Admin() {
     }
   };
 
-  const handleRemoveImage = () => setImageData(null);
+  const handleRemoveImage = () => setImageData("");
 
   const handleFillDummy = () => {
     setTitle("Apocalypse Now");
-    setCategory("Movie");
-    setType("Live action");
-    setWatchedStatus("Not Started");
+    // The persistent fields remain unchanged.
     setRecommendations("Me no like");
     setReleaseYear("1979");
     setLengthEpisodes("153");
@@ -376,31 +408,24 @@ function Admin() {
       "Apocalypse Now is an engaging film that tells a compelling story with rich characters and dramatic moments."
     );
     setComment("Great movie!");
-    setImageData(null);
-    setSeason(1);
-    setEpisode(1);
-    // Clear custom episode count if any
+    setImageData("");
+    // Also reset episode dropdown states
     setEpisodeCount("");
     setManualEpisodeCount("");
   };
 
+  // In clearForm, only clear the reset fields.
   const clearForm = () => {
     setTitle("");
-    setCategory("");
-    setType("Live action");
-    setWatchedStatus("");
-    setSeason(1);
-    setEpisode(1);
     setRecommendations("");
-    setReleaseYear("");
-    setLengthEpisodes("");
     setSynopsis("");
     setComment("");
-    setImageData(null);
-    setEditMode(false);
-    setEditId(null);
+    setImageData("");
     setEpisodeCount("");
     setManualEpisodeCount("");
+    // Do not clear category, type, watchedStatus, season, episode, releaseYear, lengthEpisodes
+    setEditMode(false);
+    setEditId(null);
   };
 
   // Handler for submitting a record (create or update)
@@ -426,11 +451,11 @@ function Admin() {
     if (category.toLowerCase() === "movie") {
       finalLength = Number(lengthEpisodes);
     } else {
-      // For series and one off series, use the episode dropdown.
+      // For series and one off series, if "30+" is selected, use manual input.
       if (episodeCount === "30+") {
         finalLength = Number(manualEpisodeCount);
       } else {
-        finalLength = Number(episodeCount);
+        finalLength = Number(episodeCount) || Number(lengthEpisodes);
       }
     }
 
@@ -524,9 +549,9 @@ function Admin() {
     setReleaseYear(getField(record, "releaseYear"));
     setLengthEpisodes(getField(record, "lengthEpisodes"));
     setSynopsis(getField(record, "synopsis"));
-    setImageData(record.image || null);
+    setImageData(record.image || "");
     setComment(getField(record, "comment"));
-    // Reset the custom episode count state
+    // Reset episode count fields
     setEpisodeCount("");
     setManualEpisodeCount("");
   };
@@ -601,6 +626,7 @@ function Admin() {
       (getField(record, "lengthEpisodes") + "").toString().includes(query)
     );
   });
+
   const sortedRecords = [...filteredRecords].sort((a, b) => {
     const dateA = a.updated_at
       ? new Date(a.updated_at)
@@ -610,6 +636,7 @@ function Admin() {
       : new Date(b.date_added);
     return dateB - dateA;
   });
+
   const handleSort = (column) => {
     if (sortColumn === column) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
