@@ -21,7 +21,14 @@ function getField(record, field) {
   return record[field.charAt(0).toUpperCase() + field.slice(1)] || "";
 }
 
-// Helper functions for dropdown options
+// Helper function for episode dropdown options
+function getEpisodeOptions() {
+  const options = ["26+"];
+  for (let i = 25; i >= 1; i--) {
+    options.push(i);
+  }
+  return options;
+}
 
 // Generate year options from current year down to 2001 then add a special "2000>" option.
 function getYearOptions() {
@@ -254,6 +261,7 @@ function Admin() {
   const [comment, setComment] = useState("");
   const [imageData, setImageData] = useState("");
 
+  const [manualEpisode, setManualEpisode] = useState("");
   // New state for manual release year input when "2000>" is selected
   const [manualReleaseYear, setManualReleaseYear] = useState("");
 
@@ -424,21 +432,28 @@ function Admin() {
   // Handler for submitting a record
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Process watched status for series
+
+    // If "26+" is selected, use the manual input; otherwise, use the selected episode.
+    const finalEpisode =
+      episode === "26+" ? Number(manualEpisode) : Number(episode);
+
+    // Process watched status for series or one off series when status is "in progress"
     let finalStatus = watchedStatus;
     if (
       (category.toLowerCase() === "series" ||
         category.toLowerCase() === "one off series") &&
       watchedStatus.toLowerCase() === "in progress"
     ) {
-      finalStatus = `${watchedStatus} (S${season} E${episode})`;
+      finalStatus = `${watchedStatus} (S${season} E${finalEpisode})`;
     }
-    // Append season to title for series (only for "series", not "one off series")
+
+    // Append season to title only for "series"
     let finalTitle = title;
     if (category.toLowerCase() === "series") {
       finalTitle = `${title} - Season ${season}`;
     }
-    // Determine final length/episodes count
+
+    // Determine final length/episodes count:
     let finalLength;
     if (category.toLowerCase() === "movie") {
       finalLength = Number(lengthEpisodes);
@@ -449,6 +464,7 @@ function Admin() {
         finalLength = Number(episodeCount) || Number(lengthEpisodes);
       }
     }
+
     // Determine final release year:
     let finalReleaseYear;
     if (releaseYear === "2000>") {
@@ -520,6 +536,7 @@ function Admin() {
   const handleEdit = (record) => {
     setEditMode(true);
     setEditId(record.id);
+    // Remove appended season text from title if present.
     setTitle(getField(record, "title").replace(/ - Season\s*\d+$/, ""));
     setCategory(getField(record, "category"));
     setType(getField(record, "type"));
@@ -533,11 +550,19 @@ function Admin() {
       if (match) {
         setWatchedStatus(match[1]);
         setSeason(Number(match[2]));
-        setEpisode(Number(match[3]));
+        const ep = Number(match[3]);
+        if (ep > 25) {
+          setEpisode("26+");
+          setManualEpisode(ep.toString());
+        } else {
+          setEpisode(ep);
+          setManualEpisode("");
+        }
       } else {
         setWatchedStatus(ws);
         setSeason(1);
         setEpisode(1);
+        setManualEpisode("");
       }
     } else {
       setWatchedStatus(ws);
@@ -548,6 +573,7 @@ function Admin() {
     setSynopsis(getField(record, "synopsis"));
     setImageData(record.image || "");
     setComment(getField(record, "comment"));
+    // Reset the episode count fields for the dropdown (if applicable)
     setEpisodeCount("");
     setManualEpisodeCount("");
     setManualReleaseYear("");
@@ -737,18 +763,23 @@ function Admin() {
                     <label>Episode:</label>
                     <StyledSelect
                       value={episode}
-                      onChange={(e) => setEpisode(Number(e.target.value))}
+                      onChange={(e) => setEpisode(e.target.value)}
                     >
-                      <option value="">Select</option>
-                      {getNumberOptions(26, episode)
-                        .slice()
-                        .reverse()
-                        .map((num) => (
-                          <option key={num} value={num}>
-                            {num}
-                          </option>
-                        ))}
+                      <option value="">Select Episode</option>
+                      {getEpisodeOptions().map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
                     </StyledSelect>
+                    {episode === "26+" && (
+                      <StyledInput
+                        type="number"
+                        placeholder="Enter episode number"
+                        value={manualEpisode}
+                        onChange={(e) => setManualEpisode(e.target.value)}
+                      />
+                    )}
                   </div>
                 </NestedGrid>
               </FormGroup>
