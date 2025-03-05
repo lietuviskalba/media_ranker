@@ -21,37 +21,31 @@ function getField(record, field) {
   return record[field.charAt(0).toUpperCase() + field.slice(1)] || "";
 }
 
-// Helper functions for dropdown options
+// --- Helper functions for dropdown options ---
 
-// Generate year options from 1980 to (current year + 5) and reverse so that recent years are on top.
+// Generate year options from (current year + 10) down to (current year - 50)
 function getYearOptions() {
   const currentYear = new Date().getFullYear();
-  // Adjust these numbers as needed:
   const startYear = currentYear - 50;
   const endYear = currentYear + 10;
   const years = [];
-  // Generate the list so that the highest (most future) year appears first:
   for (let y = endYear; y >= startYear; y--) {
     years.push(y);
   }
   return years;
 }
 
-const getEpisodeOptions = (max, currentValue) => {
-  let options = [];
-  for (let i = 1; i <= max; i++) {
+// Generate episode count options for series: "30+" then numbers from 29 down to 1.
+function getEpisodeCountOptions(max = 29) {
+  const options = ["30+"];
+  for (let i = max; i >= 1; i--) {
     options.push(i);
   }
-  // Optionally, if you want to ensure the current value is in the list:
-  if (currentValue > max && !options.includes(currentValue)) {
-    options.push(currentValue);
-    options.sort((a, b) => a - b);
-  }
-  return options.reverse(); // Reverse to have highest numbers at the top
-};
+  return options;
+}
 
+// Helper for season dropdown (ascending order)
 const getNumberOptions = (max, currentValue) => {
-  // Create options from 1 to max; if currentValue exceeds max, include it.
   let options = [];
   for (let i = 1; i <= max; i++) {
     options.push(i);
@@ -63,7 +57,8 @@ const getNumberOptions = (max, currentValue) => {
   return options;
 };
 
-// Styled Components
+// --- Styled Components ---
+
 const Container = styled.div`
   background-color: rgb(197, 7, 231);
   color: rgb(183, 183, 183);
@@ -262,6 +257,10 @@ function Admin() {
   const [imageData, setImageData] = useState(null);
   const [message, setMessage] = useState("");
 
+  // Additional state for custom episode count if "30+" is selected
+  const [episodeCount, setEpisodeCount] = useState("");
+  const [manualEpisodeCount, setManualEpisodeCount] = useState("");
+
   // Table State for Records
   const [records, setRecords] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -313,14 +312,13 @@ function Admin() {
     return res.json();
   };
 
-  // --- New UI for Year Dropdown (reversed) ---
+  // --- New Dropdown Options ---
   const yearOptions = getYearOptions();
-
-  // Always show Season and Episode dropdowns (using helper for options)
   const seasonOptions = getNumberOptions(10, season);
-  const episodeOptions = getNumberOptions(26, episode);
+  // Episode count dropdown: descending order with "30+" first
+  const episodeOptions = getEpisodeCountOptions(29);
 
-  // Handlers for column resizing
+  // --- Handlers for Column Resizing ---
   const handleMouseDown = (e, column) => {
     e.preventDefault();
     const startX = e.clientX;
@@ -340,7 +338,7 @@ function Admin() {
     document.addEventListener("mouseup", handleMouseUp);
   };
 
-  // Handlers for file upload/paste
+  // --- Handlers for File Upload/Paste ---
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -381,6 +379,9 @@ function Admin() {
     setImageData(null);
     setSeason(1);
     setEpisode(1);
+    // Clear custom episode count if any
+    setEpisodeCount("");
+    setManualEpisodeCount("");
   };
 
   const clearForm = () => {
@@ -398,6 +399,8 @@ function Admin() {
     setImageData(null);
     setEditMode(false);
     setEditId(null);
+    setEpisodeCount("");
+    setManualEpisodeCount("");
   };
 
   // Handler for submitting a record (create or update)
@@ -413,22 +416,23 @@ function Admin() {
     ) {
       finalStatus = `${watchedStatus} (S${season} E${episode})`;
     }
-    // Append season to title for series categories.
+    // Append season to title only if category is exactly "series"
     let finalTitle = title;
-    if (
-      category.toLowerCase() === "series" ||
-      category.toLowerCase() === "one off series"
-    ) {
+    if (category.toLowerCase() === "series") {
       finalTitle = `${title} - Season ${season}`;
     }
-    // For Length/Episodes: if the category is series, treat as episode count;
-    // otherwise, use as entered (for movies, minutes).
-    const finalLength =
-      (category.toLowerCase() === "series" ||
-        category.toLowerCase() === "one off series") &&
-      lengthEpisodes
-        ? Number(lengthEpisodes)
-        : Number(lengthEpisodes);
+    // Determine final length/episodes count:
+    let finalLength;
+    if (category.toLowerCase() === "movie") {
+      finalLength = Number(lengthEpisodes);
+    } else {
+      // For series and one off series, use the episode dropdown.
+      if (episodeCount === "30+") {
+        finalLength = Number(manualEpisodeCount);
+      } else {
+        finalLength = Number(episodeCount);
+      }
+    }
 
     const payload = {
       title: finalTitle,
@@ -522,6 +526,9 @@ function Admin() {
     setSynopsis(getField(record, "synopsis"));
     setImageData(record.image || null);
     setComment(getField(record, "comment"));
+    // Reset the custom episode count state
+    setEpisodeCount("");
+    setManualEpisodeCount("");
   };
 
   // Handler for deleting a record
@@ -708,11 +715,15 @@ function Admin() {
                       value={episode}
                       onChange={(e) => setEpisode(Number(e.target.value))}
                     >
-                      {episodeOptions.map((num) => (
-                        <option key={num} value={num}>
-                          {num}
-                        </option>
-                      ))}
+                      <option value="">Select</option>
+                      {getNumberOptions(26, episode)
+                        .slice()
+                        .reverse()
+                        .map((num) => (
+                          <option key={num} value={num}>
+                            {num}
+                          </option>
+                        ))}
                     </StyledSelect>
                   </div>
                 </NestedGrid>
@@ -746,17 +757,29 @@ function Admin() {
                         onChange={(e) => setLengthEpisodes(e.target.value)}
                       />
                     ) : (
-                      <StyledSelect
-                        value={episode}
-                        onChange={(e) => setEpisode(Number(e.target.value))}
-                      >
-                        <option value="">Select Episodes</option>
-                        {getEpisodeOptions(30).map((ep) => (
-                          <option key={ep} value={ep}>
-                            {ep}
-                          </option>
-                        ))}
-                      </StyledSelect>
+                      <>
+                        <StyledSelect
+                          value={episodeCount}
+                          onChange={(e) => setEpisodeCount(e.target.value)}
+                        >
+                          <option value="">Select Episodes</option>
+                          {getEpisodeCountOptions().map((opt) => (
+                            <option key={opt} value={opt}>
+                              {opt}
+                            </option>
+                          ))}
+                        </StyledSelect>
+                        {episodeCount === "30+" && (
+                          <StyledInput
+                            type="number"
+                            placeholder="Enter total episodes"
+                            value={manualEpisodeCount}
+                            onChange={(e) =>
+                              setManualEpisodeCount(e.target.value)
+                            }
+                          />
+                        )}
+                      </>
                     )}
                   </div>
                   <div style={{ display: "flex", gap: "10px" }}>
