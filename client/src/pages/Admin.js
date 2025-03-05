@@ -23,15 +23,14 @@ function getField(record, field) {
 
 // Helper functions for dropdown options
 
-// Generate year options from (currentYear+10) down to (currentYear-50)
+// Generate year options from current year down to 2001 then add a special "2000>" option.
 function getYearOptions() {
   const currentYear = new Date().getFullYear();
-  const startYear = currentYear - 50;
-  const endYear = currentYear + 10;
   const years = [];
-  for (let y = endYear; y >= startYear; y--) {
+  for (let y = currentYear; y >= 2001; y--) {
     years.push(y);
   }
+  years.push("2000>");
   return years;
 }
 
@@ -57,7 +56,7 @@ const getNumberOptions = (max, currentValue) => {
   return options;
 };
 
-// Styled Components
+// Styled Components (unchanged)
 const Container = styled.div`
   background-color: rgb(197, 7, 231);
   color: rgb(183, 183, 183);
@@ -224,9 +223,8 @@ function Admin() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  // Persistent fields state (load from localStorage if available)
+  // Persistent fields state
   const [message, setMessage] = useState("");
-
   const [category, setCategory] = useState(
     localStorage.getItem("lastCategory") || ""
   );
@@ -256,6 +254,9 @@ function Admin() {
   const [comment, setComment] = useState("");
   const [imageData, setImageData] = useState("");
 
+  // New state for manual release year input when "2000>" is selected
+  const [manualReleaseYear, setManualReleaseYear] = useState("");
+
   // Additional state for the Episode Count dropdown
   const [episodeCount, setEpisodeCount] = useState("");
   const [manualEpisodeCount, setManualEpisodeCount] = useState("");
@@ -281,31 +282,25 @@ function Admin() {
     comment: 300,
   });
 
-  // Persist persistent fields to localStorage whenever they change
+  // Persist persistent fields to localStorage
   useEffect(() => {
     localStorage.setItem("lastCategory", category);
   }, [category]);
-
   useEffect(() => {
     localStorage.setItem("lastType", type);
   }, [type]);
-
   useEffect(() => {
     localStorage.setItem("lastWatchedStatus", watchedStatus);
   }, [watchedStatus]);
-
   useEffect(() => {
     localStorage.setItem("lastSeason", season);
   }, [season]);
-
   useEffect(() => {
     localStorage.setItem("lastEpisode", episode);
   }, [episode]);
-
   useEffect(() => {
     localStorage.setItem("lastReleaseYear", releaseYear);
   }, [releaseYear]);
-
   useEffect(() => {
     localStorage.setItem("lastLengthEpisodes", lengthEpisodes);
   }, [lengthEpisodes]);
@@ -348,7 +343,7 @@ function Admin() {
     return res.json();
   };
 
-  // --- New Dropdown Options ---
+  // New Dropdown Options
   const yearOptions = getYearOptions();
   const seasonOptions = getNumberOptions(10, season);
 
@@ -400,7 +395,6 @@ function Admin() {
 
   const handleFillDummy = () => {
     setTitle("Apocalypse Now");
-    // The persistent fields remain unchanged.
     setRecommendations("Me no like");
     setReleaseYear("1979");
     setLengthEpisodes("153");
@@ -409,12 +403,11 @@ function Admin() {
     );
     setComment("Great movie!");
     setImageData("");
-    // Also reset episode dropdown states
     setEpisodeCount("");
     setManualEpisodeCount("");
+    setManualReleaseYear("");
   };
 
-  // In clearForm, only clear the reset fields.
   const clearForm = () => {
     setTitle("");
     setRecommendations("");
@@ -423,16 +416,15 @@ function Admin() {
     setImageData("");
     setEpisodeCount("");
     setManualEpisodeCount("");
-    // Do not clear category, type, watchedStatus, season, episode, releaseYear, lengthEpisodes
+    setManualReleaseYear("");
     setEditMode(false);
     setEditId(null);
   };
 
-  // Handler for submitting a record (create or update)
+  // Handler for submitting a record
   const handleSubmit = (e) => {
     e.preventDefault();
-    // If category is Series or One off series and watched status is "In Progress",
-    // append season/episode to watched status.
+    // Process watched status for series
     let finalStatus = watchedStatus;
     if (
       (category.toLowerCase() === "series" ||
@@ -441,22 +433,28 @@ function Admin() {
     ) {
       finalStatus = `${watchedStatus} (S${season} E${episode})`;
     }
-    // Append season to title only if category is exactly "series"
+    // Append season to title for series (only for "series", not "one off series")
     let finalTitle = title;
     if (category.toLowerCase() === "series") {
       finalTitle = `${title} - Season ${season}`;
     }
-    // Determine final length/episodes count:
+    // Determine final length/episodes count
     let finalLength;
     if (category.toLowerCase() === "movie") {
       finalLength = Number(lengthEpisodes);
     } else {
-      // For series and one off series, if "30+" is selected, use manual input.
       if (episodeCount === "30+") {
         finalLength = Number(manualEpisodeCount);
       } else {
         finalLength = Number(episodeCount) || Number(lengthEpisodes);
       }
+    }
+    // Determine final release year:
+    let finalReleaseYear;
+    if (releaseYear === "2000>") {
+      finalReleaseYear = Number(manualReleaseYear);
+    } else {
+      finalReleaseYear = Number(releaseYear);
     }
 
     const payload = {
@@ -465,7 +463,7 @@ function Admin() {
       type,
       watched_status: finalStatus,
       recommendations,
-      release_year: Number(releaseYear),
+      release_year: finalReleaseYear,
       length_or_episodes: finalLength,
       synopsis,
       comment,
@@ -518,11 +516,10 @@ function Admin() {
     }
   };
 
-  // Handler for editing a record (populate form)
+  // Handler for editing a record
   const handleEdit = (record) => {
     setEditMode(true);
     setEditId(record.id);
-    // Remove appended season text from title if present.
     setTitle(getField(record, "title").replace(/ - Season\s*\d+$/, ""));
     setCategory(getField(record, "category"));
     setType(getField(record, "type"));
@@ -551,9 +548,9 @@ function Admin() {
     setSynopsis(getField(record, "synopsis"));
     setImageData(record.image || "");
     setComment(getField(record, "comment"));
-    // Reset episode count fields
     setEpisodeCount("");
     setManualEpisodeCount("");
+    setManualReleaseYear("");
   };
 
   // Handler for deleting a record
@@ -770,6 +767,14 @@ function Admin() {
                         </option>
                       ))}
                     </StyledSelect>
+                    {releaseYear === "2000>" && (
+                      <StyledInput
+                        type="number"
+                        placeholder="Enter release year"
+                        value={manualReleaseYear}
+                        onChange={(e) => setManualReleaseYear(e.target.value)}
+                      />
+                    )}
                   </div>
                   <div>
                     <label>
