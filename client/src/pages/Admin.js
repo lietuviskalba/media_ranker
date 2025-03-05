@@ -21,10 +21,10 @@ function getField(record, field) {
   return record[field.charAt(0).toUpperCase() + field.slice(1)] || "";
 }
 
-// Helper function for episode dropdown options
+// Helper function for episode dropdown options (for editing the "Episode" field)
 function getEpisodeOptions() {
   const options = ["26+"];
-  for (let i = 25; i >= 1; i--) {
+  for (let i = 26; i >= 1; i--) {
     options.push(i);
   }
   return options;
@@ -41,7 +41,7 @@ function getYearOptions() {
   return years;
 }
 
-// Generate episode count options for series: "30+" then numbers from 29 down to 1.
+// Generate episode count options for series (if you need it elsewhere)
 function getEpisodeCountOptions(max = 29) {
   const options = ["30+"];
   for (let i = max; i >= 1; i--) {
@@ -261,11 +261,11 @@ function Admin() {
   const [comment, setComment] = useState("");
   const [imageData, setImageData] = useState("");
 
-  const [manualEpisode, setManualEpisode] = useState("");
-  // New state for manual release year input when "2000>" is selected
+  // New state for manual inputs
   const [manualReleaseYear, setManualReleaseYear] = useState("");
+  const [manualEpisode, setManualEpisode] = useState("");
 
-  // Additional state for the Episode Count dropdown
+  // Additional state for the Episode Count dropdown (if needed)
   const [episodeCount, setEpisodeCount] = useState("");
   const [manualEpisodeCount, setManualEpisodeCount] = useState("");
 
@@ -330,8 +330,8 @@ function Admin() {
     }
   }, [token]);
 
-  // Fetch records from API (with token)
-  useEffect(() => {
+  // Function to fetch records
+  const fetchRecords = () => {
     if (token) {
       fetch("/api/media_records", {
         headers: { Authorization: "Bearer " + token },
@@ -340,6 +340,11 @@ function Admin() {
         .then((data) => setRecords(data))
         .catch((err) => console.error("Error fetching records:", err));
     }
+  };
+
+  // Initial fetch
+  useEffect(() => {
+    fetchRecords();
   }, [token]);
 
   // Helper: Check auth response and auto-logout if session expired
@@ -414,6 +419,7 @@ function Admin() {
     setEpisodeCount("");
     setManualEpisodeCount("");
     setManualReleaseYear("");
+    setManualEpisode("");
   };
 
   const clearForm = () => {
@@ -425,6 +431,7 @@ function Admin() {
     setEpisodeCount("");
     setManualEpisodeCount("");
     setManualReleaseYear("");
+    setManualEpisode("");
     setEditMode(false);
     setEditId(null);
   };
@@ -432,12 +439,10 @@ function Admin() {
   // Handler for submitting a record
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    // If "26+" is selected, use the manual input; otherwise, use the selected episode.
+    // Determine final episode value:
     const finalEpisode =
       episode === "26+" ? Number(manualEpisode) : Number(episode);
-
-    // Process watched status for series or one off series when status is "in progress"
+    // Process watched status for series
     let finalStatus = watchedStatus;
     if (
       (category.toLowerCase() === "series" ||
@@ -446,14 +451,12 @@ function Admin() {
     ) {
       finalStatus = `${watchedStatus} (S${season} E${finalEpisode})`;
     }
-
-    // Append season to title only for "series"
+    // Append season to title for series (only for "series", not "one off series")
     let finalTitle = title;
     if (category.toLowerCase() === "series") {
       finalTitle = `${title} - Season ${season}`;
     }
-
-    // Determine final length/episodes count:
+    // Determine final length/episodes count
     let finalLength;
     if (category.toLowerCase() === "movie") {
       finalLength = Number(lengthEpisodes);
@@ -464,14 +467,9 @@ function Admin() {
         finalLength = Number(episodeCount) || Number(lengthEpisodes);
       }
     }
-
     // Determine final release year:
-    let finalReleaseYear;
-    if (releaseYear === "2000>") {
-      finalReleaseYear = Number(manualReleaseYear);
-    } else {
-      finalReleaseYear = Number(releaseYear);
-    }
+    const finalReleaseYear =
+      releaseYear === "2000>" ? Number(manualReleaseYear) : Number(releaseYear);
 
     const payload = {
       title: finalTitle,
@@ -501,11 +499,9 @@ function Admin() {
       })
         .then(checkAuthResponse)
         .then((data) => {
-          const index = records.findIndex((r) => r.id === editId);
-          setMessage(
-            `Record #${index + 1} "${data.title}" updated successfully.`
-          );
+          setMessage(`Record "${data.title}" updated successfully.`);
           clearForm();
+          fetchRecords();
         })
         .catch((err) => {
           console.error("Error updating record:", err);
@@ -524,6 +520,7 @@ function Admin() {
         .then((data) => {
           setMessage(`Record added successfully with ID: ${data.id}`);
           clearForm();
+          fetchRecords();
         })
         .catch((err) => {
           console.error("Error adding record:", err);
@@ -537,7 +534,8 @@ function Admin() {
     setEditMode(true);
     setEditId(record.id);
     // Remove appended season text from title if present.
-    setTitle(getField(record, "title").replace(/ - Season\s*\d+$/, ""));
+    const currentTitle = getField(record, "title");
+    setTitle(currentTitle.replace(/ - Season\s*\d+$/, ""));
     setCategory(getField(record, "category"));
     setType(getField(record, "type"));
     const ws = getField(record, "watchedStatus");
@@ -567,25 +565,30 @@ function Admin() {
     } else {
       setWatchedStatus(ws);
     }
+    // For release year, if the value is less than 2001, use manual input.
+    const ry = Number(getField(record, "releaseYear"));
+    if (ry < 2001) {
+      setReleaseYear("2000>");
+      setManualReleaseYear(ry.toString());
+    } else {
+      setReleaseYear(ry.toString());
+      setManualReleaseYear("");
+    }
     setRecommendations(getField(record, "recommendations"));
-    setReleaseYear(getField(record, "releaseYear"));
     setLengthEpisodes(getField(record, "lengthEpisodes"));
     setSynopsis(getField(record, "synopsis"));
     setImageData(record.image || "");
     setComment(getField(record, "comment"));
-    // Reset the episode count fields for the dropdown (if applicable)
+    // Reset dropdown states for episode count/release year if applicable
     setEpisodeCount("");
     setManualEpisodeCount("");
-    setManualReleaseYear("");
   };
 
   // Handler for deleting a record
   const handleDelete = (record) => {
     if (!skipConfirm) {
       const confirmDelete = window.confirm(
-        `Are you sure you want to delete record #${
-          records.findIndex((r) => r.id === record.id) + 1
-        } "${getField(record, "title")}"?`
+        `Are you sure you want to delete record "${getField(record, "title")}"?`
       );
       if (!confirmDelete) return;
     }
@@ -598,6 +601,7 @@ function Admin() {
         setMessage(
           `Record "${getField(record, "title")}" deleted successfully.`
         );
+        fetchRecords();
       })
       .catch((err) => {
         console.error("Error deleting record:", err);
@@ -621,6 +625,7 @@ function Admin() {
         setToken(data.token);
         localStorage.setItem("adminToken", data.token);
         setMessage("");
+        fetchRecords();
       })
       .catch((err) => {
         setMessage("Login failed: " + err.message);
