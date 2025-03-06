@@ -1,5 +1,5 @@
 // client/src/Admin.js
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { jwtDecode } from "jwt-decode";
 import Navbar from "../components/Navbar";
 import styled from "styled-components";
@@ -331,7 +331,7 @@ function Admin() {
   }, [token]);
 
   // Function to fetch records
-  const fetchRecords = () => {
+  const fetchRecords = useCallback(() => {
     if (token) {
       fetch("/api/media_records", {
         headers: { Authorization: "Bearer " + token },
@@ -340,12 +340,12 @@ function Admin() {
         .then((data) => setRecords(data))
         .catch((err) => console.error("Error fetching records:", err));
     }
-  };
+  }, [token]);
 
   // Initial fetch
   useEffect(() => {
     fetchRecords();
-  }, [token]);
+  }, [fetchRecords]);
 
   // Helper: Check auth response and auto-logout if session expired
   const checkAuthResponse = (res) => {
