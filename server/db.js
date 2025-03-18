@@ -1,14 +1,20 @@
 // db.js
 require("dotenv").config();
+
 const { Pool } = require("pg");
 
-// Read environment variables
+// Determine whether we're running locally or in production
 const isProduction = process.env.NODE_ENV === "production";
-const connectionString = process.env.DATABASE_URL;
+
+// Use a local connection string when not in production
+const connectionString = isProduction
+  ? process.env.DATABASE_URL
+  : process.env.LOCAL_DATABASE_URL;
 
 const pool = new Pool({
   connectionString,
-  ssl: isProduction ? false : false, // No need for SSL on the local server
+  host: "127.0.0.1",
+  ssl: isProduction ? { rejectUnauthorized: false } : false,
 });
 
 pool
