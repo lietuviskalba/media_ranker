@@ -13,6 +13,7 @@ const pool = require("./db");
 const NodeCache = require("node-cache");
 const net = require("net");
 const path = require("path");
+const morgan = require("morgan");
 
 // Create caches (TTL in seconds)
 const urlCache = new NodeCache({ stdTTL: 600 });
@@ -21,6 +22,8 @@ const searchCache = new NodeCache({ stdTTL: 1 });
 const app = express();
 const PORT = process.env.PORT || 5002;
 const JWT_SECRET = process.env.JWT_SECRET; // Ensure this is set in .env
+
+app.use(morgan("combined"));
 
 // Increase JSON body limit (e.g., for image uploads)
 app.use(express.json({ limit: "5mb" }));
@@ -423,4 +426,18 @@ portInUse(PORT).then((inUse) => {
   } else {
     app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
   }
+});
+
+// Error handling middleware (should be after all other app.use and routes)
+app.use((err, req, res, next) => {
+  console.error("Error details:", {
+    message: err.message,
+    stack: err.stack,
+    // You can log additional details like req.headers or req.body if needed
+    headers: req.headers,
+    body: req.body,
+  });
+  res
+    .status(500)
+    .json({ error: "Internal Server Error", details: err.message });
 });
