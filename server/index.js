@@ -21,8 +21,9 @@ const searchCache = new NodeCache({ stdTTL: 1 });
 
 const app = express();
 const PORT = process.env.PORT || 5002;
-const JWT_SECRET = process.env.JWT_SECRET; // Ensure this is set in .env
+const JWT_SECRET = process.env.JWT_SECRET;
 
+// Use morgan for HTTP request logging
 app.use(morgan("combined"));
 
 // Increase JSON body limit (e.g., for image uploads)
@@ -38,16 +39,12 @@ app.use(
     ], // Adjust based on frontend URLs
     methods: "GET,POST,PUT,DELETE",
     allowedHeaders: "Content-Type,Authorization",
-    credentials: true, // Allow credentials (cookies, authorization headers)
+    credentials: true,
     optionsSuccessStatus: 200,
   })
 );
 
-// -----------------------
-// API Endpoints (Routes)
-// -----------------------
-
-// JWT authentication middleware
+// --- JWT authentication middleware ---
 function authenticateToken(req, res, next) {
   const token = req.headers["authorization"]?.split(" ")[1];
   if (!token) return res.sendStatus(401);
@@ -58,7 +55,7 @@ function authenticateToken(req, res, next) {
   });
 }
 
-// Login endpoint
+// --- Login endpoint ---
 app.post(
   "/api/login",
   [
@@ -86,13 +83,13 @@ app.post(
   }
 );
 
-// Public endpoint: Get all media records
+// --- Get all media records (public) ---
 app.get("/api/media_records", async (req, res) => {
   try {
     const result = await pool.query(
       "SELECT * FROM media_records ORDER BY COALESCE(updated_at, date_added) DESC"
     );
-    // Decode fields you know might include HTML entities:
+    // Decode fields that might contain HTML entities
     const decodedRows = result.rows.map((record) => ({
       ...record,
       title: record.title ? decode(record.title) : record.title,
@@ -108,7 +105,7 @@ app.get("/api/media_records", async (req, res) => {
   }
 });
 
-// GET URL status with caching
+// --- GET URL status with caching ---
 app.get("/api/url-status", async (req, res) => {
   const url = req.query.url;
   if (!url)
@@ -129,7 +126,7 @@ app.get("/api/url-status", async (req, res) => {
   }
 });
 
-// Search endpoint with debouncing via cache
+// --- Search endpoint with caching ---
 app.get("/api/search", async (req, res) => {
   const q = req.query.q;
   if (!q)
@@ -152,7 +149,7 @@ app.get("/api/search", async (req, res) => {
   }
 });
 
-// Public update endpoint for ranking page (update watched_status)
+// --- Public update endpoint for watched_status ---
 app.put("/api/public/media_records/:id", async (req, res) => {
   const recordId = req.params.id;
   const { watched_status } = req.body;
@@ -178,12 +175,11 @@ app.put("/api/public/media_records/:id", async (req, res) => {
   }
 });
 
-// Protected endpoint: Add new record (with validation, sanitization, and image compression)
+// --- Protected endpoint: Add new record ---
 app.post(
   "/api/media_records",
   authenticateToken,
   [
-    // Only title is required; other fields are optional.
     body("title").notEmpty().withMessage("Title is required").trim().escape(),
     body("category").optional({ checkFalsy: true }).trim().escape(),
     body("type").optional({ checkFalsy: true }).trim().escape(),
@@ -203,7 +199,6 @@ app.post(
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    // Destructure with default values
     let {
       title,
       category = "",
@@ -217,14 +212,12 @@ app.post(
       comment = "",
     } = req.body;
 
-    // Convert numeric fields
     release_year = Number(release_year);
     length_or_episodes = Number(length_or_episodes);
 
     const id = uuidv4();
     const date_added = new Date().toISOString();
 
-    // (Image compression code remains unchanged)
     if (image) {
       try {
         const matches = image.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
@@ -272,7 +265,7 @@ app.post(
   }
 );
 
-// Protected endpoint: Update existing record (with optional fields, sanitization, and image compression)
+// --- Protected endpoint: Update existing record ---
 app.put(
   "/api/media_records/:id",
   authenticateToken,
@@ -297,7 +290,6 @@ app.put(
       return res.status(400).json({ errors: errors.array() });
     }
     const recordId = req.params.id;
-    // Destructure with defaults if missing
     let {
       title,
       category = "",
@@ -311,11 +303,9 @@ app.put(
       comment = "",
     } = req.body;
 
-    // Convert numeric fields
     release_year = Number(release_year);
     length_or_episodes = Number(length_or_episodes);
 
-    // If an image is provided, compress it using Sharp
     if (image) {
       try {
         const matches = image.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
@@ -375,7 +365,7 @@ app.put(
   }
 );
 
-// Protected endpoint: Delete a record
+// --- Protected endpoint: Delete a record ---
 app.delete("/api/media_records/:id", authenticateToken, async (req, res) => {
   const recordId = req.params.id;
   try {
@@ -390,20 +380,15 @@ app.delete("/api/media_records/:id", authenticateToken, async (req, res) => {
   }
 });
 
-// -------------------------
-// Static File Serving
-// -------------------------
-// Serve static files from the React app's build directory
+// --- Static File Serving ---
 app.use(express.static(path.join(__dirname, "../client/build")));
 
-// Catch-all route: for any route not handled above, serve index.html from the build folder
+// Catch-all route: serve index.html for any unknown route
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "../client/build", "index.html"));
 });
 
-// ------------------------------------
-// Utility: Check if a port is in use
-// ------------------------------------
+// --- Utility: Check if a port is in use ---
 const portInUse = (port) =>
   new Promise((resolve, reject) => {
     const tester = net
@@ -418,7 +403,7 @@ const portInUse = (port) =>
       .listen(port);
   });
 
-// Start the server only if the port is free
+// Start the server if the port is free
 portInUse(PORT).then((inUse) => {
   if (inUse) {
     console.error(`Port ${PORT} is already in use!`);
@@ -428,12 +413,11 @@ portInUse(PORT).then((inUse) => {
   }
 });
 
-// Error handling middleware (should be after all other app.use and routes)
+// --- Error handling middleware (must be last) ---
 app.use((err, req, res, next) => {
   console.error("Error details:", {
     message: err.message,
     stack: err.stack,
-    // You can log additional details like req.headers or req.body if needed
     headers: req.headers,
     body: req.body,
   });

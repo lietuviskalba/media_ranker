@@ -9,11 +9,11 @@ import Admin from "./pages/Admin";
 
 function App() {
   return (
-    <Router>
+    // Set basename to "/media_ranker" so that all routes are relative to it
+    <Router basename="/media_ranker">
       <Navbar />
       <div className="app-content">
         <Routes>
-          {/* For now, you can have Home ("/") render Ranking or a placeholder */}
           <Route path="/" element={<Ranking />} />
           <Route path="/ranking" element={<Ranking />} />
           <Route path="/admin" element={<Admin />} />
