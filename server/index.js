@@ -14,6 +14,7 @@ const NodeCache = require("node-cache");
 const net = require("net");
 const path = require("path");
 const morgan = require("morgan");
+const fs = require("fs"); // Import file system module
 
 // Create caches (TTL in seconds)
 const urlCache = new NodeCache({ stdTTL: 600 });
@@ -25,6 +26,19 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 // Use morgan for HTTP request logging
 app.use(morgan("combined"));
+
+// *** New Middleware: Record Web Activity ***
+// This middleware writes the current timestamp to /tmp/last_web_activity on every HTTP request.
+// An external script can then use this file's modification time to determine inactivity.
+app.use((req, res, next) => {
+  const activityFile = "/tmp/last_web_activity";
+  fs.writeFile(activityFile, Date.now().toString(), (err) => {
+    if (err) {
+      console.error("Failed to update activity file:", err);
+    }
+    next();
+  });
+});
 
 // Increase JSON body limit (e.g., for image uploads)
 app.use(express.json({ limit: "5mb" }));
