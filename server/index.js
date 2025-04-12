@@ -14,7 +14,7 @@ const NodeCache = require("node-cache");
 const net = require("net");
 const path = require("path");
 const morgan = require("morgan");
-const fs = require("fs"); // Import file system module
+const fs = require("fs");
 
 // Create caches (TTL in seconds)
 const urlCache = new NodeCache({ stdTTL: 600 });
@@ -27,9 +27,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 // Use morgan for HTTP request logging
 app.use(morgan("combined"));
 
-// *** New Middleware: Record Web Activity ***
-// This middleware writes the current timestamp to /tmp/last_web_activity on every HTTP request.
-// An external script can then use this file's modification time to determine inactivity.
+// Middleware to record web activity
 app.use((req, res, next) => {
   const activityFile = "/tmp/last_web_activity";
   fs.writeFile(activityFile, Date.now().toString(), (err) => {
@@ -40,17 +38,17 @@ app.use((req, res, next) => {
   });
 });
 
-// Increase JSON body limit (e.g., for image uploads)
+// Increase JSON body limit
 app.use(express.json({ limit: "5mb" }));
 
 // Set up Helmet and CORS
 app.use(helmet());
 app.use(
   cors({
-    rigin: [
+    origin: [
       "http://localhost:8080",
       "https://mediaranker-production.up.railway.app",
-    ], // Adjust based on frontend URLs
+    ],
     methods: "GET,POST,PUT,DELETE",
     allowedHeaders: "Content-Type,Authorization",
     credentials: true,
@@ -58,7 +56,7 @@ app.use(
   })
 );
 
-// --- JWT authentication middleware ---
+// JWT authentication middleware
 function authenticateToken(req, res, next) {
   const token = req.headers["authorization"]?.split(" ")[1];
   if (!token) return res.sendStatus(401);
@@ -71,7 +69,7 @@ function authenticateToken(req, res, next) {
 
 // --- Login endpoint ---
 app.post(
-  "/api/login",
+  "/login", // Changed from "/api/login"
   [
     body("username").notEmpty().trim().escape(),
     body("password").notEmpty().trim().escape(),
@@ -98,12 +96,12 @@ app.post(
 );
 
 // --- Get all media records (public) ---
-app.get("/api/media_records", async (req, res) => {
+app.get("/media_records", async (req, res) => {
+  // Changed from "/api/media_records"
   try {
     const result = await pool.query(
       "SELECT * FROM media_records ORDER BY COALESCE(updated_at, date_added) DESC"
     );
-    // Decode fields that might contain HTML entities
     const decodedRows = result.rows.map((record) => ({
       ...record,
       title: record.title ? decode(record.title) : record.title,
@@ -120,7 +118,8 @@ app.get("/api/media_records", async (req, res) => {
 });
 
 // --- GET URL status with caching ---
-app.get("/api/url-status", async (req, res) => {
+app.get("/url-status", async (req, res) => {
+  // Changed from "/api/url-status"
   const url = req.query.url;
   if (!url)
     return res.status(400).json({ error: "URL query parameter is required" });
@@ -141,7 +140,8 @@ app.get("/api/url-status", async (req, res) => {
 });
 
 // --- Search endpoint with caching ---
-app.get("/api/search", async (req, res) => {
+app.get("/search", async (req, res) => {
+  // Changed from "/api/search"
   const q = req.query.q;
   if (!q)
     return res.status(400).json({ error: "Query parameter 'q' is required" });
@@ -164,7 +164,8 @@ app.get("/api/search", async (req, res) => {
 });
 
 // --- Public update endpoint for watched_status ---
-app.put("/api/public/media_records/:id", async (req, res) => {
+app.put("/public/media_records/:id", async (req, res) => {
+  // Changed from "/api/public/media_records/:id"
   const recordId = req.params.id;
   const { watched_status } = req.body;
   if (!watched_status)
@@ -191,7 +192,7 @@ app.put("/api/public/media_records/:id", async (req, res) => {
 
 // --- Protected endpoint: Add new record ---
 app.post(
-  "/api/media_records",
+  "/media_records", // Changed from "/api/media_records"
   authenticateToken,
   [
     body("title").notEmpty().withMessage("Title is required").trim().escape(),
@@ -281,7 +282,7 @@ app.post(
 
 // --- Protected endpoint: Update existing record ---
 app.put(
-  "/api/media_records/:id",
+  "/media_records/:id", // Changed from "/api/media_records/:id"
   authenticateToken,
   [
     body("title").notEmpty().withMessage("Title is required").trim().escape(),
@@ -380,7 +381,8 @@ app.put(
 );
 
 // --- Protected endpoint: Delete a record ---
-app.delete("/api/media_records/:id", authenticateToken, async (req, res) => {
+app.delete("/media_records/:id", authenticateToken, async (req, res) => {
+  // Changed from "/api/media_records/:id"
   const recordId = req.params.id;
   try {
     const query = `DELETE FROM media_records WHERE id = $1`;
@@ -427,7 +429,7 @@ portInUse(PORT).then((inUse) => {
   }
 });
 
-// --- Error handling middleware (must be last) ---
+// --- Error handling middleware ---
 app.use((err, req, res, next) => {
   console.error("Error details:", {
     message: err.message,
