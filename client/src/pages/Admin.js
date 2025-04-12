@@ -5,6 +5,7 @@ import Navbar from "../components/Navbar";
 import styled from "styled-components";
 import ScrollToTop from "../components/ScrollToTop";
 import MediaTable from "../components/MediaTable";
+import { API_BASE_URL } from "../utils/api"; // Import the base URL
 
 // Mapping from camelCase keys to the underscore keys used in the database
 const fieldMapping = {
@@ -14,6 +15,7 @@ const fieldMapping = {
   dateAdded: "date_added",
 };
 
+// Helper function to get field value from record
 function getField(record, field) {
   if (record[field] !== undefined) return record[field];
   if (fieldMapping[field] && record[fieldMapping[field]] !== undefined)
@@ -21,7 +23,7 @@ function getField(record, field) {
   return record[field.charAt(0).toUpperCase() + field.slice(1)] || "";
 }
 
-// Helper function for episode dropdown options (for editing the "Episode" field)
+// Helper function for episode dropdown options
 function getEpisodeOptions() {
   const options = ["26+"];
   for (let i = 26; i >= 1; i--) {
@@ -41,7 +43,7 @@ function getYearOptions() {
   return years;
 }
 
-// Generate episode count options for series (if you need it elsewhere)
+// Generate episode count options for series
 function getEpisodeCountOptions(max = 29) {
   const options = ["30+"];
   for (let i = max; i >= 1; i--) {
@@ -63,7 +65,7 @@ const getNumberOptions = (max, currentValue) => {
   return options;
 };
 
-// Styled Components (unchanged)
+// Styled Components
 const Container = styled.div`
   background-color: rgb(197, 7, 231);
   color: rgb(183, 183, 183);
@@ -126,7 +128,7 @@ const StyledInput = styled.input`
   border: 1px solid rgb(80, 80, 80);
   border-radius: 4px;
   background-color: rgb(58, 58, 58);
-  color: rgb(58, 58, 58);
+  color: rgb(238, 238, 238);
 `;
 
 const StyledSelect = styled.select`
@@ -333,7 +335,7 @@ function Admin() {
   // Function to fetch records
   const fetchRecords = useCallback(() => {
     if (token) {
-      fetch("/api/media_records", {
+      fetch(`${API_BASE_URL}/media_records`, {
         headers: { Authorization: "Bearer " + token },
       })
         .then((res) => res.json())
@@ -489,7 +491,7 @@ function Admin() {
         ...payload,
         updated_at: new Date().toISOString(),
       };
-      fetch(`/api/media_records/${editId}`, {
+      fetch(`${API_BASE_URL}/media_records/${editId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -508,7 +510,7 @@ function Admin() {
           setMessage(`Error updating record: ${err.message}`);
         });
     } else {
-      fetch("/api/media_records", {
+      fetch(`${API_BASE_URL}/media_records`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -592,7 +594,7 @@ function Admin() {
       );
       if (!confirmDelete) return;
     }
-    fetch(`/api/media_records/${record.id}`, {
+    fetch(`${API_BASE_URL}/media_records/${record.id}`, {
       method: "DELETE",
       headers: { Authorization: "Bearer " + token },
     })
@@ -612,7 +614,7 @@ function Admin() {
   // Handler for logging in
   const handleLogin = (e) => {
     e.preventDefault();
-    fetch("/api/login", {
+    fetch(`${API_BASE_URL}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
@@ -748,7 +750,6 @@ function Admin() {
                   <option value="Completed">Completed</option>
                 </StyledSelect>
               </FormGroup>
-              {/* Always show Season and Episode dropdowns */}
               <FormGroup>
                 <NestedGrid>
                   <div>

@@ -4,6 +4,7 @@ import styled from "styled-components";
 import ScrollToTop from "../components/ScrollToTop";
 import Navbar from "../components/Navbar";
 import MediaTable from "../components/MediaTable";
+import { API_BASE_URL } from "../utils/api"; // Import the base URL
 
 // Mapping from camelCase keys to the underscore keys used in the database
 const fieldMapping = {
@@ -13,6 +14,7 @@ const fieldMapping = {
   dateAdded: "date_added",
 };
 
+// Helper function to get field value from record
 function getField(record, field) {
   if (record[field] !== undefined) return record[field];
   if (fieldMapping[field] && record[fieldMapping[field]] !== undefined)
@@ -73,7 +75,7 @@ function Ranking() {
 
   // Fetch all records (using defensive JSON parsing)
   useEffect(() => {
-    fetch("/api/media_records")
+    fetch(`${API_BASE_URL}/media_records`)
       .then((response) => response.text())
       .then((text) => {
         try {
@@ -85,7 +87,10 @@ function Ranking() {
             setRecords(data);
           }
         } catch (e) {
-          console.error("Error parsing JSON from /api/media_records:", text);
+          console.error(
+            "Error parsing JSON from /media_ranker/media_records:",
+            text
+          );
           setRecords([]);
         }
       })
@@ -194,7 +199,7 @@ function Ranking() {
       updated_at: new Date().toISOString(),
     };
 
-    fetch(`/api/public/media_records/${record.id}`, {
+    fetch(`${API_BASE_URL}/public/media_records/${record.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
